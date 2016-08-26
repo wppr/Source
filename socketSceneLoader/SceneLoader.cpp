@@ -15,7 +15,7 @@ using std::ifstream;
 using std::stringstream;
 
 #define PI 3.141592654
-#define SJSON 0
+#define SJSON 1
 
 SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height) : width(width), height(height)
 {
