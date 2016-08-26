@@ -8,15 +8,11 @@
 //#include "connection.h"
 //#pragma comment(lib,"LibConnection.lib")
 //#include "socketSceneLoader/SceneLoader.h"
-<<<<<<< HEAD
 
-//teseaa12111
-=======
 //111111
 //teseaa12
 //abc
 //aa
->>>>>>> master
 
 std::function< void (int,int)> f;
 
