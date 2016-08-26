@@ -10,7 +10,7 @@ using std::thread;
 using std::queue;
 using std::stack;
 
-#define LOG_OPEN 1
+#define LOG_OPEN 0
 
 class Server
 {
