@@ -50,6 +50,8 @@ int Server::InitSocket()
 		WSACleanup();
 		return 1;
 	}
+
+	if (LOG_OPEN)
 	printf("init success\n");
 }
 
@@ -64,6 +66,7 @@ void Server::SetAddr(string ip, string port)
 
 void Server::Bind()
 {
+	if (LOG_OPEN)
 	printf("binding...\n");
 	int iResult;
 
@@ -76,6 +79,7 @@ void Server::Bind()
 
 	iResult = bind(ServerSocket, server_info->ai_addr, static_cast<int>(server_info->ai_addrlen));
 	if (iResult == SOCKET_ERROR) {
+		if (LOG_OPEN)
 		printf("bind failed with error: %d\n", WSAGetLastError());
 		closesocket(ServerSocket);
 		freeaddrinfo(server_info);
@@ -86,12 +90,14 @@ void Server::Bind()
 	freeaddrinfo(server_info);
 
 	if (listen(ServerSocket, SOMAXCONN) == SOCKET_ERROR) {
+		if (LOG_OPEN)
 		printf("Listen failed with error: %ld\n", WSAGetLastError());
 		closesocket(ServerSocket);
 		WSACleanup();
 		return;
 	}
 
+	if (LOG_OPEN)
 	printf("bind success\n");
 }
 
@@ -169,9 +175,11 @@ void Server::Receive()
 
 void Server::Accept()
 {
+	if (LOG_OPEN)
 	printf("accepting...\n");
 	ServerSocket = accept(ServerSocket, NULL, NULL);
 	if (ServerSocket == INVALID_SOCKET) {
+		if (LOG_OPEN)
 		printf("accept failed: %d\n", WSAGetLastError());
 		closesocket(ServerSocket);
 		WSACleanup();
@@ -246,6 +254,7 @@ int Client::Connect(string ip, string port)
 	iResult = SOCKET_ERROR;
 	while (iResult == SOCKET_ERROR)
 	{
+		if (LOG_OPEN)
 		printf("connecting...\n");
 		iResult = connect(ClientSocket, server_info->ai_addr, static_cast<int>(server_info->ai_addrlen));
 	}
