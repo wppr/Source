@@ -3,12 +3,8 @@
 #include <vector>
 #include <iostream>
 #include <mutex>
-#include <connection.h>
-#ifdef _DEBUG
-#pragma comment(lib,"LibConnection_d.lib")
-#else
-#pragma comment(lib,"LibConnection.lib")
-#endif // _DEBUG
+#include "connection.h"
+
 #include <sstream>
 #include <map>
 #include "AppFrameWork2.h"
