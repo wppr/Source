@@ -27,7 +27,7 @@ public:
 	vector<MeshPtr> meshs;
 	SceneManager* scene=NULL;
 	MeshManager* meshMgr=NULL;
-	void FillBlockData(map<string, BlockDef>& blockPresets, vector<MeshPtr>& meshs) {
+	void FillBlockData() {
 		BlockDef b;
 
 		for (int i = 1; i <= 15; i++) {
@@ -35,7 +35,8 @@ public:
 			blockPresets[b.name] = b;
 
 		}
-		vector<string> names = { "xcross","tcross","lcross","street" };
+		vector<string> names = { "xcross","tcross","lcross","xcross_greenlight",
+			"tcross_greenlight","lcross_greenlight","street", };
 		for (auto x : names) {
 			serializeLoad("model/uniform/data/" + x + ".txt", b);
 			blockPresets[b.name] = b;
@@ -156,10 +157,16 @@ public:
 
 		MeshPtr cross = meshMgr->loadMesh_assimp_check("floor", "model/uniform/road1.obj");
 		MeshPtr street = meshMgr->loadMesh_assimp_check("floor", "model/uniform/road2.obj");
+		MeshPtr glight = meshMgr->loadMesh_assimp_check("floor", "model/uniform/lightGreen2.obj");
+		MeshPtr rlight = meshMgr->loadMesh_assimp_check("floor", "model/uniform/lightRed2.obj");
+		MeshPtr ylight = meshMgr->loadMesh_assimp_check("floor", "model/uniform/lightYellow2.obj");
 		meshs.push_back(cross);
 		meshs.push_back(street);
+		meshs.push_back(glight);
+		meshs.push_back(rlight);
+		meshs.push_back(ylight);
 
-		FillBlockData(blockPresets, meshs);
+		FillBlockData();
 	}
 	void AttachBlock(string blockname, string nodename, Vector3 pos) {
 		SceneNode* root=scene->GetSceneRoot();
