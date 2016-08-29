@@ -51,6 +51,7 @@ int Server::InitSocket()
 		return 1;
 	}
 	LOG("init success\n");
+
 }
 
 void Server::SetAddr(string ip, string port)
@@ -65,6 +66,7 @@ void Server::SetAddr(string ip, string port)
 void Server::Bind()
 {
 	LOG("binding...\n");
+
 	int iResult;
 
 	addrinfo hints = {}, *server_info = nullptr;
@@ -77,6 +79,7 @@ void Server::Bind()
 	iResult = bind(ServerSocket, server_info->ai_addr, static_cast<int>(server_info->ai_addrlen));
 	if (iResult == SOCKET_ERROR) {
 		LOG("bind failed with error: %d\n", WSAGetLastError());
+
 		closesocket(ServerSocket);
 		freeaddrinfo(server_info);
 		WSACleanup();
@@ -86,13 +89,16 @@ void Server::Bind()
 	freeaddrinfo(server_info);
 
 	if (listen(ServerSocket, SOMAXCONN) == SOCKET_ERROR) {
+
 		LOG("Listen failed with error: %ld\n", WSAGetLastError());
+
 		closesocket(ServerSocket);
 		WSACleanup();
 		return;
 	}
 
 	LOG("bind success\n");
+
 }
 
 void Server::Receive()
@@ -165,6 +171,7 @@ void Server::Receive()
 
 void Server::Accept()
 {
+
 	LOG("accepting...\n");
 	ServerSocket = accept(ServerSocket, NULL, NULL);
 	if (ServerSocket == INVALID_SOCKET) {
