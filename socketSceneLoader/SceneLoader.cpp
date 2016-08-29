@@ -414,7 +414,7 @@ void SceneLoader::LoadJson()
 	stringstream ss;
 
 	ss.str("");
-	stream1.open("model/uniform/block.json");
+	stream1.open("model/uniform/data/block.json");
 	if (stream1.is_open())
 	{
 		ss << stream1.rdbuf();

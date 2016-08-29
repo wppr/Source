@@ -31,7 +31,7 @@ public:
 		BlockDef b;
 
 		for (int i = 1; i <= 15; i++) {
-			serializeLoad("block" + to_string(i) + ".txt", b);
+			serializeLoad("model/uniform/data/block" + to_string(i) + ".txt", b);
 			blockPresets[b.name] = b;
 
 		}
