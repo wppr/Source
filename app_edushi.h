@@ -103,7 +103,7 @@ public:
 			if (ImGui::Button("RemoveAll")) RemoveAllNodes();
 			if (ImGui::Button("AttachFloor")) sl->AttachFloar();
 			if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;
-			static char blockpath[100] = "block0.txt";
+			static char blockpath[100] = "model/uniform/data/block0.txt";
 			ImGui::InputText("Block Path", blockpath, 100);
 			static char blockname[100] = "1";
 			ImGui::InputText("Block Name", blockname, 100);
