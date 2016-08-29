@@ -19,7 +19,7 @@ public:
 	SceneLoader* sl;
 
 	void Init() {
-		w = 1000;
+		w = 1280;
 		h = 700;
 		render = new EGLRenderSystem;
 		render->SetWandH(w, h);
@@ -102,6 +102,7 @@ public:
 			if (ImGui::Button("Load model")) LoadModel(tmp,name);
 			if (ImGui::Button("RemoveAll")) RemoveAllNodes();
 			if (ImGui::Button("AttachFloor")) sl->AttachFloar();
+			if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;
 			static char blockpath[100] = "block0.txt";
 			ImGui::InputText("Block Path", blockpath, 100);
 			static char blockname[100] = "1";

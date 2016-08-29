@@ -10,8 +10,12 @@ using std::thread;
 using std::queue;
 using std::stack;
 
-#define LOG_OPEN 0
-
+//#define LOG_OPEN
+#ifdef LOG_OPEN
+#define LOG(X) printf(X)
+#else
+#define LOG(X) 
+#endif
 class Server
 {
 public:

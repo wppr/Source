@@ -15,7 +15,7 @@ using std::ifstream;
 using std::stringstream;
 
 #define PI 3.141592654
-#define SJSON 1
+
 
 SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height) : width(width), height(height)
 {
@@ -68,13 +68,13 @@ void SceneLoader::ParseScene(string json)
 	}
 	if (!crosses.empty())
 	{
-		cout << crosses.size() << std::endl;
+		//cout << crosses.size() << std::endl;
 		crosses.clear();
 	}
 
 	Value &entry = root["entry"];
 	assert(entry.IsArray());
-	cout << "num " << entry.Size() << endl;
+	//cout << "num " << entry.Size() << endl;
 	for (SizeType i = 0; i < entry.Size(); ++i)
 	{
 		int x = entry[i]["x"].GetInt();
@@ -213,7 +213,7 @@ void SceneLoader::UpdateScene()
 	string json;
 	mutex m;
 
-	if (SJSON)
+	if (show_json)
 	{
 		ParseScene(staticJson);
 		UpdateSceneNodes();

@@ -106,7 +106,7 @@ namespace Block
 	{
 
 	public:
-
+		bool show_json = true;
 		//default 32 * 16
 		SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height);
 
