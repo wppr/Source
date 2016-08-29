@@ -90,14 +90,16 @@ void SceneLoader::ParseScene(string json)
 			Entry::EntryType type;
 			string name = entry[i]["id"].GetString();
 			BlockDef block = bh.blockPresets[name];
-			if (name.substr(1, name.size()) == "cross")
+			if (name.substr(1, 5) == "cross")
 			{
 				crosses.push_back(y * width + x);
-				if (name == "xcross")
+				if (name == "xcross" || name == "xcross_greenlight")
+				{
 					type = Entry::EntryType::XCROSS;
-				else if(name == "tcross")
+				}
+				else if(name == "tcross" || name == "tcross_greenlight")
 					type = Entry::EntryType::TCROSS;
-				else if(name == "lcross")
+				else if(name == "lcross" || name == "lcross_greenlight")
 					type = Entry::EntryType::LCROSS;
 			}
 			else
