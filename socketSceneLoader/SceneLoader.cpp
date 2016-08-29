@@ -81,8 +81,6 @@ void SceneLoader::ParseScene(string json)
 		int y = entry[i]["y"].GetInt();
 		if (!(x >= 0 && x < 32 && y >= 0 && y < 16)) continue;
 		string type = entry[i]["type"].GetString();
-		int spanX = entry[i]["span"]["x"].GetInt();
-		int spanY = entry[i]["span"]["y"].GetInt();
 		
 		this->layoutMatrix[y * width + x].IsEmpty() = false;
 		this->layoutMatrix[y * width + x].IsDrawable() = true;
