@@ -54,6 +54,10 @@ public:
 		SceneNode* s;
 		if (name == "") name = path;
 		s = LoadMeshtoSceneNode(path, name);
+		if (s == NULL) {
+			cout << "cant find model:" << path << endl;
+			return;
+		}
 		s->setScale(Vector3(modelscale));
 		s->setTranslation(modelTranslate);
 		Quaternion q;

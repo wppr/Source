@@ -146,25 +146,32 @@ public:
 	void Init(SceneManager* _scene,MeshManager* _meshmgr ) {
 		scene = _scene;
 		meshMgr = _meshmgr;
+		map<int, string> modellist;
+
 		for (int i = 1; i <= 9; i++) {
-			MeshPtr mesh = meshMgr->loadMesh_assimp_check("floor", "model/uniform/building0" + to_string(i) + ".obj");
-			meshs.push_back(mesh);
+			modellist[i] = "building0" + to_string(i) + ".obj";
 		}
 		for (int i = 10; i <= 15; i++) {
-			MeshPtr mesh = meshMgr->loadMesh_assimp_check("floor", "model/uniform/building" + to_string(i) + ".obj");
-			meshs.push_back(mesh);
+			modellist[i] = "building" + to_string(i) + ".obj";
+		}
+		modellist[16] = "road1.obj";
+		modellist[17] = "road2.obj";
+		modellist[18] = "lightGreen2.obj";
+		modellist[19] = "lightRed2.obj";
+		modellist[20] = "lightYellow2.obj";
+		modellist[21] = "roadpark.obj";
+		modellist[22] = "busStation.obj";
+
+		int end = 23;
+		for (int i = 16; i <= 25; i++) {
+			modellist[end] = "building" + to_string(i) + ".obj";
+			end++;
 		}
 
-		MeshPtr cross = meshMgr->loadMesh_assimp_check("floor", "model/uniform/road1.obj");
-		MeshPtr street = meshMgr->loadMesh_assimp_check("floor", "model/uniform/road2.obj");
-		MeshPtr glight = meshMgr->loadMesh_assimp_check("floor", "model/uniform/lightGreen2.obj");
-		MeshPtr rlight = meshMgr->loadMesh_assimp_check("floor", "model/uniform/lightRed2.obj");
-		MeshPtr ylight = meshMgr->loadMesh_assimp_check("floor", "model/uniform/lightYellow2.obj");
-		meshs.push_back(cross);
-		meshs.push_back(street);
-		meshs.push_back(glight);
-		meshs.push_back(rlight);
-		meshs.push_back(ylight);
+		for (int i = 1; i < end; i++) {
+			MeshPtr mesh = meshMgr->loadMesh_assimp_check("", "model/uniform/" + modellist[i]);
+			meshs.push_back(mesh);
+		}
 
 		FillBlockData();
 	}
