@@ -12,6 +12,7 @@ public:
 	bool use_huawei_head = false;
 	int head_index = 0;
 	float modelscale = 0.003;
+	Vector3 modelTranslate = Vector3(-1.6,0.5,-1.6);
 	vector<SceneNode*> lightpoint= vector<SceneNode*>(5,nullptr);
 	void Init() {
 		w = 1280;
@@ -63,6 +64,7 @@ public:
 			cout << "cant load model:" + path << endl; return;
 		}
 		s->setScale(Vector3(modelscale));
+		s->setTranslation(modelTranslate);
 		if (s != NULL)
 			root->attachNode(s);
 		auto b = root->getBoundingBox();
@@ -144,7 +146,7 @@ public:
 				ImGui::DragFloat3("Light Center", &p->LightCenter[0]);
 				ImGui::DragFloat("Light Near", &p->lightnear,0.01,0.01);
 				ImGui::DragFloat("Light Far", &p->lightfar,0.01);
-				ImGui::DragFloat("ambient strength", &p->ambient, 0.002, 0.0, 1.0);
+				ImGui::DragFloat("ambient light", &p->ambient, 0.002, 0.0, 1.0);
 				
 
 				ImGui::Text("hard shadowmap");
@@ -215,14 +217,14 @@ public:
 
 		for (int i = 0; i < 3; i++) {
 			s = LoadMeshtoSceneNode("model/pbr_test/sphere7d.obj", "light point" + to_string(i));
-			s->scale(0.01, 0.01, 0.01);
+			s->scale(0.03, 0.03, 0.03);
 			lightpoint[i] = s;
 			root->attachNode(s);
 		}
 		//head
 		//if (!use_huawei_head) {
-			s = LoadMeshtoSceneNode("model/head/head5.obj", "Head");
-			s->scale(3, 3, 3);
+			//s = LoadMeshtoSceneNode("model/head/head5.obj", "Head");
+			//s->scale(3, 3, 3);
 		//}
 		//else 
 		//{
