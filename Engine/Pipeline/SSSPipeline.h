@@ -71,7 +71,7 @@ public:
 	VarianceShadowMapGenerateEffect vsm;
 	ShadowMapGenerateEffect e_shadowmap;
 	int mode = 0;
-	vector<float> sw = { 0.2f,0.2f,0.15f };
+	vector<float> sw = { 0.2f,0.2f,0.2f };
 	float bumpiness = 0.9;
 	float specularIntensity = 1.88;
 	float specularRoughness = 0.3;
@@ -79,10 +79,10 @@ public:
 	float translucency = 0.83;
 	int sssEnabled = 1;
 	float sssWidth = 0.012;
-	float ambient = 0.61;
+	float ambient = 0.05;
 	float environment = 0.55;
 	int normalenable = 1;
-	float lightnear = 0.1, lightfar = 100;
+	float lightnear = 0.06, lightfar = 100;
 	Light_SSS lights[N_LIGHTS];
 	Vector3 LightCenter=Vector3(0.0);
 	bool use_huawei_head=false;

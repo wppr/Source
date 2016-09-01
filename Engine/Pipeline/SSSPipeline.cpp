@@ -51,7 +51,8 @@ void SSSPipeline::Init()
 	vsm.height = 2048;
 	vsm.Init();
 
-
+	lights[1].color = Vector3(0.0);
+	lights[2].color = Vector3(0.0);
 	//LightCamera[0].LightPosition = lights[2].positon;
 	//LightCamera[0].LightDir = LightCenter-lights[2].positon;
 	//LightCamera[0].Near = 0.1;

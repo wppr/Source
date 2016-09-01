@@ -95,7 +95,7 @@ void EdushiPipeline::Init()
 
 	ssao.depth = gbuffer.depth;
 	ssao.normal = gbuffer.normal2;
-	ssao.radius = 0.01;
+	ssao.radius = 0.17;
 	ssao.num_samples_ssao = 48;
 	ssao.halfResolution = false;
 	ssao.Init();
