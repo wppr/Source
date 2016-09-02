@@ -116,7 +116,7 @@ void Server::Receive()
 		if (iResult > 0) {
 			//json segmentation
 			LOG("recv success\n");
-			printf("iResult %d\n", iResult);
+			LOG("iResult %d\n", iResult);
 			for (int i = 0; i < iResult; ++i)
 			{
 				ss << buf[i];
