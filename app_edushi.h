@@ -19,8 +19,8 @@ public:
 	SceneLoader* sl;
 
 	void Init() {
-		w = 1280;
-		h = 700;
+		w = 1920;
+		h = 1080;
 		render = new EGLRenderSystem;
 		render->SetWandH(w, h);
 		render->Initialize();
@@ -31,8 +31,8 @@ public:
 		//sceneLoader
 		sl = new SceneLoader(scene, meshMgr, 32, 16);
 		sl->loadMesh();
-		sl->InitServer("192.168.2.41", "56025");
-		sl->LoadJson();
+		sl->InitServer("127.0.0.1", "56025");
+		//sl->LoadJson();
 		
 	}
 	void InitPipeline()

@@ -42,8 +42,8 @@ int Server::InitSocket()
 
 	ServerSocket = INVALID_SOCKET;
 	ServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	u_long iMode = 1;
-	ioctlsocket(ServerSocket, FIONBIO, &iMode);
+	/*u_long iMode = 1;
+	ioctlsocket(ServerSocket, FIONBIO, &iMode);*/
 
 	if (ServerSocket == INVALID_SOCKET) {
 		LOG("Error at socket(): %ld\n", WSAGetLastError());
@@ -112,11 +112,11 @@ void Server::Receive()
 		char buf[BATCH];
 		LOG("receiving\n");
 		iResult = recv(ServerSocket, buf, 100000, 0);
-		LOG("iResult %d\n", iResult);
-
+		
 		if (iResult > 0) {
 			//json segmentation
 			LOG("recv success\n");
+			printf("iResult %d\n", iResult);
 			for (int i = 0; i < iResult; ++i)
 			{
 				ss << buf[i];

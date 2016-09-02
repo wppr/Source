@@ -131,8 +131,11 @@ void SceneLoader::ParseScene(string json)
 			for (int i = 0; i < rotated_spanX; ++i)
 				for (int j = 0; j < rotated_spanY; ++j)
 				{
-					this->layoutMatrix[(y + j) * width + x + i].IsEmpty() = false;
-					this->layoutMatrix[(y + j) * width + x + i].SetEntryType(type);
+					if ((y + j) < height && (x + i) < width)
+					{
+						this->layoutMatrix[(y + j) * width + x + i].IsEmpty() = false;
+						this->layoutMatrix[(y + j) * width + x + i].SetEntryType(type);
+					}
 				}
 		}
 	}
@@ -310,9 +313,9 @@ void SceneLoader::UpdateSceneNodes()
 		{
 			if (layoutMatrix[i * width + j].IsDrawable())
 			{
-			
 				BlockDef &block = layoutMatrix[i * width + j].GetBlock();
 				string id = block.name;
+				cout << "id: " << id << endl;
 
 				int orien = block.orientation;
 				string span = block.size;
@@ -383,7 +386,6 @@ void SceneLoader::loadMesh() {
 		ss << "model/uniform/building0" << i + 1 << ".obj";
 		ss1 << "building0" << i + 1;
 		auto meshPtr = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
-		cout << ss1.str() << endl;
 		buildings.insert(std::pair<string, MeshPtr>(ss1.str(), meshPtr));
 	}
 

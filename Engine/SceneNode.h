@@ -264,8 +264,10 @@ namespace HW
 		inline void setOrientation(const Quaternion& quater)
 		{
 			m_orientation = quater;
-			if(m_parent)
+			if (m_parent)
+			{
 				m_parent->notifyChildTransformChanged();
+			}
 			m_orientationCurrent = false;
 			thisNodeMoved();
 		}
