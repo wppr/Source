@@ -221,11 +221,11 @@ public:
 			lightpoint[i] = s;
 			root->attachNode(s);
 		}
-		//head
-		//if (!use_huawei_head) {
-			//s = LoadMeshtoSceneNode("model/head/head5.obj", "Head");
-			//s->scale(3, 3, 3);
-		//}
+
+		if (!use_huawei_head) {
+			s = LoadMeshtoSceneNode("model/head/head5.obj", "Head");
+			s->scale(3, 3, 3);
+		}
 		//else 
 		//{
 		//	float scale = 300;
