@@ -12,9 +12,9 @@ using std::stack;
 
 //#define LOG_OPEN
 #ifdef LOG_OPEN
-#define LOG(X) printf(X)
+#define LOG(...) printf(...)
 #else
-#define LOG(X) 
+#define LOG(...) 
 #endif
 class Server
 {
