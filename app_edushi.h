@@ -35,6 +35,11 @@ public:
 		//sl->LoadJson();
 		
 	}
+	Vector3 getSceneCenter() {
+		int w = 32, h = 16;
+		Vector3 c = 0.5*Vector3(w, 0, h)*scenescale + sceneTranlate;
+		return c;
+	}
 	void InitPipeline()
 	{
 		pipeline = new EdushiPipeline;
