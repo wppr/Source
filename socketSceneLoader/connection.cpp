@@ -20,6 +20,10 @@ queue<string> Server::jsonQueue;
 string Server::ipAddr;
 string Server::port;
 mutex jsonQueueMutex;
+vector<SOCKET> Server::clientSockets;
+int Server::clientNum;
+int clientSocketsLock = 0;
+mutex clientSocketsLockMutex;
 
 #define BATCH 100000+10
 
@@ -42,8 +46,8 @@ int Server::InitSocket()
 
 	ServerSocket = INVALID_SOCKET;
 	ServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	/*u_long iMode = 1;
-	ioctlsocket(ServerSocket, FIONBIO, &iMode);*/
+	u_long iMode = 1;
+	ioctlsocket(ServerSocket, FIONBIO, &iMode);
 
 	if (ServerSocket == INVALID_SOCKET) {
 		LOG("Error at socket(): %ld\n", WSAGetLastError());
@@ -59,8 +63,12 @@ void Server::SetAddr(string ip, string port)
 	this->ipAddr = ip;
 	this->port = port;
 
+	InitSocket();
+	Bind();
+
 	recieveThread = thread(Start);
 	recieveThread.detach();
+
 }
 
 void Server::Bind()
@@ -101,6 +109,42 @@ void Server::Bind()
 
 }
 
+int Server::Send(string buf)
+{
+	/*clientSocketsLockMutex.lock();
+	LOG("lock...\n");
+	clientSocketsLock = 1; 
+	clientSocketsLockMutex.unlock();*/
+	
+	for (vector<SOCKET>::iterator it = clientSockets.begin(); it != clientSockets.end(); )//iterate clients and send
+	{
+		LOG("sending...\n");
+		int iResult = send(*it, &buf[0], (int)(buf.size() * sizeof(char)), 0);
+		if (iResult == SOCKET_ERROR) 
+		{//if error, close socket and delete
+			LOG("send failed: %d\n", WSAGetLastError());
+			closesocket(*it);
+			it = clientSockets.erase(it);
+			printf("client deleted!\n");
+			printf("current client num: %d\n", clientSockets.size());
+			
+			clientNum--;
+		}
+		else
+		{
+			++it;
+			LOG("send success!\n");
+		}
+	}
+
+	/*clientSocketsLockMutex.lock();
+	clientSocketsLock = 0;
+	LOG("unlock...\n");
+	clientSocketsLockMutex.unlock();*/
+	
+	return 0;
+}
+
 void Server::Receive()
 {
 	int iResult;
@@ -109,101 +153,114 @@ void Server::Receive()
 
 	//receive buffer
 	do {
-		char buf[BATCH];
-		LOG("receiving\n");
-		iResult = recv(ServerSocket, buf, 100000, 0);
-		
-		if (iResult > 0) {
-			//json segmentation
-			LOG("recv success\n");
-			printf("iResult %d\n", iResult);
-			for (int i = 0; i < iResult; ++i)
+		for (int j = 0; j < clientSockets.size(); ++j)
+		{
+			char buf[BATCH];
+			//LOG("receiving\n");
+			iResult = recv(clientSockets[j], buf, 100000, 0);
+			if (!jsonQueue.empty())
 			{
-				ss << buf[i];
-				switch (buf[i])
+				string s = jsonQueue.front();
+				//cout << s << endl;
+				jsonQueue.pop();
+			}
+			//LOG("json size: %d\n", jsonQueue.size());
+
+			if (iResult > 0) {
+				//json segmentation
+				LOG("recv success\n");
+				for (int i = 0; i < iResult; ++i)
 				{
-				case '{':
-					charStack.push(buf[i]);
-					break;
-
-				case '}':
-					assert('{' == charStack.top());
-					charStack.pop();
-					if (charStack.empty())
+					ss << buf[i];
+					switch (buf[i])
 					{
-						jsonQueueMutex.lock();
-						jsonQueue.push(ss.str());
-						jsonQueueMutex.unlock();
-						ss.str("");
-					}
-					break;
+					case '{':
+						charStack.push(buf[i]);
+						break;
 
-				case '[':
-					charStack.push(buf[i]);
-					break;
+					case '}':
+						assert('{' == charStack.top());
+						charStack.pop();
+						if (charStack.empty())
+						{
+							jsonQueueMutex.lock();
+							jsonQueue.push(ss.str());
+							jsonQueueMutex.unlock();
+							ss.str("");
+						}
+						break;
 
-				case ']':
-					assert('[' == charStack.top());
-					charStack.pop();
-					if (charStack.empty())
-					{
-						jsonQueueMutex.lock();
-						jsonQueue.push(ss.str());
-						jsonQueueMutex.unlock();
-						ss.str("");
+					case '[':
+						charStack.push(buf[i]);
+						break;
+
+					case ']':
+						assert('[' == charStack.top());
+						charStack.pop();
+						if (charStack.empty())
+						{
+							jsonQueueMutex.lock();
+							jsonQueue.push(ss.str());
+							jsonQueueMutex.unlock();
+							ss.str("");
+						}
+						break;
 					}
-					break;
 				}
 			}
+			else if (iResult == 0)
+			{
+				LOG("Connection closing...\n");
+			}
+			else {
+				LOG("recv failed: %d\n", WSAGetLastError());
+				closesocket(clientSockets[j]);
+				WSACleanup();
+				mutex m;
+				m.lock();
+				clientNum--;
+				m.unlock();
+				return;
+			}
 		}
-		else if (iResult == 0)
-			LOG("Connection closing...\n");
-		else{
-			LOG("recv failed: %d\n", WSAGetLastError());
-			closesocket(ServerSocket);
-			WSACleanup();
-			return;
-		}
+	} while (true);
 
-	} while (iResult > 0);
+}
 
+void Server::Start()
+{
+	while (true)
+	{
+		Accept();
+		Send("{server}");
+	}
 }
 
 void Server::Accept()
 {
-
-	LOG("accepting...\n");
-	ServerSocket = accept(ServerSocket, NULL, NULL);
-	if (ServerSocket == INVALID_SOCKET) {
-		LOG("accept failed: %d\n", WSAGetLastError());
-		closesocket(ServerSocket);
-		WSACleanup();
-		return;
-	}
-	else
-	{
-		LOG("accepted!\n");
-	}
-
-	return;
+	//while (true)//repeatedly accept
+	//{
+		LOG("accepting...\n");
+		SOCKET clientSocket = accept(ServerSocket, NULL, NULL);
+		if (clientSocket == INVALID_SOCKET) 
+		{
+			LOG("accept failed: %d\n", WSAGetLastError());
+			closesocket(clientSocket);
+		}
+		else
+		{
+			clientSockets.push_back(clientSocket);
+			clientNum++;
+			cout << "new client connected!" << endl << "current client num: " << clientNum << endl;
+			LOG("accepted!\n");
+		}
+	//}
 }
 
 void Server::Close()
 {
 	closesocket(ServerSocket);
 	WSACleanup();
-}
-
-//Note : the socket's creation ,connection and ... must be in the same thread
-void Server::Start()
-{
-	while (true)
-	{
-		InitSocket();
-		Bind();
-		Accept();
-		Receive();
-	}
 }
 
 /*********************************************************************/
@@ -251,6 +308,7 @@ int Client::Connect(string ip, string port)
 	{
 		LOG("connecting...\n");
 		iResult = connect(ClientSocket, server_info->ai_addr, static_cast<int>(server_info->ai_addrlen));
+		LOG("iresult %d\n", iResult);
 	}
 
 	LOG("connected!\n");
@@ -259,6 +317,7 @@ int Client::Connect(string ip, string port)
 
 int Client::Send(string buf)
 {
+	printf("sending..\n");
 	int iResult = send(ClientSocket, &buf[0], (int)(buf.size() * sizeof(char)), 0);
 	if (iResult == SOCKET_ERROR) {
 		LOG("send failed: %d\n", WSAGetLastError());
@@ -268,6 +327,80 @@ int Client::Send(string buf)
 	}
 
 	return 0;
+}
+
+void Client::Receive()
+{
+	int iResult;
+	stringstream ss;
+	ss.str("");
+
+	//receive buffer
+	do {
+		char buf[BATCH];
+		LOG("receiving\n");
+		iResult = recv(ClientSocket, buf, 100000, 0);
+		LOG("iResult %d\n", iResult);
+
+		if (!jsonQueue.empty())
+		{
+			cout << jsonQueue.front() << endl;
+			jsonQueue.pop();
+		}
+
+		if (iResult > 0) {
+			//json segmentation
+			LOG("recv success\n");
+			for (int i = 0; i < iResult; ++i)
+			{
+				ss << buf[i];
+				switch (buf[i])
+				{
+				case '{':
+					charStack.push(buf[i]);
+					break;
+
+				case '}':
+					assert('{' == charStack.top());
+					charStack.pop();
+					if (charStack.empty())
+					{
+						jsonQueueMutex.lock();
+						jsonQueue.push(ss.str());
+						jsonQueueMutex.unlock();
+						ss.str("");
+					}
+					break;
+
+				case '[':
+					charStack.push(buf[i]);
+					break;
+
+				case ']':
+					assert('[' == charStack.top());
+					charStack.pop();
+					if (charStack.empty())
+					{
+						jsonQueueMutex.lock();
+						jsonQueue.push(ss.str());
+						jsonQueueMutex.unlock();
+						ss.str("");
+					}
+					break;
+				}
+			}
+		}
+		else if (iResult == 0)
+			LOG("Connection closing...\n");
+		else {
+			LOG("recv failed: %d\n", WSAGetLastError());
+			closesocket(ClientSocket);
+			WSACleanup();
+			return;
+		}
+
+	} while (iResult > 0);
+
 }
 
 void Client::Close()
