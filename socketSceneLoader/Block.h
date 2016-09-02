@@ -27,16 +27,17 @@ public:
 	vector<MeshPtr> meshs;
 	SceneManager* scene=NULL;
 	MeshManager* meshMgr=NULL;
+	int blocknum = 19;
 	void FillBlockData() {
 		BlockDef b;
 
-		for (int i = 1; i <= 15; i++) {
+		for (int i = 1; i <= blocknum; i++) {
 			serializeLoad("model/uniform/data/block" + to_string(i) + ".txt", b);
 			blockPresets[b.name] = b;
 
 		}
 		vector<string> names = { "xcross","tcross","lcross","xcross_greenlight",
-			"tcross_greenlight","lcross_greenlight","street", };
+			"tcross_greenlight","lcross_greenlight","street","park","station" };
 		for (auto x : names) {
 			serializeLoad("model/uniform/data/" + x + ".txt", b);
 			blockPresets[b.name] = b;
@@ -189,12 +190,12 @@ public:
 				removeNode(name);
 			}
 			snode = scene->getSceneNode(name);
-				auto entity = scene->CreateEntity(name);
-				entity->setMesh(meshs[block.meshID[i]]);
-				snode = scene->CreateSceneNode(name);
-				snode->attachMovable(entity);
-				root->attachNode(snode);
-			//}
+			auto entity = scene->CreateEntity(name);
+			entity->setMesh(meshs[block.meshID[i]]);
+			snode = scene->CreateSceneNode(name);
+			snode->attachMovable(entity);
+			root->attachNode(snode);
+
 			snode->setTranslation(block.translate[i] + pos);
 			snode->setScale(block.scale[i]);
 			Quaternion q;
@@ -214,9 +215,28 @@ public:
 	}
 	void PutblockTest() {
 
-		for (int i = 1; i <= 10; i++) {
+		for (int i = 1; i <= blocknum; i++) {
 			AttachBlock(to_string(i), "block_demo" + to_string(i), Vector3((i%4)*4, 0, (i /4)*4));
 		}
 
+	}
+
+	void attachAllMesh() {
+		SceneNode* root = scene->GetSceneRoot();
+		for (int i = 0; i < meshs.size(); i++) {
+			string name = "attach all mesh" + to_string(i);
+			auto snode = scene->getSceneNode(name);
+			if (snode != NULL) {
+				removeNode(name);
+			}
+			auto entity = scene->CreateEntity(name);
+			entity->setMesh(meshs[i]);
+			snode = scene->CreateSceneNode(name);
+			snode->attachMovable(entity);
+			int x = i % 8 * 4, y = i / 8 * 4;
+
+			snode->setTranslation(Vector3(x, 0, y));
+			root->attachNode(snode);
+		}
 	}
 };

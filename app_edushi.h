@@ -138,12 +138,15 @@ public:
 			ImGui::InputText("Block Node Name", nodename, 100);
 			if (ImGui::Button("Attach Block"))
 			{
-				//static int i = 0;
-				//i++;
-				
-				//RemoveAllNodes();
-				//sl->AttachFloar();
 				sl->bh.AttachBlock(blockname, string(nodename), blockPos);
+			}
+			if (ImGui::Button("Attach All Block"))
+			{
+				sl->bh.PutblockTest();
+			}
+			if (ImGui::Button("Attach All Mesh"))
+			{
+				sl->bh.attachAllMesh();
 			}
 			ImGui::DragFloat("scene scale", &scenescale, 0.001);
 			ImGui::DragFloat3("scene translate", &sceneTranlate[0], 0.01);
