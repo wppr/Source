@@ -233,11 +233,11 @@ void Server::Receive()
 
 void Server::Start()
 {
-	while (true)
-	{
-		Accept();
-		Send("{server}");
-	}
+	//while (true)
+	//{
+	//	//Accept();
+	//	//Send("{server}");
+	//}
 }
 
 void Server::Accept()

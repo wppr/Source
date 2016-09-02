@@ -31,9 +31,9 @@ public:
 		//sceneLoader
 		sl = new SceneLoader(scene, meshMgr, 32, 16);
 		sl->loadMesh();
-		sl->InitServer("127.0.0.1", "56025");
-		//sl->LoadJson();
-		
+		//sl->InitServer("127.0.0.1", "56025");
+		sl->LoadJson();
+		sl->UpdateScene();
 	}
 	Vector3 getSceneCenter() {
 		int w = 32, h = 16;
@@ -48,7 +48,7 @@ public:
 
 	void Render() {
 		UpdateGUI();
-		sl->UpdateScene();
+		//sl->UpdateScene();
 		pipeline->Render();
 		//CarSim.Update();
 	}

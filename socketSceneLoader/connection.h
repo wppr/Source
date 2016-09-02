@@ -19,7 +19,7 @@ using std::vector;
 #define LOG(X)
 #endif
 class Server
-{
+{ 
 public:
 	Server()
 	{
