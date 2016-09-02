@@ -19,8 +19,8 @@ public:
 	SceneLoader* sl;
 
 	void Init() {
-		w = 1920;
-		h = 1080;
+		w = 1000;
+		h = 600;
 		render = new EGLRenderSystem;
 		render->SetWandH(w, h);
 		render->Initialize();
@@ -31,9 +31,9 @@ public:
 		//sceneLoader
 		sl = new SceneLoader(scene, meshMgr, 32, 16);
 		sl->loadMesh();
-		sl->InitServer("127.0.0.1", "56025");
-		//sl->LoadJson();
-		
+		//sl->InitServer("127.0.0.1", "56025");
+		sl->LoadJson();
+		sl->UpdateScene();
 	}
 	Vector3 getSceneCenter() {
 		int w = 32, h = 16;
@@ -48,7 +48,7 @@ public:
 
 	void Render() {
 		UpdateGUI();
-		sl->UpdateScene();
+		//sl->UpdateScene();
 		pipeline->Render();
 		//CarSim.Update();
 	}
@@ -138,12 +138,15 @@ public:
 			ImGui::InputText("Block Node Name", nodename, 100);
 			if (ImGui::Button("Attach Block"))
 			{
-				//static int i = 0;
-				//i++;
-				
-				//RemoveAllNodes();
-				//sl->AttachFloar();
 				sl->bh.AttachBlock(blockname, string(nodename), blockPos);
+			}
+			if (ImGui::Button("Attach All Block"))
+			{
+				sl->bh.PutblockTest();
+			}
+			if (ImGui::Button("Attach All Mesh"))
+			{
+				sl->bh.attachAllMesh();
 			}
 			ImGui::DragFloat("scene scale", &scenescale, 0.001);
 			ImGui::DragFloat3("scene translate", &sceneTranlate[0], 0.01);

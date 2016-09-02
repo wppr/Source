@@ -27,77 +27,22 @@ public:
 	vector<MeshPtr> meshs;
 	SceneManager* scene=NULL;
 	MeshManager* meshMgr=NULL;
+	int blocknum = 20;
 	void FillBlockData() {
 		BlockDef b;
 
-		for (int i = 1; i <= 15; i++) {
+		for (int i = 1; i <= blocknum; i++) {
 			serializeLoad("model/uniform/data/block" + to_string(i) + ".txt", b);
 			blockPresets[b.name] = b;
 
 		}
 		vector<string> names = { "xcross","tcross","lcross","xcross_greenlight",
-			"tcross_greenlight","lcross_greenlight","street", };
+			"tcross_greenlight","lcross_greenlight","street","park","station" };
 		for (auto x : names) {
 			serializeLoad("model/uniform/data/" + x + ".txt", b);
 			blockPresets[b.name] = b;
 		}
-		//{
-		//	BlockDef b[10];
 
-		//	b[0].name = "block1";
-		//	b[0].type = "BLOCK";
-		//	b[0].meshID = { 0,1,4 };
-		//	b[0].translate = { Vector3(0,0,0),Vector3(3,0,0),Vector3(1,0,2) };
-		//	b[0].scale = { Vector3(0.5),Vector3(0.5),Vector3(0.5) };
-		//	b[0].size = "5x3";
-
-		//	b[1].name = "block2";
-		//	b[1].type = "BLOCK";
-		//	b[1].size = "4x5";
-		//	b[1].meshID = { 8,3,7 };
-		//	b[1].translate = { Vector3(0,0,1),Vector3(3,0,0),Vector3(3,0,3) };
-		//	b[1].scale = { Vector3(0.5),Vector3(0.5),Vector3(0.5) };
-
-		//	b[2].name = "xcross";
-		//	b[2].type = "XCROSS";
-		//	b[2].size = "1x1";
-		//	b[2].meshID = { 16,15,15,15,15 };
-		//	//center up left down right
-		//	b[2].translate = { Vector3(1 / 3.0,0,1 / 3.0), Vector3(2 / 3.0,0, 1 / 3.0), Vector3(1 / 3.0,0,1 / 3.0), Vector3(1 / 3.0,0,2 / 3.0) , Vector3(2 / 3.0,0,2 / 3.0) };
-		//	b[2].scale = { Vector3(1 / 3.0),Vector3(1 / 3.0),Vector3(1 / 3.0),Vector3(1 / 3.0),Vector3(1 / 3.0) };
-		//	Vector3 axis(0.0, 1.0, 0.0);
-		//	b[2].orientations = { 0.0f, float(PI),  float(1.5*PI), 0.0f, float(0.5*PI) };
-
-		//	b[3].name = "lcross";
-		//	b[3].type = "LCROSS";
-		//	b[3].size = "1x1";
-		//	b[3].meshID = { 16, 15, 15 };
-		//	//center down right
-		//	b[3].translate = { Vector3(1 / 3.0,0,1 / 3.0), Vector3(1 / 3.0,0,2 / 3.0), Vector3(2 / 3.0,0,2 / 3.0) };
-		//	b[3].scale = { Vector3(1 / 3.0),Vector3(1 / 3.0),Vector3(1 / 3.0) };
-		//	b[3].orientations = { 0.0f, 0.0f, float(0.5*PI) };
-
-		//	b[4].name = "tcross";
-		//	b[4].type = "TCROSS";
-		//	b[4].size = "1x1";
-		//	b[4].meshID = { 16, 15, 15, 15 };
-		//	//center up right down
-		//	b[4].translate = { Vector3(1 / 3.0,0,1 / 3.0), Vector3(2 / 3.0,0,1 / 3.0), Vector3(2 / 3.0,0,2 / 3.0),  Vector3(1 / 3.0,0,2 / 3.0) };
-		//	b[4].scale = { Vector3(1 / 3.0),Vector3(1 / 3.0),Vector3(1 / 3.0), Vector3(1 / 3.0) };
-		//	b[4].orientations = { 0.0f, float(PI), float(0.5*PI), 0.0f };
-
-		//	b[5].name = "street";
-		//	b[5].type = "STREET";
-		//	b[5].size = "1x1";
-		//	b[5].orientation = 1;
-		//	b[5].meshID = { 16,16,16 };
-		//	b[5].translate = { Vector3(0, 0, 1 / 3.0), Vector3(1 / 3.0, 0, 1 / 3.0) , Vector3(2 / 3.0, 0, 1 / 3.0) };
-		//	b[5].scale = { Vector3(1 / 3.0) , Vector3(1 / 3.0) , Vector3(1 / 3.0) };
-		//	b[5].orientations = { 0, 0, 0};
-		//	for (int i = 0; i < 10; i++) {
-		//		blockPresets[b[i].name] = b[i];
-		//	}
-		//}
 	}
 	void SaveBlock(string fname,string bname,string bsize,string btype,int borien) {
 		auto nodes = scene->GetSceneRoot()->getAllChildNodes();
@@ -189,12 +134,12 @@ public:
 				removeNode(name);
 			}
 			snode = scene->getSceneNode(name);
-				auto entity = scene->CreateEntity(name);
-				entity->setMesh(meshs[block.meshID[i]]);
-				snode = scene->CreateSceneNode(name);
-				snode->attachMovable(entity);
-				root->attachNode(snode);
-			//}
+			auto entity = scene->CreateEntity(name);
+			entity->setMesh(meshs[block.meshID[i]]);
+			snode = scene->CreateSceneNode(name);
+			snode->attachMovable(entity);
+			root->attachNode(snode);
+
 			snode->setTranslation(block.translate[i] + pos);
 			snode->setScale(block.scale[i]);
 			Quaternion q;
@@ -214,9 +159,28 @@ public:
 	}
 	void PutblockTest() {
 
-		for (int i = 1; i <= 10; i++) {
-			AttachBlock(to_string(i), "block_demo" + to_string(i), Vector3((i%4)*4, 0, (i /4)*4));
+		for (int i = 1; i <= blocknum; i++) {
+			int x = i % 8 * 4, y = i / 8 * 4;
+			AttachBlock(to_string(i), "block_demo" + to_string(i), Vector3(x, 0, y));
 		}
 
+	}
+
+	void attachAllMesh() {
+		SceneNode* root = scene->GetSceneRoot();
+		for (int i = 0; i < meshs.size(); i++) {
+			string name = "attach all mesh" + to_string(i);
+			auto snode = scene->getSceneNode(name);
+			if (snode != NULL) {
+				removeNode(name);
+			}
+			auto entity = scene->CreateEntity(name);
+			entity->setMesh(meshs[i]);
+			snode = scene->CreateSceneNode(name);
+			snode->attachMovable(entity);
+			int x = i % 8 * 4, y = i / 8 * 4;
+			snode->setTranslation(Vector3(x, 0, y));
+			root->attachNode(snode);
+		}
 	}
 };
