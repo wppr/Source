@@ -12,7 +12,7 @@ using std::stack;
 
 #define LOG_OPEN
 #ifdef LOG_OPEN
-#define LOG(...) printf(...)
+#define LOG(...) printf(__VA_ARGS__)
 #else
 #define LOG(...) 
 #endif
