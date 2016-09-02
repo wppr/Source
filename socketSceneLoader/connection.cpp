@@ -153,7 +153,6 @@ void Server::Receive()
 
 	//receive buffer
 	do {
-<<<<<<< HEAD
 		char buf[BATCH];
 		LOG("receiving\n");
 		iResult = recv(ServerSocket, buf, 100000, 0);
@@ -163,14 +162,7 @@ void Server::Receive()
 			LOG("recv success\n");
 			LOG("iResult %d\n", iResult);
 			for (int i = 0; i < iResult; ++i)
-=======
-		for (int j = 0; j < clientSockets.size(); ++j)
-		{
-			char buf[BATCH];
-			//LOG("receiving\n");
-			iResult = recv(clientSockets[j], buf, 100000, 0);
-			if (!jsonQueue.empty())
->>>>>>> origin/master
+
 			{
 				string s = jsonQueue.front();
 				//cout << s << endl;
@@ -226,7 +218,7 @@ void Server::Receive()
 			}
 			else {
 				LOG("recv failed: %d\n", WSAGetLastError());
-				closesocket(clientSockets[j]);
+				//closesocket(clientSockets[j]);
 				WSACleanup();
 				mutex m;
 				m.lock();
