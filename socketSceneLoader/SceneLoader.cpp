@@ -55,11 +55,11 @@ void SceneLoader::ParseScene(string json)
 	}
 	assert(root.IsObject());
 	Value &blockSize = root["blockSize"];
-	width = blockSize["width"].GetInt();
-	height = blockSize["height"].GetInt();
+	/*width = blockSize["width"].GetInt();
+	height = blockSize["height"].GetInt();*/
 	
 	//set all to NULL
-	for (int i = 0; i < 32 * 16; ++i)
+	for (int i = 0; i < width * height; ++i)
 	{
 		layoutMatrix[i].IsEmpty() = true;
 		layoutMatrix[i].IsDrawable() = false;
@@ -79,7 +79,7 @@ void SceneLoader::ParseScene(string json)
 	{
 		int x = entry[i]["x"].GetInt();
 		int y = entry[i]["y"].GetInt();
-		if (!(x >= 0 && x < 32 && y >= 0 && y < 16)) continue;
+		if (!(x >= 0 && x < width && y >= 0 && y < height)) continue;//discarded
 		string type = entry[i]["type"].GetString();
 		
 		this->layoutMatrix[y * width + x].IsEmpty() = false;
@@ -261,26 +261,26 @@ void SceneLoader::InitSceneNode()
 void SceneLoader::InitFloor()
 {
 	//floarNodes
-	floarNodes = new SceneNode*[16 * 32];
-	for (int i = 0; i < 16; i++) {
-		for (int j = 0; j < 32; ++j) {
+	floarNodes = new SceneNode*[height * width];
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; ++j) {
 			stringstream name;
 			name.str("");
 			name << "floar" << i << " " << j;
-			floarNodes[i * 32 + j] = this->scene->CreateSceneNode(name.str());
+			floarNodes[i * width + j] = this->scene->CreateSceneNode(name.str());
 		}
 	}
 
 	//floarEntities
-	floarEntities = new Entity*[16 * 32];
-	for (int i = 0; i < 16; ++i)
+	floarEntities = new Entity*[height * width];
+	for (int i = 0; i < height; ++i)
 	{
-		for (int j = 0; j < 32; ++j)
+		for (int j = 0; j < width; ++j)
 		{
 			stringstream name;
 			name << "floar" << i << " " << j;
-			floarEntities[i * 32 + j] = this->scene->CreateEntity(name.str());
-			floarNodes[i * 32 + j]->attachMovable(floarEntities[i * 32 + j]);
+			floarEntities[i * width + j] = this->scene->CreateEntity(name.str());
+			floarNodes[i * width + j]->attachMovable(floarEntities[i * width + j]);
 		}
 	}
 
