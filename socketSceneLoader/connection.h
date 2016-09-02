@@ -10,34 +10,33 @@ using std::thread;
 using std::queue;
 using std::stack;
 
-#define LOG_OPEN
+//#define LOG_OPEN
 #ifdef LOG_OPEN
-#define LOG(...) printf(...)
+#define LOG(X) printf(X)
 #else
-#define LOG(...) 
+#define LOG(X) 
 #endif
 class Server
 {
 public:
 
 	void SetAddr(string ip, string port);
+	void Bind();
+	void Receive();
+	void Accept();
+	int InitSocket();
 	void Close();
 
 private:
 	thread recieveThread;
 	queue<char> charQueue;
-	static SOCKET ServerSocket;
-	static stack<char> charStack;
-	static void Start();
-	static void Bind();
-	static void Receive();
-	static void Accept();
-	static int InitSocket();
-	static string ipAddr;
-	static string port;
+	SOCKET ServerSocket;
+	stack<char> charStack;
+	string ipAddr;
+	string port;
 
 public:
-	static queue<string> jsonQueue;
+	queue<string> jsonQueue;
 };
 
 class Client

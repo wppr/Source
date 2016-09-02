@@ -14,11 +14,11 @@ using std::mutex;
 using std::vector;
 using std::stringstream;
 
-SOCKET Server::ServerSocket;
-stack<char> Server::charStack;
-queue<string> Server::jsonQueue;
-string Server::ipAddr;
-string Server::port;
+//SOCKET Server::ServerSocket;
+//stack<char> Server::charStack;
+//queue<string> Server::jsonQueue;
+//string Server::ipAddr;
+//string Server::port;
 mutex jsonQueueMutex;
 
 #define BATCH 100000+10
@@ -54,12 +54,13 @@ int Server::InitSocket()
 
 }
 
+void Start(Server* server);
 void Server::SetAddr(string ip, string port)
 {
 	this->ipAddr = ip;
 	this->port = port;
 
-	recieveThread = thread(Start);
+	recieveThread = thread(Start, this);
 	recieveThread.detach();
 }
 
@@ -195,14 +196,14 @@ void Server::Close()
 }
 
 //Note : the socket's creation ,connection and ... must be in the same thread
-void Server::Start()
+void Start(Server* server)
 {
 	while (true)
 	{
-		InitSocket();
-		Bind();
-		Accept();
-		Receive();
+		server->InitSocket();
+		server->Bind();
+		server->Accept();
+		server->Receive();
 	}
 }
 
