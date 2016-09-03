@@ -31,7 +31,7 @@ public:
 		//sceneLoader
 		sl = new SceneLoader(scene, meshMgr, 32, 16);
 		sl->loadMesh();
-		sl->InitClient("127.0.0.1", "56025");
+		sl->InitClient("192.168.1.106", "56025");
 		//sl->LoadJson();
 		//sl->UpdateScene();
 	}

@@ -396,8 +396,8 @@ void Client::Receive()
 			LOG("Connection closing...\n");
 		else {
 			LOG("recv failed: %d\n", WSAGetLastError());
-			closesocket(ClientSocket);
-			WSACleanup();
+			/*closesocket(ClientSocket);
+			WSACleanup();*/
 			return;
 		}
 
