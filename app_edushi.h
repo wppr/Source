@@ -109,7 +109,8 @@ public:
 			string tmp(file);
 			string tmp2(name);
 			if (ImGui::Button("Load model")) LoadModel(tmp,name);
-			if (ImGui::Button("RemoveAll")) RemoveAllNodes();
+			
+			if (ImGui::Button("RemoveAll")) RemoveAllNodes(); ImGui::SameLine();
 			if (ImGui::Button("AttachFloor")) sl->AttachFloar();
 			if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;
 			static char blockpath[100] = "model/uniform/data/block0.txt";
@@ -131,6 +132,7 @@ public:
 				b.type.copy(blocktype, b.type.size() + 1);
 				blockorien = b.orientation;
 			}
+			ImGui::SameLine();
 			if (ImGui::Button("Save Block Preset")) sl->bh.SaveBlock(blockpath, blockname, blocksize,blocktype,blockorien);
 			static char nodename[100] = "node_b0_";
 			static Vector3 blockPos(0.0);
@@ -139,11 +141,11 @@ public:
 			if (ImGui::Button("Attach Block"))
 			{
 				sl->bh.AttachBlock(blockname, string(nodename), blockPos);
-			}
+			}ImGui::SameLine();
 			if (ImGui::Button("Attach All Block"))
 			{
-				sl->bh.PutblockTest();
-			}
+				sl->bh.attachAllBlock();
+			}ImGui::SameLine();
 			if (ImGui::Button("Attach All Mesh"))
 			{
 				sl->bh.attachAllMesh();

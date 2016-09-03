@@ -88,7 +88,7 @@ namespace HW
 
 			program->texture_count = 0;
 			program->updateProgramData(program->m_ProgramData);
-
+			SortByMeshName(renderqueue);
 			for (auto& x : renderqueue) {
 				if (x.asMesh == NULL) continue;
 				if (x.entity != NULL) {
