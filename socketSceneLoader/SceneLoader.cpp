@@ -16,7 +16,6 @@ using std::stringstream;
 
 #define PI 3.141592654
 
-
 SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height) : width(width), height(height)
 {
 	this->scene = scene;
@@ -206,9 +205,9 @@ void SceneLoader::PrintLayout()
 	}
 }
 
-void SceneLoader::InitServer(string ip, string port)
+void SceneLoader::InitClient(string ip, string port)
 {
-	server.SetAddr(ip, port);
+	client.Connect(ip, port);
 }
 
 void SceneLoader::UpdateScene()
@@ -221,21 +220,17 @@ void SceneLoader::UpdateScene()
 		ParseScene(staticJson);
 		UpdateSceneNodes();
 	}
-
-	else if (!server.jsonQueue.empty())
+	else
 	{
-		//m.lock();
-		int size = server.jsonQueue.size();
-		for (int i = 0; i < size - 1; ++i)
+		m.lock();
+		string json = client.clientJson;
+		m.unlock();
+		
+		if ("" != json)
 		{
-			server.jsonQueue.pop();
+			ParseScene(json);
+			UpdateSceneNodes();
 		}
-		json = server.jsonQueue.front();
-		server.jsonQueue.pop();
-		cout << "json queue size " << server.jsonQueue.size() << endl;
-		//m.unlock();
-		ParseScene(json);
-		UpdateSceneNodes();
 	}
 }
 

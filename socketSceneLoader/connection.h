@@ -53,6 +53,7 @@ public:
 	int Connect(string ip, string port);
 	int Send(string str);
 	void Receive();
+	void ClientConnect();
 	void Close();
 
 	stack<char> charStack;
@@ -62,4 +63,5 @@ private:
 	thread recieveThread;
 	int InitSocket();
 	SOCKET ClientSocket;
+	string ip, port;
 };

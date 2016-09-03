@@ -283,6 +283,17 @@ int Client::Connect(string ip, string port)
 {
 	InitSocket();
 
+	this->ip = ip;
+	this->port = port;
+
+	recieveThread = thread(Start, this);
+	recieveThread.detach();
+
+	return 0;
+}
+
+void Client::ClientConnect()
+{
 	int iResult;
 
 	addrinfo hints = {}, *server_info = nullptr;
@@ -301,11 +312,6 @@ int Client::Connect(string ip, string port)
 	}
 
 	LOG("connected!\n");
-
-	recieveThread = thread(Start, this);
-	recieveThread.detach();
-
-	return 0;
 }
 
 int Client::Send(string buf)
@@ -324,6 +330,7 @@ int Client::Send(string buf)
 
 void Start(Client* client)
 {
+	client->ClientConnect();
 	while (true)
 	{
 		client->Receive();
@@ -389,8 +396,8 @@ void Client::Receive()
 			LOG("Connection closing...\n");
 		else {
 			LOG("recv failed: %d\n", WSAGetLastError());
-			closesocket(ClientSocket);
-			WSACleanup();
+			//closesocket(ClientSocket);
+			//WSACleanup();
 			return;
 		}
 

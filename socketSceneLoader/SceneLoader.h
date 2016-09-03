@@ -20,7 +20,6 @@ using std::pair;
 namespace Block
 {
 
-
 	class Entry
 	{
 	public :
@@ -106,7 +105,7 @@ namespace Block
 	{
 
 	public:
-		bool show_json = true;
+		bool show_json = false;
 		//default 32 * 16
 		SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height);
 
@@ -154,7 +153,7 @@ namespace Block
 		void PrintLayout();
 		
 		//Server
-		void InitServer(string ip, string port);
+		void InitClient(string ip, string port);
 
 
 		//block
@@ -177,7 +176,7 @@ namespace Block
 		string staticJson;
 
 		//network
-		Server server;
+		Client client;
 
 		//invalid invoke
 		SceneLoader(const SceneLoader&);
