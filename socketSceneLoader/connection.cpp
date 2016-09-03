@@ -106,23 +106,23 @@ int Server::Send(string buf)
 {
 	/*clientSocketsLockMutex.lock();
 	LOG("lock...\n");
-	clientSocketsLock = 1; 
+	clientSocketsLock = 1;
 	clientSocketsLockMutex.unlock();*/
-	
+
 	Accept();
 
 	for (vector<SOCKET>::iterator it = clientSockets.begin(); it != clientSockets.end(); )//iterate clients and send
 	{
 		LOG("sending...\n");
 		int iResult = send(*it, &buf[0], (int)(buf.size() * sizeof(char)), 0);
-		if (iResult == SOCKET_ERROR) 
+		if (iResult == SOCKET_ERROR)
 		{//if error, close socket and delete
 			LOG("send failed: %d\n", WSAGetLastError());
 			closesocket(*it);
 			it = clientSockets.erase(it);
 			printf("client deleted!\n");
 			printf("current client num: %d\n", clientSockets.size());
-			
+
 			clientNum--;
 		}
 		else
@@ -136,7 +136,7 @@ int Server::Send(string buf)
 	clientSocketsLock = 0;
 	LOG("unlock...\n");
 	clientSocketsLockMutex.unlock();*/
-	
+
 	return 0;
 }
 
@@ -226,20 +226,20 @@ void Server::Accept()
 {
 	//while (true)//repeatedly accept
 	//{
-		LOG("accepting...\n");
-		SOCKET clientSocket = accept(ServerSocket, NULL, NULL);
-		if (clientSocket == INVALID_SOCKET) 
-		{
-			LOG("accept failed: %d\n", WSAGetLastError());
-			closesocket(clientSocket);
-		}
-		else
-		{
-			clientSockets.push_back(clientSocket);
-			clientNum++;
-			cout << "new client connected!" << endl << "current client num: " << clientNum << endl;
-			LOG("accepted!\n");
-		}
+	LOG("accepting...\n");
+	SOCKET clientSocket = accept(ServerSocket, NULL, NULL);
+	if (clientSocket == INVALID_SOCKET)
+	{
+		LOG("accept failed: %d\n", WSAGetLastError());
+		closesocket(clientSocket);
+	}
+	else
+	{
+		clientSockets.push_back(clientSocket);
+		clientNum++;
+		cout << "new client connected!" << endl << "current client num: " << clientNum << endl;
+		LOG("accepted!\n");
+	}
 	//}
 }
 
@@ -396,8 +396,8 @@ void Client::Receive()
 			LOG("Connection closing...\n");
 		else {
 			LOG("recv failed: %d\n", WSAGetLastError());
-			//closesocket(ClientSocket);
-			//WSACleanup();
+			closesocket(ClientSocket);
+			WSACleanup();
 			return;
 		}
 

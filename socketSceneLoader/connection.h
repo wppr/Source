@@ -62,6 +62,6 @@ public:
 private:
 	thread recieveThread;
 	int InitSocket();
-	SOCKET ClientSocket;
 	string ip, port;
+	SOCKET ClientSocket;
 };
