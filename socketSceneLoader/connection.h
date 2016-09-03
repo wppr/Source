@@ -14,12 +14,12 @@ using std::vector;
 
 //#define LOG_OPEN
 #ifdef LOG_OPEN
-#define LOG(...) printf(__VA_ARGS__)
+#define LOG(X) printf(X)
 #else
 #define LOG(X)
 #endif
 class Server
-{ 
+{
 public:
 	Server()
 	{
@@ -28,38 +28,38 @@ public:
 
 	void SetAddr(string ip, string port);
 	void Close();
-	static int Send(string str);
-	static void Receive();
+	int Send(string str);
+	void Receive();
 
 private:
 	thread recieveThread;
-	static SOCKET ServerSocket;
-	static stack<char> charStack;
-	static void Bind();
-	static void Start();
-	static void Accept();
-	static int InitSocket();
-	static string ipAddr;
-	static string port;
-	static vector<SOCKET> clientSockets;
-	static int clientNum;
+	SOCKET ServerSocket;
+	stack<char> charStack;
+	void Bind();
+	void Accept();
+	int InitSocket();
+	string ipAddr;
+	string port;
+	vector<SOCKET> clientSockets;
+	int clientNum;
 
 public:
-	static queue<string> jsonQueue;
+	queue<string> jsonQueue;
 };
 
 class Client
 {
 public:
-	int InitSocket();
 	int Connect(string ip, string port);
 	int Send(string str);
 	void Receive();
 	void Close();
 
-	queue<string> jsonQueue;
 	stack<char> charStack;
+	string clientJson;
 
 private:
+	thread recieveThread;
+	int InitSocket();
 	SOCKET ClientSocket;
 };

@@ -14,14 +14,7 @@ using std::mutex;
 using std::vector;
 using std::stringstream;
 
-SOCKET Server::ServerSocket;
-stack<char> Server::charStack;
-queue<string> Server::jsonQueue;
-string Server::ipAddr;
-string Server::port;
-mutex jsonQueueMutex;
-vector<SOCKET> Server::clientSockets;
-int Server::clientNum;
+mutex jsonMutex;
 int clientSocketsLock = 0;
 mutex clientSocketsLockMutex;
 
@@ -66,8 +59,8 @@ void Server::SetAddr(string ip, string port)
 	InitSocket();
 	Bind();
 
-	recieveThread = thread(Start);
-	recieveThread.detach();
+	/*recieveThread = thread(Start, this);
+	recieveThread.detach();*/
 
 }
 
@@ -116,6 +109,8 @@ int Server::Send(string buf)
 	clientSocketsLock = 1; 
 	clientSocketsLockMutex.unlock();*/
 	
+	Accept();
+
 	for (vector<SOCKET>::iterator it = clientSockets.begin(); it != clientSockets.end(); )//iterate clients and send
 	{
 		LOG("sending...\n");
@@ -153,16 +148,12 @@ void Server::Receive()
 
 	//receive buffer
 	do {
-		char buf[BATCH];
-		LOG("receiving\n");
-		iResult = recv(ServerSocket, buf, 100000, 0);
-		
-		if (iResult > 0) {
-			//json segmentation
-			LOG("recv success\n");
-			LOG("iResult %d\n", iResult);
-			for (int i = 0; i < iResult; ++i)
-
+		for (int j = 0; j < clientSockets.size(); ++j)
+		{
+			char buf[BATCH];
+			//LOG("receiving\n");
+			iResult = recv(clientSockets[j], buf, 100000, 0);
+			if (!jsonQueue.empty())
 			{
 				string s = jsonQueue.front();
 				//cout << s << endl;
@@ -187,9 +178,9 @@ void Server::Receive()
 						charStack.pop();
 						if (charStack.empty())
 						{
-							jsonQueueMutex.lock();
+							jsonMutex.lock();
 							jsonQueue.push(ss.str());
-							jsonQueueMutex.unlock();
+							jsonMutex.unlock();
 							ss.str("");
 						}
 						break;
@@ -203,9 +194,9 @@ void Server::Receive()
 						charStack.pop();
 						if (charStack.empty())
 						{
-							jsonQueueMutex.lock();
+							jsonMutex.lock();
 							jsonQueue.push(ss.str());
-							jsonQueueMutex.unlock();
+							jsonMutex.unlock();
 							ss.str("");
 						}
 						break;
@@ -218,7 +209,7 @@ void Server::Receive()
 			}
 			else {
 				LOG("recv failed: %d\n", WSAGetLastError());
-				//closesocket(clientSockets[j]);
+				closesocket(clientSockets[j]);
 				WSACleanup();
 				mutex m;
 				m.lock();
@@ -229,15 +220,6 @@ void Server::Receive()
 		}
 	} while (true);
 
-}
-
-void Server::Start()
-{
-	//while (true)
-	//{
-	//	//Accept();
-	//	//Send("{server}");
-	//}
 }
 
 void Server::Accept()
@@ -266,7 +248,6 @@ void Server::Close()
 	closesocket(ServerSocket);
 	WSACleanup();
 }
-
 /*********************************************************************/
 //Client
 /*********************************************************************/
@@ -296,8 +277,12 @@ int Client::InitSocket()
 	}
 }
 
+void Start(Client* client);
+
 int Client::Connect(string ip, string port)
 {
+	InitSocket();
+
 	int iResult;
 
 	addrinfo hints = {}, *server_info = nullptr;
@@ -316,6 +301,10 @@ int Client::Connect(string ip, string port)
 	}
 
 	LOG("connected!\n");
+
+	recieveThread = thread(Start, this);
+	recieveThread.detach();
+
 	return 0;
 }
 
@@ -333,6 +322,14 @@ int Client::Send(string buf)
 	return 0;
 }
 
+void Start(Client* client)
+{
+	while (true)
+	{
+		client->Receive();
+	}
+}
+
 void Client::Receive()
 {
 	int iResult;
@@ -345,12 +342,6 @@ void Client::Receive()
 		LOG("receiving\n");
 		iResult = recv(ClientSocket, buf, 100000, 0);
 		LOG("iResult %d\n", iResult);
-
-		if (!jsonQueue.empty())
-		{
-			cout << jsonQueue.front() << endl;
-			jsonQueue.pop();
-		}
 
 		if (iResult > 0) {
 			//json segmentation
@@ -369,9 +360,9 @@ void Client::Receive()
 					charStack.pop();
 					if (charStack.empty())
 					{
-						jsonQueueMutex.lock();
-						jsonQueue.push(ss.str());
-						jsonQueueMutex.unlock();
+						jsonMutex.lock();
+						clientJson = ss.str();
+						jsonMutex.unlock();
 						ss.str("");
 					}
 					break;
@@ -385,9 +376,9 @@ void Client::Receive()
 					charStack.pop();
 					if (charStack.empty())
 					{
-						jsonQueueMutex.lock();
-						jsonQueue.push(ss.str());
-						jsonQueueMutex.unlock();
+						jsonMutex.lock();
+						clientJson = ss.str();
+						jsonMutex.unlock();
 						ss.str("");
 					}
 					break;

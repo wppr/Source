@@ -94,7 +94,9 @@ void SceneLoader::ParseScene(string json)
 			{
 				crosses.push_back(y * width + x);
 				if (name == "xcross" || name == "xcross_greenlight")
+				{
 					type = Entry::EntryType::XCROSS;
+				}
 				else if(name == "tcross" || name == "tcross_greenlight")
 					type = Entry::EntryType::TCROSS;
 				else if(name == "lcross" || name == "lcross_greenlight")
@@ -230,6 +232,7 @@ void SceneLoader::UpdateScene()
 		}
 		json = server.jsonQueue.front();
 		server.jsonQueue.pop();
+		cout << "json queue size " << server.jsonQueue.size() << endl;
 		//m.unlock();
 		ParseScene(json);
 		UpdateSceneNodes();
