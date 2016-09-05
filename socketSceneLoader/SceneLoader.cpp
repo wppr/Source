@@ -140,7 +140,6 @@ void SceneLoader::ParseScene(string json)
 	}
 
 	//generate street
-	 
 	pair<int, int> dirs[4];
 	dirs[0] = pair<int, int>(0, 1); 
 	dirs[1] = pair<int, int>(1, 0);
