@@ -178,9 +178,10 @@ void EdushiPipeline::Render()
 	p->setProgramConstantData("bias", &LightCamera.bias, "float", sizeof(float));
 
 	p->setProgramConstantData("ReduceBleeding", &shadowmap.ReduceBleeding, "float", sizeof(float));
+	ShadingPass->UseInstance = true;
 	// render to a buffer
 	mRenderSystem->RenderPass(camera, queue, ShadingPass, rt_render); 
-
+	
 	profile.Tick("Shading");
 	rt_render->BlitTexture(rt_resolve, "color0", "color0"); 
 	rt_render->BlitTexture(rt_resolve, "depth", "depth");

@@ -31,7 +31,7 @@ void VarianceShadowMapGenerateEffect::Init()
 		cameras.push_back(c);
 	}
 	shadowmap_pass = pm.LoadPass("shadowmap/VSM_prog.json");
-
+	shadowmap_pass->UseInstance = true;
 	blureffect.BlurFloatTexture = true;
 	blureffect.radius = 1.0;
 	blureffect.input_color = out_ShadowMapTexture[0];

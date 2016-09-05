@@ -27,11 +27,19 @@ namespace HW
 	};
 
 	typedef std::vector<RenderQueueItem> RenderQueue;
-
-	inline bool CompDistRenderQueueItem(const RenderQueueItem & a,const RenderQueueItem & b)
+	static bool namecompare(const RenderQueueItem & a, const RenderQueueItem & b)
 	{
-		
-		return a.sortkey < b.sortkey;
-		
+		if (a.asMesh == NULL || b.asMesh == NULL) return false;
+		return a.asMesh->name < b.asMesh->name;  
 	}
+	static void SortByMeshName(RenderQueue& queue) {
+		sort(queue.begin(), queue.end(), namecompare);
+	}
+
+	//inline bool CompDistRenderQueueItem(const RenderQueueItem & a,const RenderQueueItem & b)
+	//{
+	//	
+	//	return a.sortkey < b.sortkey;
+	//	
+	//}
 }

@@ -157,11 +157,12 @@ public:
 		if (entity != NULL)
 			scene->destroy(entity);
 	}
-	void PutblockTest() {
-
-		for (int i = 1; i <= blocknum; i++) {
+	void attachAllBlock() {
+		int i = 0;
+		for (auto& b:blockPresets) {
+			i++;
 			int x = i % 8 * 4, y = i / 8 * 4;
-			AttachBlock(to_string(i), "block_demo" + to_string(i), Vector3(x, 0, y));
+			AttachBlock(b.first, "block_demo" + to_string(i), Vector3(x, 0, y));
 		}
 
 	}

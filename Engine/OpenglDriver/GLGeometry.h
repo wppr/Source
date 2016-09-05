@@ -23,6 +23,7 @@ public:
 
 	//help func
 	void Draw();
+	void DrawInstance(int num);
 private:
 	GL_GPUVertexData gldata;
 };

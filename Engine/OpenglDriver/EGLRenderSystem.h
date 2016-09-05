@@ -174,6 +174,7 @@ namespace HW
 		void GetWandH(int &w, int &h) { w = width; h = height; }
 		virtual void CreateGeometryGpuData(as_Geometry* rdata, VertexDataDesc* inputlayout, Geometry*& geo);
 		virtual void DrawGeometry(Geometry* geo);
+		virtual void DrawGeometryInstance(Geometry* geo, int num);
 		void term_display();
 
 		// temporay use;

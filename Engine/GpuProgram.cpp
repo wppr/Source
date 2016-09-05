@@ -54,8 +54,10 @@ namespace HW
 		if (itr != m_ProgramData.end())
 		{
 			ProgramData & pd = (itr->second);
-			if(pd.size<size)//此处会造成内存泄漏
+			if (pd.size < size) {
+				delete pd.data;
 				pd.data = ::operator new(size);
+			}
 			memcpy(pd.data, val, size);
 			pd.datetype = datetype;
 			pd.int_flag = int_flag;
