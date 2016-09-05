@@ -40,8 +40,6 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 void SceneLoader::ParseScene(string json)
 {
 	//cout << json << endl;
-	//debug
-	vector<pair<int, int>> cords;
 
 	//parse json into sceneMatrix
 	Document root;
@@ -54,8 +52,6 @@ void SceneLoader::ParseScene(string json)
 	}
 	assert(root.IsObject());
 	Value &blockSize = root["blockSize"];
-	/*width = blockSize["width"].GetInt();
-	height = blockSize["height"].GetInt();*/
 	
 	//set all to NULL
 	for (int i = 0; i < width * height; ++i)
@@ -93,9 +89,7 @@ void SceneLoader::ParseScene(string json)
 			{
 				crosses.push_back(y * width + x);
 				if (name == "xcross" || name == "xcross_greenlight")
-				{
 					type = Entry::EntryType::XCROSS;
-				}
 				else if(name == "tcross" || name == "tcross_greenlight")
 					type = Entry::EntryType::TCROSS;
 				else if(name == "lcross" || name == "lcross_greenlight")
