@@ -56,7 +56,12 @@ void GLGeometry::Draw()
 		DrawElements(gldata.vao, gldata.elementbuffer, gldata.indices_size);
 	}
 }
-
+void GLGeometry::DrawInstance(int num)
+{
+	if (m_bResourceValid) {
+		DrawElementsInstance(gldata.vao, gldata.elementbuffer, gldata.indices_size,num);
+	}
+}
 Geometry* GLGeometryFactory::create() {
 	return new GLGeometry;
 }

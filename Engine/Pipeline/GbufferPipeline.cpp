@@ -28,6 +28,7 @@ void GBufferEffect::Init()
 	depth = tm.get("effect_gbuffer_tex5");
 	
 	gbuffer_pass=PassManager::getInstance().LoadPass("gbuffer_prog.json");
+	gbuffer_pass->UseInstance = true;
 }
 
 void GBufferEffect::Render()

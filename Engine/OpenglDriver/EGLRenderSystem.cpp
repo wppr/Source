@@ -359,6 +359,13 @@ namespace HW
 		 GLGeometry* g = static_cast<GLGeometry*>(geo);
 		 g->Draw();
 	 }
+
+	 void EGLRenderSystem::DrawGeometryInstance(Geometry* geo, int num)
+	 {
+		 GLGeometry* g = static_cast<GLGeometry*>(geo);
+		 g->DrawInstance(num);
+	 }
+
 	 void EGLRenderSystem::InitFactory()
 	 {
 		 auto& grm = GlobalResourceManager::getInstance();

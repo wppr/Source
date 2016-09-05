@@ -36,6 +36,8 @@ public:
 	ClearState				mClearState;
 	GpuProgram*			mProgram;
 
+	bool	UseInstance = false;
+	int InstanceBatchNum = 50;
 	string					name;
 
 	//input uniform

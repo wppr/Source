@@ -150,6 +150,7 @@ namespace HW
 
 		virtual void CreateGeometryGpuData(as_Geometry* rawdata, VertexDataDesc* inputlayout, Geometry*& geo){}
 		virtual void DrawGeometry(Geometry* geo){}
+		virtual void DrawGeometryInstance(Geometry* geo,int num) {}
 		virtual void SetTexture(Texture* texture, int index){}
 
 		void RenderPass(Camera* camera, RenderQueue & renderqueue, as_Pass* pass, RenderTarget * rt);

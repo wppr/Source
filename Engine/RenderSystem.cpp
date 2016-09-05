@@ -15,6 +15,35 @@
 namespace HW
 {
 
+	vector<RenderQueue> SplitRenderQueue(RenderQueue& queue, int maxNum = 0) {
+		vector<RenderQueue> outqueue;
+		SortByMeshName(queue);
+
+		string lastname;
+		int count = 0;
+		for (int i = 0; i < queue.size(); i++) {
+			if (queue[i].asMesh == NULL) continue;
+			count++;
+			if (outqueue.size() == 0 || queue[i].asMesh->name != lastname || count == maxNum) {
+				outqueue.push_back(RenderQueue());
+				count = 0;
+			}
+			lastname = queue[i].asMesh->name;
+			int l = outqueue.size();
+			outqueue[l - 1].push_back(queue[i]);
+		}
+
+
+		return outqueue;
+	}
+	void CollectWorldMatrixs(RenderQueue& queue, vector<Matrix4>& out) {
+		out = vector<Matrix4>(queue.size(),Matrix4::IDENTITY);
+		for (int i = 0; i < queue.size();i++) {
+			if (queue[i].entity != NULL) {
+				out[i]=queue[i].entity->getParent()->getWorldMatrix();
+			}
+		}
+	}
 
 	void RenderSystem::RenderPass(Camera* camera, RenderQueue & renderqueue, as_Pass* pass, RenderTarget * rt)
 	{
@@ -86,33 +115,60 @@ namespace HW
 			if (camera != NULL)
 				gp->SetCamera(camera);
 
-			program->texture_count = 0;
-			program->updateProgramData(program->m_ProgramData);
-			SortByMeshName(renderqueue);
-			for (auto& x : renderqueue) {
-				if (x.asMesh == NULL) continue;
-				if (x.entity != NULL) {
 
-					gp->SetWorldMatrix(x.entity->getParent()->getWorldMatrix());
+			if (pass->UseInstance) {
+				auto splitdQueues = SplitRenderQueue(renderqueue, pass->InstanceBatchNum);
+				for (auto& queue : splitdQueues) {
+
+					vector<Matrix4> worldMatrixs;
+					CollectWorldMatrixs(queue, worldMatrixs);
+					auto x = queue[0];
+					if (x.asMesh != NULL)
+						gp->SetMaterial(x.asMesh->material);
+					program->setProgramConstantData("InstanceMatrix", worldMatrixs.data(), "mat4", 
+						worldMatrixs.size()*sizeof(Matrix4));
+					program->texture_count = 0;
+					program->updateProgramData(program->m_ProgramData);
+					program->UpdateGlobalVariable(pass->mUniformMap);
+
+					auto& currentGeo = x.asMesh->renderable;
+					if (currentGeo == NULL) {
+						auto g = GlobalResourceManager::getInstance().m_GeometryFactory;
+						auto& grm = GlobalResourceManager::getInstance();
+						//auto eg = static_cast<GLGeometryFactory*>(g);
+						currentGeo = g->create(x.asMesh->geometry, pass->mInputLayout);
+					}
+					DrawGeometryInstance(currentGeo,queue.size());
 				}
-					
-				//gp->setMatrices(temp_matrices);
-				if (x.asMesh != NULL)
-					gp->SetMaterial(x.asMesh->material);
+			}
+			else {
+				program->texture_count = 0;
+				program->updateProgramData(program->m_ProgramData);
+				for (auto& x : renderqueue) {
+					if (x.asMesh == NULL) continue;
+					if (x.entity != NULL) {
 
-				program->UpdateGlobalVariable(pass->mUniformMap);
+						gp->SetWorldMatrix(x.entity->getParent()->getWorldMatrix());
+					}
 
-				auto& currentGeo = x.asMesh->renderable;
-				if (currentGeo == NULL) {
-					auto g = GlobalResourceManager::getInstance().m_GeometryFactory;
-					auto& grm = GlobalResourceManager::getInstance();
-					//auto eg = static_cast<GLGeometryFactory*>(g);
-					currentGeo = g->create(x.asMesh->geometry, pass->mInputLayout);
+					//gp->setMatrices(temp_matrices);
+					if (x.asMesh != NULL)
+						gp->SetMaterial(x.asMesh->material);
+
+					program->UpdateGlobalVariable(pass->mUniformMap);
+
+					auto& currentGeo = x.asMesh->renderable;
+					if (currentGeo == NULL) {
+						auto g = GlobalResourceManager::getInstance().m_GeometryFactory;
+						auto& grm = GlobalResourceManager::getInstance();
+						//auto eg = static_cast<GLGeometryFactory*>(g);
+						currentGeo = g->create(x.asMesh->geometry, pass->mInputLayout);
+					}
+					DrawGeometry(currentGeo);
 				}
-				DrawGeometry(currentGeo);
+
 			}
 
-
-
 	}
+
 }
