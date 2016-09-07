@@ -16,8 +16,12 @@ public:
 	Vector3 modelTranslate = Vector3(0.0);
 	float modelscale = 1.0;
 	float modelrotate = 0;
-	SceneLoader* sl;
-
+	SceneLoader* sl=NULL;
+	float cameraUpAngle = 30;
+	float cameraRadius = 4;
+	float cameraRoundAngle = 0;
+	float rotatespeed = 2;
+	bool rotateCamera=false;
 	void Init() {
 		w = 1000;
 		h = 600;
@@ -31,14 +35,30 @@ public:
 		//sceneLoader
 		sl = new SceneLoader(scene, meshMgr, 32, 16);
 		sl->loadMesh();
-		sl->InitClient("172.31.11.12", "56025");
-		//sl->LoadJson();
-		//sl->UpdateScene();
+		//sl->InitClient("172.31.11.12", "56025");
+		sl->LoadJson();
+		sl->show_json = true;
+		sl->UpdateScene();
 	}
 	Vector3 getSceneCenter() {
 		int w = 32, h = 16;
 		Vector3 c = 0.5*Vector3(w, 0, h)*scenescale + sceneTranlate;
 		return c;
+	}
+	void SetCamera(float angleUp, float angleRound) {
+		auto c = getSceneCenter();
+		float radRound = angleRound/180* PI;
+		float radUp = angleUp / 180 * PI;
+		float h = cameraRadius*sin(radUp);
+		Vector3 offset = Vector3(cameraRadius*sin(radRound), h, cameraRadius*cos(radRound));
+		camera->lookAt(c + offset, c, Vector3(0, 1, 0));
+	}
+	void RotateCamera() {
+		static float lasttime = AbsolutTime;
+		float dura = AbsolutTime - lasttime;
+		lasttime = AbsolutTime;
+		cameraRoundAngle += rotatespeed*dura;
+		SetCamera(cameraUpAngle, cameraRoundAngle);
 	}
 	void InitPipeline()
 	{
@@ -48,7 +68,9 @@ public:
 
 	void Render() {
 		UpdateGUI();
-		sl->UpdateScene();
+		if (rotateCamera)
+			RotateCamera();
+		//sl->UpdateScene();
 		pipeline->Render();
 		//CarSim.Update();
 	}
@@ -113,6 +135,21 @@ public:
 			if (ImGui::Button("RemoveAll")) RemoveAllNodes(); ImGui::SameLine();
 			if (ImGui::Button("AttachFloor")) sl->AttachFloar();
 			if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;
+			ImGui::Text("Camera");
+			ImGui::InputFloat3("CameraPos", &camera->m_Position[0]);
+			ImGui::DragFloat("UpAngle", &cameraUpAngle, 0.1, 0, 89);
+			ImGui::DragFloat("RoundAngle", &cameraRoundAngle, 0.2, 0, 360);
+			ImGui::DragFloat("cameraRadius", &cameraRadius);
+			ImGui::DragFloat("cameraRotateSpeed", &rotatespeed);
+			if (ImGui::Button("Set Camera")) SetCamera(cameraUpAngle, cameraRoundAngle);
+			ImGui::SameLine();
+			if (ImGui::Button("Next Camera")) {
+				cameraRoundAngle = (floor((cameraRoundAngle) / 90) + 1) * 90;
+				if (cameraRoundAngle >= 360) cameraRoundAngle -= 360;
+				SetCamera(cameraUpAngle, cameraRoundAngle);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Start Rotate Camera")) rotateCamera = !rotateCamera;
 			static char blockpath[100] = "model/uniform/data/block0.txt";
 			ImGui::InputText("Block Path", blockpath, 100);
 			static char blockname[100] = "1";
@@ -158,7 +195,7 @@ public:
 				root->setTranslation(sceneTranlate);
 			}
 			ImGui::Text("Shading");
-			ImGui::InputFloat3("CameraPos", &camera->m_Position[0]);
+			
 			ImGui::ColorEdit3("LightColor0", &p->LightColor[0][0]);
 			ImGui::ColorEdit3("LightColor1", &p->LightColor[1][0]);
 			ImGui::DragFloat3("LightPos0", &p->LightPos[0][0]);

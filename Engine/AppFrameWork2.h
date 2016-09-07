@@ -28,6 +28,7 @@ public:
 	RenderTarget * renderwindow;
 	Camera* camera;
 	SysEntry * sysentry;
+	double AbsolutTime=0;
 	virtual void Init() = 0;
 	virtual void Render() = 0;
 	virtual void UpdateGUI() {

@@ -95,6 +95,7 @@ public:
 				continue;
 			}
 			glfwPollEvents();
+			app->AbsolutTime = glfwGetTime();
 			app->Render();
 			imgui.Render();
 			InteractionControler::key_func();
