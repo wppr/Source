@@ -40,8 +40,6 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 void SceneLoader::ParseScene(string json)
 {
 	//cout << json << endl;
-	//debug
-	vector<pair<int, int>> cords;
 
 	//parse json into sceneMatrix
 	Document root;
@@ -54,8 +52,6 @@ void SceneLoader::ParseScene(string json)
 	}
 	assert(root.IsObject());
 	Value &blockSize = root["blockSize"];
-	/*width = blockSize["width"].GetInt();
-	height = blockSize["height"].GetInt();*/
 	
 	//set all to NULL
 	for (int i = 0; i < width * height; ++i)
@@ -63,7 +59,7 @@ void SceneLoader::ParseScene(string json)
 		layoutMatrix[i].IsEmpty() = true;
 		layoutMatrix[i].IsDrawable() = false;
 
-		layoutMatrix[i].GetBlock() = BlockDef();
+		layoutMatrix[i].GetBlock().clear();
 	}
 	if (!crosses.empty())
 	{
@@ -93,14 +89,14 @@ void SceneLoader::ParseScene(string json)
 			{
 				crosses.push_back(y * width + x);
 				if (name == "xcross" || name == "xcross_greenlight")
-				{
 					type = Entry::EntryType::XCROSS;
-				}
 				else if(name == "tcross" || name == "tcross_greenlight")
 					type = Entry::EntryType::TCROSS;
 				else if(name == "lcross" || name == "lcross_greenlight")
 					type = Entry::EntryType::LCROSS;
 			}
+			else if (name == "park" || name == "station")
+				type = Entry::EntryType::AFFL;
 			else
 				type = Entry::EntryType::BLOCK;
 
@@ -111,10 +107,10 @@ void SceneLoader::ParseScene(string json)
 			string spanY = size.substr(x_pos + 1, size.size());
 
 			//modify matrix
-			this->layoutMatrix[y * width + x].GetBlock() = block;
-			this->layoutMatrix[y * width + x].SetEntryType(type);
 			int orientation = entry[i]["orientation"].GetInt();
-			this->layoutMatrix[y * width + x].GetBlock().orientation = orientation;
+			block.orientation = orientation;
+			this->layoutMatrix[y * width + x].GetBlock().push_back(block);
+			this->layoutMatrix[y * width + x].SetEntryType(type);
 
 			int rotated_spanX, rotated_spanY;
 			if (orientation % 2 == 1)
@@ -151,7 +147,7 @@ void SceneLoader::ParseScene(string json)
 		int fork = layoutMatrix[crosses[i]].GetEntryType();
 		for (int k = 0; k < fork; ++k)//expand the cross 
 		{
-			int crossOrien = layoutMatrix[crosses[i]].GetBlock().orientation;
+			int crossOrien = layoutMatrix[crosses[i]].GetBlock()[0].orientation;
 			pair<int, int> dir = dirs[(k - 1 + crossOrien) % 4];
 
 			for (int x = layoutMatrix[crosses[i]].GetX() + dir.first, y = layoutMatrix[crosses[i]].GetY() + dir.second; x >= 0 && x < width && y >= 0 && y < height;
@@ -164,7 +160,7 @@ void SceneLoader::ParseScene(string json)
 					string name = "street";
 					BlockDef bd = bh.blockPresets[name];
 					bd.orientation = (k + crossOrien) % 2 + 1;
-					this->layoutMatrix[y * width + x].GetBlock() = bd;
+					this->layoutMatrix[y * width + x].GetBlock().push_back(bd);
 					//this->layoutMatrix[y * width + x].SetObject(new Street(k + 1));
 					this->layoutMatrix[y * width + x].SetEntryType(Entry::EntryType::STREET);
 				}
@@ -172,10 +168,22 @@ void SceneLoader::ParseScene(string json)
 				else if (this->layoutMatrix[y * width + x].GetEntryType() == Entry::EntryType::BLOCK)//BLOCK
 					break;
 
-				else
+				else if (this->layoutMatrix[y * width + x].GetEntryType() == Entry::EntryType::AFFL)
+				{
+					this->layoutMatrix[y * width + x].IsEmpty() = false;
+					this->layoutMatrix[y * width + x].IsDrawable() = true;
+					string name = "street";
+					BlockDef bd = bh.blockPresets[name];
+					bd.orientation = (k + crossOrien) % 2 + 1;
+					this->layoutMatrix[y * width + x].GetBlock().push_back(bd);
+					//this->layoutMatrix[y * width + x].SetObject(new Street(k + 1));
+					this->layoutMatrix[y * width + x].SetEntryType(Entry::EntryType::STREET);
+				}
+
+				else//CROSS
 				{
 					Entry::EntryType type = this->layoutMatrix[y * width + x].GetEntryType();
-					BlockDef bd = this->layoutMatrix[y * width + x].GetBlock();
+					BlockDef bd = this->layoutMatrix[y * width + x].GetBlock()[0];
 					//TCROSS
 					if (type == Entry::EntryType::TCROSS && bd.orientation % 4 == (k + 1 + crossOrien) % 4)
 						break;
@@ -307,63 +315,65 @@ void SceneLoader::UpdateSceneNodes()
 		{
 			if (layoutMatrix[i * width + j].IsDrawable())
 			{
-				BlockDef &block = layoutMatrix[i * width + j].GetBlock();
-				string id = block.name;
-
-				int orien = block.orientation;
-				string span = block.size;
-				int xPos = span.find_first_of("x");
-				int spanX = atoi(span.substr(0, xPos).c_str());
-				int spanY = atoi(span.substr(xPos + 1, span.size()).c_str());
-				int xCalibration = 0, yCalibration = 0;
-				switch (orien)
-				{
-				case 2:
-					yCalibration = spanX;
-					break;
-				case 3:
-					xCalibration = spanX;
-					yCalibration = spanY;
-					break;
-				case 4:
-					xCalibration = spanY;
-					break;
-				}
-
-				Quaternion quaternion((orien - 1) * 0.5f * PI, Vector3(0, 1, 0));
-				sceneNodes[i * width + j]->setOrientation(quaternion);
-				sceneNodes[i * width + j]->setTranslation(j + xCalibration, 0, i + yCalibration);
-				
 				sceneNodes[i * width + j]->detachAllNodes();
-
-				for (int k = 0; k < block.meshID.size(); ++k)
+				int blockSize = layoutMatrix[i * width + j].GetBlock().size();
+				for (int m = 0; m < blockSize; ++m)
 				{
-					string name = "entry" + to_string(i) + " " + to_string(j) + "mesh"+to_string(k);
-					SceneNode* node = scene->getSceneNode(name);
-					if (NULL != node)
-						scene->destroy(node);
-					node = scene->CreateSceneNode(name);
+					BlockDef &block = layoutMatrix[i * width + j].GetBlock()[m];
+					string id = block.name;
 
-					Entity* entity = scene->getEntity(name);
-					if (NULL != entity)
-						scene->destroy(entity);
-					entity = scene->CreateEntity(name);
-
-					entity->setMesh(bh.meshs[block.meshID[k]]);
-					node->attachMovable(entity);
-					node->setScale(block.scale[k]);
-					//rotation
-					if (block.orientations.size() > k)
+					int orien = block.orientation;
+					string span = block.size;
+					int xPos = span.find_first_of("x");
+					int spanX = atoi(span.substr(0, xPos).c_str());
+					int spanY = atoi(span.substr(xPos + 1, span.size()).c_str());
+					int xCalibration = 0, yCalibration = 0;
+					switch (orien)
 					{
-						Quaternion q(block.orientations[k], Vector3(0, 1, 0));
-						node->setOrientation(q);
+					case 2:
+						yCalibration = spanX;
+						break;
+					case 3:
+						xCalibration = spanX;
+						yCalibration = spanY;
+						break;
+					case 4:
+						xCalibration = spanY;
+						break;
 					}
-					node->setTranslation(block.translate[k]);
-					sceneNodes[i * width + j]->attachNode(node);
+
+					Quaternion quaternion((orien - 1) * 0.5f * PI, Vector3(0, 1, 0));
+					sceneNodes[i * width + j]->setOrientation(quaternion);
+					sceneNodes[i * width + j]->setTranslation(j + xCalibration, 0, i + yCalibration);
+
+					for (int k = 0; k < block.meshID.size(); ++k)
+					{
+						string name = "entry" + to_string(i) + " " + to_string(j) + "block" + to_string(m) + "mesh" + to_string(k);
+						SceneNode* node = scene->getSceneNode(name);
+						if (NULL != node)
+							scene->destroy(node);
+						node = scene->CreateSceneNode(name);
+
+						Entity* entity = scene->getEntity(name);
+						if (NULL != entity)
+							scene->destroy(entity);
+						entity = scene->CreateEntity(name);
+
+						entity->setMesh(bh.meshs[block.meshID[k]]);
+						node->attachMovable(entity);
+						node->setScale(block.scale[k]);
+						//rotation
+						if (block.orientations.size() > k)
+						{
+							Quaternion q(block.orientations[k], Vector3(0, 1, 0));
+							node->setOrientation(q);
+						}
+						node->setTranslation(block.translate[k]);
+						sceneNodes[i * width + j]->attachNode(node);
+					}
+
+					root->attachNode(sceneNodes[i * width + j]);
 				}
-
-				root->attachNode(sceneNodes[i * width + j]);
-
 			}
 		}
 	}

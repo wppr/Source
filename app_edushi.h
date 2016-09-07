@@ -36,6 +36,7 @@ public:
 		sl = new SceneLoader(scene, meshMgr, 32, 16);
 		sl->loadMesh();
 		//sl->InitClient("172.31.11.12", "56025");
+
 		sl->LoadJson();
 		sl->show_json = true;
 		sl->UpdateScene();
@@ -70,6 +71,7 @@ public:
 		UpdateGUI();
 		if (rotateCamera)
 			RotateCamera();
+
 		//sl->UpdateScene();
 		pipeline->Render();
 		//CarSim.Update();

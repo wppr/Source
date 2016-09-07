@@ -118,10 +118,10 @@ int Server::Send(string buf)
 		if (iResult == SOCKET_ERROR)
 		{//if error, close socket and delete
 			LOG("send failed: %d\n", WSAGetLastError());
-			closesocket(*it);
-			it = clientSockets.erase(it);
-			printf("client deleted!\n");
-			printf("current client num: %d\n", clientSockets.size());
+			//closesocket(*it);
+			//it = clientSockets.erase(it);
+			//printf("client deleted!\n");
+			//printf("current client num: %d\n", clientSockets.size());
 
 			clientNum--;
 		}
