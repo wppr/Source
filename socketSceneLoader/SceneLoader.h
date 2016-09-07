@@ -29,7 +29,8 @@ namespace Block
 			XCROSS = 4,
 			LCROSS = 2,
 			TCROSS = 3,
-			BLOCK = 5
+			BLOCK = 5,
+			AFFL = 6
 		};
 
 	protected :
@@ -37,7 +38,7 @@ namespace Block
 		int x, y;
 		bool drawable;//true if marker exist
 		bool empty;//true if object cover
-		BlockDef block;
+		vector<BlockDef> blocks;
 
 	public :
 		Entry()
@@ -91,9 +92,9 @@ namespace Block
 			return this->drawable;
 		}
 
-		BlockDef& GetBlock()
+		vector<BlockDef>& GetBlock()
 		{
-			return this->block;
+			return this->blocks;
 		}
 
 	private:

@@ -49,7 +49,7 @@ public:
 
 	void Render() {
 		UpdateGUI();
-		sl->UpdateScene();
+		//sl->UpdateScene();
 		pipeline->Render();
 		//CarSim.Update();
 	}
