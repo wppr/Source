@@ -32,8 +32,9 @@ public:
 		sl = new SceneLoader(scene, meshMgr, 32, 16);
 		sl->loadMesh();
 		sl->InitClient("172.31.11.12", "56025");
-		//sl->LoadJson();
-		//sl->UpdateScene();
+		sl->LoadJson();
+		sl->show_json = true;
+		sl->UpdateScene();
 	}
 	Vector3 getSceneCenter() {
 		int w = 32, h = 16;
