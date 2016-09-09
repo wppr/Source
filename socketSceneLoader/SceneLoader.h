@@ -128,6 +128,7 @@ namespace Block
 		void InitFloor();
 		void AttachFloar();
 		void UpdateSceneNodes();
+		void GetRandomCars(vector<Vector3>& roadPos, vector<Quaternion>& roadOrien);
 
 		//Getters $ Setters
 		int GetWidth()
@@ -163,6 +164,8 @@ namespace Block
 		int width, height;//width & height of the layoutMatrix
 		Entry* layoutMatrix;
 		vector<int> crosses;
+		vector<Vector3> streetPos;
+		vector<Quaternion> streetOrien;
 
 		SceneManager * scene;
 		MeshManager * meshMgr;

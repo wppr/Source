@@ -67,6 +67,10 @@ void SceneLoader::ParseScene(string json)
 		crosses.clear();
 	}
 
+	//clear street info
+	streetPos.clear();
+	streetOrien.clear();
+
 	Value &entry = root["entry"];
 	assert(entry.IsArray());
 	//cout << "num " << entry.Size() << endl;
@@ -161,8 +165,12 @@ void SceneLoader::ParseScene(string json)
 					BlockDef bd = bh.blockPresets[name];
 					bd.orientation = (k + crossOrien) % 2 + 1;
 					this->layoutMatrix[y * width + x].GetBlock().push_back(bd);
-					//this->layoutMatrix[y * width + x].SetObject(new Street(k + 1));
 					this->layoutMatrix[y * width + x].SetEntryType(Entry::EntryType::STREET);
+
+					//push back street pos and orien
+					this->streetPos.push_back(Vector3(x, y, 0));
+					Quaternion quaternion((bd.orientation - 1) * 0.5f * PI, Vector3(0, 1, 0));
+					this->streetOrien.push_back(quaternion);
 				}
 
 				else if (this->layoutMatrix[y * width + x].GetEntryType() == Entry::EntryType::BLOCK)//BLOCK
@@ -176,7 +184,6 @@ void SceneLoader::ParseScene(string json)
 					BlockDef bd = bh.blockPresets[name];
 					bd.orientation = (k + crossOrien) % 2 + 1;
 					this->layoutMatrix[y * width + x].GetBlock().push_back(bd);
-					//this->layoutMatrix[y * width + x].SetObject(new Street(k + 1));
 					this->layoutMatrix[y * width + x].SetEntryType(Entry::EntryType::STREET);
 				}
 
@@ -197,6 +204,12 @@ void SceneLoader::ParseScene(string json)
 			}
 		}
 	}
+}
+
+void SceneLoader::GetRandomCars(vector<Vector3>& streetPos, vector<Quaternion>& streetOrien)
+{
+	streetPos = this->streetPos;
+	streetOrien = this->streetOrien;
 }
 
 void SceneLoader::PrintLayout()
