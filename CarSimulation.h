@@ -58,7 +58,7 @@ public:
 	fstream f;
 	map<string,CarTrackingData> carmap;
 	int MaxCarNum=100;
-	int CarTypeNum = 11;
+	int CarTypeNum = 7;
 	int RunningCarNum = 1;
 	float carDensity = 0.3;
 	string prefix = "carNode";
