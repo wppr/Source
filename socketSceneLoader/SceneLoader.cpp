@@ -168,7 +168,7 @@ void SceneLoader::ParseScene(string json)
 					this->layoutMatrix[y * width + x].SetEntryType(Entry::EntryType::STREET);
 
 					//push back street pos and orien
-					this->streetPos.push_back(Vector3(x, y, 0));
+					this->streetPos.push_back(Vector3(x, 0, y));
 					Quaternion quaternion((bd.orientation - 1) * 0.5f * PI, Vector3(0, 1, 0));
 					this->streetOrien.push_back(quaternion);
 				}
