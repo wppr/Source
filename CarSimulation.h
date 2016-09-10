@@ -11,6 +11,7 @@ public:
 	Quaternion q=Quaternion::IDENTITY;
 	int frame = 0;
 	SceneNode* Node=NULL;
+
 	void Track(Vector3 newpos) {
 		frame++;
 		LastPos = pos;
@@ -52,46 +53,78 @@ public:
 class CarSimulation {
 public:
 	App* app=NULL;
+	SceneManager* scene;
 	vector<MeshPtr> CarList;
 	fstream f;
 	map<string,CarTrackingData> carmap;
 	int MaxCarNum=100;
 	int CarTypeNum = 11;
 	int RunningCarNum = 1;
+	float carDensity = 0.3;
+	string prefix = "carNode";
 	void Init(App* _app) {
 		this->app = _app;
+		scene=app->scene;
 		f = fstream("CarSim/CarData.txt");
 		LoadCarMeshes();
-		for (int i = 0; i < RunningCarNum;i++) {
-			AddCar(to_string(i), i%CarTypeNum);
-		}
-
-	}
-	void AddCar(string name,int type) {
-		CarTrackingData cd;
-		InitCarTrack(cd, name, type);
-		carmap[name] = cd;
-	}
-	void removeCar(string name) {
+		//for (int i = 0; i < RunningCarNum;i++) {
+		//	AddCar(to_string(i), i%CarTypeNum);
+		//}
 
 	}
 	void LoadCarMeshes() {
 		for (int i = 1; i <= CarTypeNum; i++) {
 			string prefix = i < 10 ? "car0" : "car";
 			string name = prefix + to_string(i);
-			MeshPtr mesh = app->meshMgr->loadMesh_assimp_check(name,"model/edushi/car/" + name + ".obj");
+			MeshPtr mesh = app->meshMgr->loadMesh_assimp_check(name, "model/edushi/car/" + name + ".obj");
 			CarList.push_back(mesh);
 		}
 	}
-	void InitCarTrack(CarTrackingData& cardata, string name, int meshId) {
-		SceneNode* carNode = app->scene->CreateSceneNode("CarNode"+ name);
+	void GenRandomCars(vector<Vector3>& pos, vector<Quaternion>& orients) {
+		for (int i = 0; i < pos.size(); i++) {
+			string name = prefix + to_string(i);
+			AddCar(name, i%CarTypeNum);
+			carmap[name].Node->setTranslation(pos[i]);
+			carmap[name].Node->setOrientation(orients[i]);
+		}
+	} 
+	void AddCar(string name,int type) {
+		CarTrackingData cd;
+		AttachCarNode(cd, name, type);
+		carmap[name] = cd;
+	}
+	void RemoveCar(string name) {
+		auto snode = scene->getSceneNode(name);
+		if (snode != NULL) {
+			RemoveNode(name);
+		}
+		carmap.erase(name);
+	}
+	void RemoveNode(string nodename) {
+		auto scene = app->scene;
+		auto node = scene->getSceneNode(nodename);
+		auto entity = scene->getEntity(nodename);
+		if (node != NULL) {
+			node->getParent()->detachNode(node);
+			scene->destroy(node);
+		}
+		if (entity != NULL)
+			scene->destroy(entity);
+	}
+
+	void AttachCarNode(CarTrackingData& cardata, string name, int meshId) {
+		auto snode = app->scene->getSceneNode(name);
+		if (snode != NULL) {
+			RemoveNode(name);
+		}
+		snode = scene->CreateSceneNode(name);
 		auto mesh = CarList[meshId];
-		Entity* entity = app->scene->CreateEntity(name);
+		Entity* entity = scene->CreateEntity(name);
 		entity->setMesh(mesh);
-		carNode->attachMovable(entity);
-		carNode->setScale(0.01, 0.01, 0.01);
-		app->scene->GetSceneRoot()->attachNode(carNode);
-		cardata.Node = carNode;
+		snode->attachMovable(entity);
+		snode->setScale(0.01, 0.01, 0.01);
+		scene->GetSceneRoot()->attachNode(snode);
+		cardata.Node = snode;
 	}
 	void UpdateCars() {
 		Vector3 pos;
@@ -103,11 +136,11 @@ public:
 			f.seekg(0, ios::beg);
 		}
 
-		for (int i = 0; i < RunningCarNum; i++) {
-			Vector3 offset(0.04*i, 0, -0.04*i);
-			carmap[to_string(i)].Track(pos+offset);
-			carmap[to_string(i)].UpdateNode();
-		}
+		//for (int i = 0; i < RunningCarNum; i++) {
+		//	Vector3 offset(0.04*i, 0, -0.04*i);
+		//	carmap[to_string(i)].Track(pos+offset);
+		//	carmap[to_string(i)].UpdateNode();
+		//}
 
 	}
 
