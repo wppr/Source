@@ -40,6 +40,11 @@ public:
 		sl->LoadJson();
 		sl->show_json = true;
 		sl->UpdateScene();
+		CarSim.Init(this);
+		vector<Vector3> pos;
+		vector<Quaternion> orients;
+		sl->GetRandomCars(pos,orients);
+		CarSim.GenRandomCars(pos, orients);
 	}
 	Vector3 getSceneCenter() {
 		int w = 32, h = 16;

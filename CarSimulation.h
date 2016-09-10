@@ -1,8 +1,8 @@
 #pragma once
 #include "AppFrameWork2.h"
 #include <fstream>
-
-
+#include <stdlib.h>
+#define PI 3.141592654
 class CarTrackingData {
 public:
 	Vector3 pos=Vector3(0,0,0);
@@ -76,16 +76,32 @@ public:
 		for (int i = 1; i <= CarTypeNum; i++) {
 			string prefix = i < 10 ? "car0" : "car";
 			string name = prefix + to_string(i);
-			MeshPtr mesh = app->meshMgr->loadMesh_assimp_check(name, "model/edushi/car/" + name + ".obj");
+			MeshPtr mesh = app->meshMgr->loadMesh_assimp_check(name, "model/uniform/car/" + name + ".obj");
 			CarList.push_back(mesh);
 		}
 	}
 	void GenRandomCars(vector<Vector3>& pos, vector<Quaternion>& orients) {
+		float scale = 1.7;
+		float carProb = 0.9;
 		for (int i = 0; i < pos.size(); i++) {
+			if (rand() % 1000 / 1000.0>carProb) continue;
+
 			string name = prefix + to_string(i);
 			AddCar(name, i%CarTypeNum);
-			carmap[name].Node->setTranslation(pos[i]);
-			carmap[name].Node->setOrientation(orients[i]);
+			Quaternion q(0.5*PI, Vector3(0, 1, 0));
+			carmap[name].Node->scale(Vector3(scale));
+			
+			Matrix3 m;
+			orients[i].toRotationMatrix(m);
+			Vector3 offset;
+			offset.x = (rand() % 1000) / 1000.0 *0.8+0.1;
+			
+			offset.z = (rand() % 4 * 0.25 + 0.125)*0.3333+0.3333;
+			offset.y = 0.01;
+			carmap[name].Node->setOrientation(q*orients[i]);
+			carmap[name].Node->setTranslation(pos[i]+m*offset);
+			
+			
 		}
 	} 
 	void AddCar(string name,int type) {
