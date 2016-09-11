@@ -151,7 +151,8 @@ void EdushiPipeline::Render()
 	profile.Tick("SSAO");
 	
 
-	skybox.Render();
+	//skybox.Render();
+
 
 	RenderQueue queue;
 	scene->getVisibleRenderQueue_as(camera, queue);

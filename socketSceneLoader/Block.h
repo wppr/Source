@@ -113,6 +113,11 @@ public:
 			end++;
 		}
 
+		for (int i = 1; i <= 35; i++) {
+			modellist[end] = "v2/b" + to_string(i) + ".obj";
+			end++;
+		}
+
 		for (int i = 1; i < end; i++) {
 			MeshPtr mesh = meshMgr->loadMesh_assimp_check("", "model/uniform/" + modellist[i]);
 			meshs.push_back(mesh);

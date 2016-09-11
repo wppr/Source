@@ -127,8 +127,8 @@ public:
 			auto p =(EdushiPipeline*) pipeline;
 			ImGui::TextWrapped(p->profile.ToString().c_str());
 			ImGui::Text("Model Path");
-			static char file[100]="model/uniform/building01.obj";
-			//static char file[100] = "../../../daochu/b1.obj";
+			static char file[100]="model/uniform/v2/b1.obj";
+			//static char file[100] = "../../../v2/b1.obj";
 			static char name[100] = "node_b0_0";
 			
 			ImGui::InputText("Model Path", file, 100);
