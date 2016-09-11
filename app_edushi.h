@@ -17,14 +17,58 @@ public:
 	float modelscale = 1.0;
 	float modelrotate = 0;
 	SceneLoader* sl=NULL;
-	float cameraUpAngle = 30;
-	float cameraRadius = 4;
+	struct CameraParam {
+		float UpAngle = 2.7;
+		float Radius = 10;
+		float RoundAngle = 0;
+		float centerY = 1.82;
+		float fov = 25;
+		META(N(cameraUpAngle), N(Radius), N(RoundAngle)
+			, N(centerY), N(fov));
+	};
+	CameraParam cameraParam;
+	float cameraUpAngle = 2.7;
+	float cameraRadius = 10;
 	float cameraRoundAngle = 0;
-	float rotatespeed = 2;
-	bool rotateCamera=false;
+	float centerY = 1.82;
+	float fov = 25;
+	float rotatespeed = 0;
+	bool rotateCamera=true;
+	
+	void SetCamera1() {
+		cameraUpAngle = 0;
+		cameraRadius = 7;
+		cameraRoundAngle = 270;
+		centerY = 0.72;
+	}
+	void SetCamera2() {
+		cameraUpAngle = 2.7;
+		cameraRadius = 10;
+		cameraRoundAngle = 180;
+		centerY = 1.80;
+	}
+	void SetCamera4() {
+		cameraUpAngle = 2.7;
+		cameraRadius = 10;
+		cameraRoundAngle = 0;
+		centerY = 1.82;
+	}
+	void SetCamera3_2() {
+		cameraUpAngle = 1.7;
+		cameraRadius = 7;
+		cameraRoundAngle = 90;
+		centerY = 0.81;
+	}
+	void SetCamera3() {
+		cameraUpAngle = 0;
+		cameraRadius = 7;
+		cameraRoundAngle = 90;
+		centerY = 1.5;
+	}
+
 	void Init() {
-		w = 1000;
-		h = 600;
+		w = 1024;
+		h = 768;
 		render = new EGLRenderSystem;
 		render->SetWandH(w, h);
 		render->Initialize();
@@ -43,8 +87,9 @@ public:
 		CarSim.Init(this);
 		vector<Vector3> pos;
 		vector<Quaternion> orients;
-		sl->GetRandomCars(pos,orients);
-		CarSim.GenRandomCars(pos, orients);
+		//sl->GetRandomCars(pos,orients);
+		//CarSim.GenRandomCars(pos, orients);
+		SetCamera1();
 	}
 	Vector3 getSceneCenter() {
 		int w = 32, h = 16;
@@ -53,11 +98,13 @@ public:
 	}
 	void SetCamera(float angleUp, float angleRound) {
 		auto c = getSceneCenter();
+		c.y += centerY;
 		float radRound = angleRound/180* PI;
 		float radUp = angleUp / 180 * PI;
 		float h = cameraRadius*sin(radUp);
 		Vector3 offset = Vector3(cameraRadius*sin(radRound), h, cameraRadius*cos(radRound));
 		camera->lookAt(c + offset, c, Vector3(0, 1, 0));
+		//camera->setPerspective(fovy, float(w) / float(h), 0.01, 200);
 	}
 	void RotateCamera() {
 		static float lasttime = AbsolutTime;
@@ -76,7 +123,7 @@ public:
 		UpdateGUI();
 		if (rotateCamera)
 			RotateCamera();
-
+		
 		//sl->UpdateScene();
 		pipeline->Render();
 		//CarSim.Update();
@@ -127,8 +174,8 @@ public:
 			auto p =(EdushiPipeline*) pipeline;
 			ImGui::TextWrapped(p->profile.ToString().c_str());
 			ImGui::Text("Model Path");
-			static char file[100]="model/uniform/v2/b1.obj";
-			//static char file[100] = "../../../v2/b1.obj";
+			static char file[100]="model/uniform/building01.obj";
+			//static char file[100] = "../../../daochu/b1.obj";
 			static char name[100] = "node_b0_0";
 			
 			ImGui::InputText("Model Path", file, 100);
@@ -143,21 +190,36 @@ public:
 			if (ImGui::Button("RemoveAll")) RemoveAllNodes(); ImGui::SameLine();
 			if (ImGui::Button("AttachFloor")) sl->AttachFloar();
 			if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;
-			ImGui::Text("Camera");
-			ImGui::InputFloat3("CameraPos", &camera->m_Position[0]);
-			ImGui::DragFloat("UpAngle", &cameraUpAngle, 0.1, 0, 89);
-			ImGui::DragFloat("RoundAngle", &cameraRoundAngle, 0.2, 0, 360);
-			ImGui::DragFloat("cameraRadius", &cameraRadius);
-			ImGui::DragFloat("cameraRotateSpeed", &rotatespeed);
-			if (ImGui::Button("Set Camera")) SetCamera(cameraUpAngle, cameraRoundAngle);
-			ImGui::SameLine();
-			if (ImGui::Button("Next Camera")) {
-				cameraRoundAngle = (floor((cameraRoundAngle) / 90) + 1) * 90;
-				if (cameraRoundAngle >= 360) cameraRoundAngle -= 360;
-				SetCamera(cameraUpAngle, cameraRoundAngle);
+			static bool show_config=true;
+			if (ImGui::Button("Show Config")) show_config = !show_config;
+			if (show_config) {
+				ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_FirstUseEver);
+				ImGui::Begin("config");
+				ImGui::Text("Camera");
+				static Vector3 pos,dir;
+				pos = camera->getPosition();
+				dir = camera->getDirection();
+				ImGui::DragFloat3("CameraPos", &pos[0]);
+				ImGui::DragFloat3("CameraDir", &dir[0]);
+				camera->setPosition(pos);
+				camera->setDirection(dir);
+				ImGui::DragFloat("UpAngle", &cameraUpAngle, 0.1, 0, 89);
+				ImGui::DragFloat("RoundAngle", &cameraRoundAngle, 0.2, 0, 360);
+				ImGui::DragFloat("cameraRadius", &cameraRadius, 0.1);
+				ImGui::DragFloat("cameraRotateSpeed", &rotatespeed);
+				ImGui::DragFloat("cameraFov", &fov, 0.1);
+				ImGui::DragFloat("LookCenter", &centerY, 0.01);
+				if (ImGui::Button("Set Camera")) SetCamera(cameraUpAngle, cameraRoundAngle);
+				ImGui::SameLine();
+				if (ImGui::Button("Next Camera")) {
+					cameraRoundAngle = (floor((cameraRoundAngle) / 90) + 1) * 90;
+					if (cameraRoundAngle >= 360) cameraRoundAngle -= 360;
+					SetCamera(cameraUpAngle, cameraRoundAngle);
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Start Rotate Camera")) rotateCamera = !rotateCamera;
+				ImGui::End();
 			}
-			ImGui::SameLine();
-			if (ImGui::Button("Start Rotate Camera")) rotateCamera = !rotateCamera;
 			static char blockpath[100] = "model/uniform/data/block0.txt";
 			ImGui::InputText("Block Path", blockpath, 100);
 			static char blockname[100] = "1";
@@ -249,9 +311,8 @@ public:
 		SceneNode* pRoot = scene->GetSceneRoot();
 		camera = scene->CreateCamera("main");
 		camera->lookAt(Vector3(-1.8, 0.6, 0.4), Vector3(-2, 0, -2), Vector3(0, 1, 0));
-		float fovy = 45;
-		camera->setPerspective(fovy, float(w) / float(h), 0.01, 200);
 
+		camera->setPerspective(fov, float(w) / float(h), 0.01, 200);
 		loadModels();
 		//sl->bh.PutblockTest();
 		//CarSim.Init(this);
