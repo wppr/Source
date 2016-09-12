@@ -59,7 +59,7 @@ namespace HW
 
 	void Camera::calcLocalSystem()
 	{
-		m_Up = Vector3(0, 1, 0);
+		//m_Up = Vector3(0, 1, 0);
 		Vector3 mRight = m_Direction.crossProduct(m_Up);
 		m_Up = mRight.crossProduct(m_Direction);
 		m_Up.normalize();

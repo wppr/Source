@@ -121,11 +121,13 @@ public:
 		float h = c.cameraCenterDist*sin(radUp);
 		Vector3 offset = Vector3(c.cameraCenterDist*sin(radRound), h, c.cameraCenterDist*cos(radRound));
 		float rady=c.UpYAngle / 180 * PI;
-		camera->lookAt(cen + offset, cen, Vector3(sin(rady), cos(rady), 0));
+		Quaternion q(rady, -offset);
+		Vector3 up2 = q*Vector3(0, 1, 0);
+		camera->lookAt(cen + offset, cen, up2);
 
 		c.cameraPos = cen + offset;
 		c.LookCenter = cen;
-		c.cameraUp = Vector3(sin(rady), cos(rady),0);
+		c.cameraUp = up2;
 		
 	}
 	void SetCamera(float angleUp, float angleRound) {
@@ -241,7 +243,7 @@ public:
 				c.cameraPos = camera->getPosition();
 				c.cameraUp = camera->getUp();
 				ImGui::DragFloat3("CameraPos", &c.cameraPos[0],0.01);
-				//ImGui::DragFloat3("CameraCenter", &c.LookCenter[0], 0.01);
+				ImGui::DragFloat3("CameraCenter", &c.LookCenter[0], 0.01);
 				ImGui::DragFloat3("CameraUp", &c.cameraUp[0], 0.01);
 
 
