@@ -33,7 +33,7 @@ public:
 	float centerY = 1.82;
 	float fov = 25;
 	float rotatespeed = 0;
-	bool rotateCamera=true;
+	bool rotateCamera=false;
 	
 	void SetCamera1() {
 		cameraUpAngle = 0;
@@ -235,7 +235,8 @@ public:
 					SetCamera(cameraUpAngle, cameraRoundAngle);
 				}
 				ImGui::SameLine();
-				if (ImGui::Button("Start Rotate Camera")) rotateCamera = !rotateCamera;
+				ImGui::Checkbox("Start Rotate Camera", &rotateCamera);
+				
 				ImGui::End();
 			}
 
