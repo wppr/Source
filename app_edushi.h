@@ -173,34 +173,46 @@ public:
 			ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			auto p =(EdushiPipeline*) pipeline;
 			ImGui::TextWrapped(p->profile.ToString().c_str());
-			ImGui::Text("Model Path");
-			static char file[100]="model/uniform/building01.obj";
-			//static char file[100] = "../../../daochu/b1.obj";
-			static char name[100] = "node_b0_0";
-			
-			ImGui::InputText("Model Path", file, 100);
-			ImGui::InputText("SceneNode Name", name, 100);
-			ImGui::DragFloat3("model translate", &modelTranslate[0], 0.01);
-			ImGui::DragFloat("model scale", &modelscale, 0.01);
-			ImGui::DragFloat("model rotate degree", &modelrotate, 0.01);
-			string tmp(file);
-			string tmp2(name);
-			if (ImGui::Button("Load model")) LoadModel(tmp,name);
-			
-			if (ImGui::Button("RemoveAll")) RemoveAllNodes(); ImGui::SameLine();
-			if (ImGui::Button("AttachFloor")) sl->AttachFloar();
-			if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;
-			static bool show_config=true;
-			if (ImGui::Button("Show Config")) show_config = !show_config;
+			static bool show_load_model = false;
+			if (ImGui::Button("Show Model Window")) show_load_model = !show_load_model;
+			if (show_load_model) {
+				ImGui::Begin("model");
+				ImGui::Text("Model Path");
+				static char file[100] = "model/uniform/building01.obj";
+				//static char file[100] = "../../../daochu/b1.obj";
+				static char name[100] = "node_b0_0";
+
+				ImGui::InputText("Model Path", file, 100);
+				ImGui::InputText("SceneNode Name", name, 100);
+				ImGui::DragFloat3("model translate", &modelTranslate[0], 0.01);
+				ImGui::DragFloat("model scale", &modelscale, 0.01);
+				ImGui::DragFloat("model rotate degree", &modelrotate, 0.01);
+				string tmp(file);
+				string tmp2(name);
+				if (ImGui::Button("Load model")) LoadModel(tmp, name);
+
+				if (ImGui::Button("RemoveAll")) RemoveAllNodes(); ImGui::SameLine();
+				if (ImGui::Button("AttachFloor")) sl->AttachFloar();
+				if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;	
+				ImGui::End();
+			}
+			static bool show_config = true;
+			if (ImGui::Button("Show Camera Config")) show_config = !show_config;
 			if (show_config) {
-				ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_FirstUseEver);
 				ImGui::Begin("config");
+				ImGui::DragFloat("scene scale", &scenescale, 0.001);
+				ImGui::DragFloat3("scene translate", &sceneTranlate[0], 0.01);
+				{
+					SceneNode* root = scene->GetSceneRoot();
+					root->setScale(Vector3(scenescale));
+					root->setTranslation(sceneTranlate);
+				}
 				ImGui::Text("Camera");
 				static Vector3 pos,dir;
 				pos = camera->getPosition();
 				dir = camera->getDirection();
-				ImGui::DragFloat3("CameraPos", &pos[0]);
-				ImGui::DragFloat3("CameraDir", &dir[0]);
+				ImGui::DragFloat3("CameraPos", &pos[0],0.01);
+				ImGui::DragFloat3("CameraDir", &dir[0], 0.01);
 				camera->setPosition(pos);
 				camera->setDirection(dir);
 				ImGui::DragFloat("UpAngle", &cameraUpAngle, 0.1, 0, 89);
@@ -212,94 +224,107 @@ public:
 				if (ImGui::Button("Set Camera")) SetCamera(cameraUpAngle, cameraRoundAngle);
 				ImGui::SameLine();
 				if (ImGui::Button("Next Camera")) {
-					cameraRoundAngle = (floor((cameraRoundAngle) / 90) + 1) * 90;
-					if (cameraRoundAngle >= 360) cameraRoundAngle -= 360;
+					static int i = 0;
+					i = (i + 1) % 4;
+					if (i == 0) SetCamera4();
+					if (i == 1) SetCamera3();
+					if (i == 2) SetCamera2();
+					if (i == 3) SetCamera1();
+					//cameraRoundAngle = (floor((cameraRoundAngle) / 90) + 1) * 90;
+					//if (cameraRoundAngle >= 360) cameraRoundAngle -= 360;
 					SetCamera(cameraUpAngle, cameraRoundAngle);
 				}
 				ImGui::SameLine();
 				if (ImGui::Button("Start Rotate Camera")) rotateCamera = !rotateCamera;
 				ImGui::End();
 			}
-			static char blockpath[100] = "model/uniform/data/block0.txt";
-			ImGui::InputText("Block Path", blockpath, 100);
-			static char blockname[100] = "1";
-			ImGui::InputText("Block Name", blockname, 100);
-			static char blocksize[100] = "1x1";
-			ImGui::InputText("Block Size", blocksize, 100);
-			static char blocktype[100] = "block";
-			ImGui::InputText("Block type", blocktype, 100);
-			static int blockorien = 1;
-			ImGui::InputInt("Block Orientation", &blockorien);
-			if (ImGui::Button("Load Block Preset"))
-			{
-				string bname=sl->bh.LoadBlockPreset(blockpath);
-				auto& b = sl->bh.blockPresets[bname];
-				b.name.copy(blockname, b.name.size()+1);
-				b.size.copy(blocksize, b.size.size() + 1);
-				b.type.copy(blocktype, b.type.size() + 1);
-				blockorien = b.orientation;
+
+			static bool show_block_window = false;
+			if (ImGui::Button("Show Block Window")) show_block_window = !show_block_window;
+			if (show_block_window) {
+				ImGui::Begin("");
+				static char blockpath[100] = "model/uniform/data/block0.txt";
+				ImGui::InputText("Block Path", blockpath, 100);
+				static char blockname[100] = "1";
+				ImGui::InputText("Block Name", blockname, 100);
+				static char blocksize[100] = "1x1";
+				ImGui::InputText("Block Size", blocksize, 100);
+				static char blocktype[100] = "block";
+				ImGui::InputText("Block type", blocktype, 100);
+				static int blockorien = 1;
+				ImGui::InputInt("Block Orientation", &blockorien);
+				if (ImGui::Button("Load Block Preset"))
+				{
+					string bname = sl->bh.LoadBlockPreset(blockpath);
+					auto& b = sl->bh.blockPresets[bname];
+					b.name.copy(blockname, b.name.size() + 1);
+					b.size.copy(blocksize, b.size.size() + 1);
+					b.type.copy(blocktype, b.type.size() + 1);
+					blockorien = b.orientation;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Save Block Preset")) sl->bh.SaveBlock(blockpath, blockname, blocksize, blocktype, blockorien);
+				static char nodename[100] = "node_b0_";
+				static Vector3 blockPos(0.0);
+				ImGui::DragFloat3("Block Translate", &blockPos[0], 0.01);
+				ImGui::InputText("Block Node Name", nodename, 100);
+				if (ImGui::Button("Attach Block"))
+				{
+					sl->bh.AttachBlock(blockname, string(nodename), blockPos);
+				}ImGui::SameLine();
+				if (ImGui::Button("Attach All Block"))
+				{
+					sl->bh.attachAllBlock();
+				}ImGui::SameLine();
+				if (ImGui::Button("Attach All Mesh"))
+				{
+					sl->bh.attachAllMesh();
+				}
+				ImGui::End();
 			}
-			ImGui::SameLine();
-			if (ImGui::Button("Save Block Preset")) sl->bh.SaveBlock(blockpath, blockname, blocksize,blocktype,blockorien);
-			static char nodename[100] = "node_b0_";
-			static Vector3 blockPos(0.0);
-			ImGui::DragFloat3("Block Translate", &blockPos[0], 0.01);
-			ImGui::InputText("Block Node Name", nodename, 100);
-			if (ImGui::Button("Attach Block"))
-			{
-				sl->bh.AttachBlock(blockname, string(nodename), blockPos);
-			}ImGui::SameLine();
-			if (ImGui::Button("Attach All Block"))
-			{
-				sl->bh.attachAllBlock();
-			}ImGui::SameLine();
-			if (ImGui::Button("Attach All Mesh"))
-			{
-				sl->bh.attachAllMesh();
+
+			static bool show_shading = false;
+			if (ImGui::Button("Show Shading")) show_shading = !show_shading;
+			if (show_shading) {
+				ImGui::Begin("shading");
+				ImGui::Text("Shading");
+
+				ImGui::ColorEdit3("LightColor0", &p->LightColor[0][0]);
+				ImGui::ColorEdit3("LightColor1", &p->LightColor[1][0]);
+				ImGui::DragFloat3("LightPos0", &p->LightPos[0][0]);
+				ImGui::DragFloat3("LightPos1", &p->LightPos[1][0]);
+				ImGui::DragFloat("Metalness", &p->metalness, 0.002, 0.0001, 1.0);
+				ImGui::DragFloat("Roughness", &p->roughness, 0.002, 0.0001, 1.0);
+				const char* ModeDesc[] = { "direct light+Env",
+					"direct light+Env+ao",
+					"ao",
+					"Env",
+					"Direct light",
+					"Normal",
+					"ShadowMap",
+					"Shadow Factor",
+					"Shaodw+Direct" };
+				int modeNum = 9;
+
+				ImGui::Combo("Shading Mode", &p->mode, ModeDesc, modeNum);
+				ImGui::Combo("EnvMap", &p->envMapId, "pisa\0uffizi\0sky\0");
+				ImGui::DragFloat("SSAO Radius", &p->ssao.radius, 0.002, 0.0001, 1.0);
+				ImGui::DragFloat("ToneMap exposure", &p->tonemap.exposure, 0.01, 0.1, 10.0);
+				static bool f = true;
+				ImGui::Checkbox("Tonemap ON", &f); p->tonemap.ToneMapOn = f ? 1 : 0;
+				ImGui::Text("ShadowMap");
+				static bool f2 = false;
+				//ImGui::Checkbox("LinearDepth", &f2); p->shadowmap.LinearDepth = f2 ? 1 : 0;
+				ImGui::DragFloat("ReduceBleeding", &p->shadowmap.ReduceBleeding, 0.002, 0.0001, 1.0);
+				ImGui::DragFloat("BlurRadius", &p->shadowmap.blureffect.radius, 0.002, 0.0001, 5.0);
+				ImGui::DragFloat("bias", &p->LightCamera.bias, 0.001, -0.1, 0.1);
+				ImGui::DragFloat("near", &p->LightCamera.Near, 0.002, 0.0001);
+				ImGui::DragFloat("far", &p->LightCamera.Far, 0.002, 0.0001);
+				ImGui::DragFloat("width", &p->LightCamera.width, 0.002, 0.0001);
+				ImGui::DragFloat("height", &p->LightCamera.height, 0.002, 0.0001);
+				p->shadowmap.SetLightCamera(0, p->LightCamera);
+				ImGui::End();
 			}
-			ImGui::DragFloat("scene scale", &scenescale, 0.001);
-			ImGui::DragFloat3("scene translate", &sceneTranlate[0], 0.01);
-			{
-				SceneNode* root = scene->GetSceneRoot();
-				root->setScale(Vector3(scenescale));
-				root->setTranslation(sceneTranlate);
-			}
-			ImGui::Text("Shading");
-			
-			ImGui::ColorEdit3("LightColor0", &p->LightColor[0][0]);
-			ImGui::ColorEdit3("LightColor1", &p->LightColor[1][0]);
-			ImGui::DragFloat3("LightPos0", &p->LightPos[0][0]);
-			ImGui::DragFloat3("LightPos1", &p->LightPos[1][0]);
-			ImGui::DragFloat("Metalness", &p->metalness, 0.002, 0.0001, 1.0);
-			ImGui::DragFloat("Roughness", &p->roughness, 0.002, 0.0001, 1.0);
-			const char* ModeDesc[] = { "direct light+Env",
-				"direct light+Env+ao",
-				"ao",
-				"Env",
-				"Direct light",
-				"Normal",
-				"ShadowMap",
-				"Shadow Factor",
-				"Shaodw+Direct"};
-			int modeNum = 9;
-			
-			ImGui::Combo("Shading Mode", &p->mode, ModeDesc, modeNum);
-			ImGui::Combo("EnvMap", &p->envMapId, "pisa\0uffizi\0sky\0");
-			ImGui::DragFloat("SSAO Radius", &p->ssao.radius,0.002,0.0001,1.0);
-			ImGui::DragFloat("ToneMap exposure", &p->tonemap.exposure, 0.01, 0.1, 10.0);
-			static bool f=true;
-			ImGui::Checkbox("Tonemap ON", &f); p->tonemap.ToneMapOn = f?1:0;
-			ImGui::Text("ShadowMap");
-			static bool f2 = false;
-			//ImGui::Checkbox("LinearDepth", &f2); p->shadowmap.LinearDepth = f2 ? 1 : 0;
-			ImGui::DragFloat("ReduceBleeding", &p->shadowmap.ReduceBleeding, 0.002, 0.0001, 1.0);
-			ImGui::DragFloat("BlurRadius", &p->shadowmap.blureffect.radius, 0.002, 0.0001, 5.0);
-			ImGui::DragFloat("bias", &p->LightCamera.bias, 0.001, -0.1, 0.1);
-			ImGui::DragFloat("near", &p->LightCamera.Near, 0.002, 0.0001);
-			ImGui::DragFloat("far", &p->LightCamera.Far, 0.002, 0.0001);
-			ImGui::DragFloat("width", &p->LightCamera.width, 0.002, 0.0001);
-			ImGui::DragFloat("height", &p->LightCamera.height, 0.002, 0.0001);
-			p->shadowmap.SetLightCamera(0, p->LightCamera);
 			ImGui::End();
 
 		}
