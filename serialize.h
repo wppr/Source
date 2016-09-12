@@ -15,13 +15,17 @@ using namespace std;
 //public:
 	static auto serializeSave = [](string fname, auto& x) {
 		std::ofstream os(fname, std::ios::binary);
-		cereal::JSONOutputArchive archive(os);
-		archive(x);
+		if (os.good()) {
+			cereal::JSONOutputArchive archive(os);
+			archive(x);
+		}
 	};
 	static auto serializeLoad = [](string fname, auto& x) {
 		std::ifstream os(fname, std::ios::binary);
-		cereal::JSONInputArchive archive(os);
-		archive(x);
+		if (os.good()) {
+			cereal::JSONInputArchive archive(os);
+			archive(x);
+		}
 	};
 //};
 
