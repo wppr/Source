@@ -443,6 +443,7 @@ namespace HW
 	{
 		Vector3 pos = getPosition();
 		setPosition(pos + d*Vector3(0, 1, 0));
+
 	}
 
 	void Camera::MoveDown(float d)

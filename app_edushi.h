@@ -130,26 +130,24 @@ public:
 		c.cameraUp = up2;
 		
 	}
-	void SetCamera(float angleUp, float angleRound) {
-		auto cen = getSceneCenter(32,16);
-		cen.y += c.LookCenter[1];
-		float radRound = angleRound/180* PI;
-		float radUp = angleUp / 180 * PI;
-		float h = c.cameraCenterDist*sin(radUp);
-		Vector3 offset = Vector3(c.cameraCenterDist*sin(radRound), h, c.cameraCenterDist*cos(radRound));
-		camera->lookAt(cen + offset, cen, Vector3(0, 1, 0));
-		//camera->setPerspective(fovy, float(w) / float(h), 0.01, 200);
-	}
+	//void SetCamera(float angleUp, float angleRound) {
+	//	auto cen = getSceneCenter(32,16);
+	//	cen.y += c.LookCenter[1];
+	//	float radRound = angleRound/180* PI;
+	//	float radUp = angleUp / 180 * PI;
+	//	float h = c.cameraCenterDist*sin(radUp);
+	//	Vector3 offset = Vector3(c.cameraCenterDist*sin(radRound), h, c.cameraCenterDist*cos(radRound));
+	//	camera->lookAt(cen + offset, cen, Vector3(0, 1, 0));
+	//	//camera->setPerspective(fovy, float(w) / float(h), 0.01, 200);
+	//}
 	void RotateCamera() {
 		static float lasttime = AbsolutTime;
 		float dura = AbsolutTime - lasttime;
 		lasttime = AbsolutTime;
 		c.cameraRoundAngle += rotatespeed*dura;
-		SetCamera(c.LookDownAngle, c.cameraRoundAngle);
+		UpdateCamera(c);
 	}
-	void UpdateCamera() {
-		SetCamera(c.LookDownAngle, c.cameraRoundAngle);
-	}
+
 	void InitPipeline()
 	{
 		pipeline = new EdushiPipeline;
@@ -234,9 +232,13 @@ public:
 				ImGui::Begin("config");
 				ImGui::DragFloat("scene scale", &scenescale, 0.001);
 				ImGui::DragFloat3("scene translate", &sceneTranlate[0], 0.01);
+				static bool scene2x=false;
+				ImGui::Checkbox("2x Scene", &scene2x);
 				{
 					SceneNode* root = scene->GetSceneRoot();
-					root->setScale(Vector3(scenescale));
+					int x = 1;
+					if (scene2x) x = 2;
+					root->setScale(Vector3(scenescale)*x);
 					root->setTranslation(sceneTranlate);
 				}
 				ImGui::Text("Camera");

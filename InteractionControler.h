@@ -68,6 +68,7 @@ public:
 		 lastx = x;
 		 lasty = y;
 		 camera->RotatePitchYaw(-dy, dx);
+		 camera->setUp(Vector3(0, 1, 0));
 	 }
 };
 
