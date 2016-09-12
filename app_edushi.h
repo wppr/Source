@@ -25,8 +25,11 @@ struct EdushiConfig {
 	int mapw = 32;
 	int maph = 16;
 
+	string ip;
+	string port;
+
 	META(N(cameraPos),N(cameraUp),N(LookCenter),N(LookDownAngle),N(UpYAngle),
-		N(cameraCenterDist), N(cameraRoundAngle), N(fov),N(mapw),N(maph));
+		N(cameraCenterDist),N(ip),N(port),N(cameraRoundAngle), N(fov),N(mapw),N(maph));
 };
 
 class App_edushi :public App {
@@ -86,26 +89,26 @@ public:
 		InitDevice();
 		InitPipeline();
 		CreateScene();
-
+		LoadConfig();
 		//sceneLoader
 		sl = new SceneLoader(scene, meshMgr, 32, 16);
 		sl->loadMesh();
-		//sl->InitClient("172.31.11.12", "56025");
+		sl->InitClient(c.ip, c.port);
 
-		sl->LoadJson();
+		/*sl->LoadJson();
 		sl->show_json = true;
-		sl->UpdateScene();
+		sl->UpdateScene();*/
 		CarSim.Init(this);
 		vector<Vector3> pos;
 		vector<Quaternion> orients;
 		//sl->GetRandomCars(pos,orients);
 		//CarSim.GenRandomCars(pos, orients);
 		
-		SetCamera1();
-		c.cameraPos = camera->getPosition();
-		c.cameraUp == camera->getUp();
-		c.LookCenter = getSceneCenter(c.mapw, c.maph);
-		LoadConfig();
+		//SetCamera1();
+		//c.cameraPos = camera->getPosition();
+		//c.cameraUp == camera->getUp();
+		//c.LookCenter = getSceneCenter(c.mapw, c.maph);
+		
 		UpdateCamera(c);
 	}
 	Vector3 getSceneCenter(int w,int h) {
@@ -159,7 +162,7 @@ public:
 		if (rotateCamera)
 			RotateCamera();
 		
-		//sl->UpdateScene();
+		sl->UpdateScene();
 		pipeline->Render();
 		//CarSim.Update();
 	}

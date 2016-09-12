@@ -47,7 +47,7 @@ public:
 			return;
 		}	
 		//glfwWindowHint(GLFW_SAMPLES, samples);
-		window = glfwCreateWindow(w, h, "Window", NULL, NULL);
+		window = glfwCreateWindow(w, h, "Window", glfwGetPrimaryMonitor(), NULL);
 		
 		if (!window) {
 			fprintf(stderr, "ERROR: could not open window with GLFW3\n");
