@@ -78,6 +78,8 @@ void SceneLoader::ParseScene(string json)
 	{
 		int x = entry[i]["x"].GetInt();
 		int y = entry[i]["y"].GetInt();
+		if (x < 6 || x > 26) continue;//clip sides
+
 		if (!(x >= 0 && x < width && y >= 0 && y < height)) continue;//discarded
 		string type = entry[i]["type"].GetString();
 		
@@ -308,6 +310,8 @@ void SceneLoader::AttachFloar()
 
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; ++j) {
+			if (j < 6 || j > 26) continue;//clip sides
+
 			floarEntities[i * width + j]->setMesh(floarFragment);
 			floarNodes[i * width + j]->setTranslation(j, 0, i);
 			root->attachNode(floarNodes[i * width + j]);
@@ -326,6 +330,8 @@ void SceneLoader::UpdateSceneNodes()
 
 		for (int j = 0; j < width; ++j)
 		{
+			if (j < 6 || j > 26) continue;//clip sides
+
 			if (layoutMatrix[i * width + j].IsDrawable())
 			{
 				sceneNodes[i * width + j]->detachAllNodes();

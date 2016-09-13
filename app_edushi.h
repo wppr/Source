@@ -45,7 +45,6 @@ public:
 
 	EdushiConfig c;
 
-
 	float rotatespeed = 0;
 	bool rotateCamera=false;
 	bool updateCamera = false;
