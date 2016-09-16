@@ -37,7 +37,9 @@ public:
 
 		}
 		vector<string> names = { "xcross","tcross","lcross","xcross_greenlight",
-			"tcross_greenlight","lcross_greenlight","street","park","station" };
+			"tcross_greenlight","lcross_greenlight","xcross_redlight",
+			"tcross_redlight","lcross_redlight","xcross_yellowlight",
+			"tcross_yellowlight","lcross_yellowlight","street","park","station" };
 		for (auto x : names) {
 			serializeLoad("model/uniform/data/" + x + ".txt", b);
 			blockPresets[b.name] = b;
