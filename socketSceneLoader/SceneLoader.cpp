@@ -21,6 +21,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 	this->scene = scene;
 	this->meshMgr = meshMgr;
 	this->layoutMatrix = new Entry[width * height];
+	this->rotateFlag = false;
 
 	for (int i = 0; i < height; ++i)
 	{
@@ -52,6 +53,8 @@ void SceneLoader::ParseScene(string json)
 	}
 	assert(root.IsObject());
 	Value &blockSize = root["blockSize"];
+	Value &rotateFlag = root["rotate"];
+	this->rotateFlag = rotateFlag.GetBool();
 	
 	//set all to NULL
 	for (int i = 0; i < width * height; ++i)
@@ -114,6 +117,11 @@ void SceneLoader::ParseScene(string json)
 
 			//modify matrix
 			int orientation = entry[i]["orientation"].GetInt();
+			if (name == "lcross") orientation = (orientation + 2) % 4;
+			else if (name == "lcross_greenlight") orientation = (orientation + 3) % 4;
+			else if (name == "tcross") orientation = (orientation + 1) % 4;
+			if (!orientation) orientation = 4;
+
 			block.orientation = orientation;
 			this->layoutMatrix[y * width + x].GetBlock().push_back(block);
 			this->layoutMatrix[y * width + x].SetEntryType(type);
@@ -178,7 +186,7 @@ void SceneLoader::ParseScene(string json)
 				else if (this->layoutMatrix[y * width + x].GetEntryType() == Entry::EntryType::BLOCK)//BLOCK
 					break;
 
-				else if (this->layoutMatrix[y * width + x].GetEntryType() == Entry::EntryType::AFFL)
+				else if (this->layoutMatrix[y * width + x].GetEntryType() == Entry::EntryType::AFFL || this->layoutMatrix[y * width + x].GetEntryType() == Entry::EntryType::STREET)
 				{
 					this->layoutMatrix[y * width + x].IsEmpty() = false;
 					this->layoutMatrix[y * width + x].IsDrawable() = true;
@@ -310,7 +318,7 @@ void SceneLoader::AttachFloar()
 
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; ++j) {
-			if (j < 6 || j > 26) continue;//clip sides
+			if (j < 6 || j > 25) continue;//clip sides
 
 			floarEntities[i * width + j]->setMesh(floarFragment);
 			floarNodes[i * width + j]->setTranslation(j, 0, i);
@@ -330,7 +338,7 @@ void SceneLoader::UpdateSceneNodes()
 
 		for (int j = 0; j < width; ++j)
 		{
-			if (j < 6 || j > 26) continue;//clip sides
+			if (j < 6 || j > 25) continue;//clip sides
 
 			if (layoutMatrix[i * width + j].IsDrawable())
 			{
@@ -338,6 +346,12 @@ void SceneLoader::UpdateSceneNodes()
 				int blockSize = layoutMatrix[i * width + j].GetBlock().size();
 				for (int m = 0; m < blockSize; ++m)
 				{
+					string subEntryName = "entry" + to_string(i) + " " + to_string(j) + "block" + to_string(m);
+					SceneNode* subEntryNode = scene->getSceneNode(subEntryName);
+					if (NULL != subEntryNode)
+						scene->destroy(subEntryNode);
+					subEntryNode = scene->CreateSceneNode(subEntryName);
+
 					BlockDef &block = layoutMatrix[i * width + j].GetBlock()[m];
 					string id = block.name;
 
@@ -362,8 +376,9 @@ void SceneLoader::UpdateSceneNodes()
 					}
 
 					Quaternion quaternion((orien - 1) * 0.5f * PI, Vector3(0, 1, 0));
-					sceneNodes[i * width + j]->setOrientation(quaternion);
-					sceneNodes[i * width + j]->setTranslation(j + xCalibration, 0, i + yCalibration);
+					subEntryNode->setOrientation(quaternion);
+					subEntryNode->setTranslation(j + xCalibration, 0, i + yCalibration);
+					sceneNodes[i * width + j]->attachNode(subEntryNode);
 
 					for (int k = 0; k < block.meshID.size(); ++k)
 					{
@@ -388,7 +403,7 @@ void SceneLoader::UpdateSceneNodes()
 							node->setOrientation(q);
 						}
 						node->setTranslation(block.translate[k]);
-						sceneNodes[i * width + j]->attachNode(node);
+						subEntryNode->attachNode(node);
 					}
 
 					root->attachNode(sceneNodes[i * width + j]);

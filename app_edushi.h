@@ -16,7 +16,7 @@ struct EdushiConfig {
 	float LookDownAngle = 2.7;
 	float UpYAngle = 0;
 	float cameraCenterDist = 10;
-	float cameraRoundAngle = 0;
+	float cameraRoundAngle = 30;
 	
 	//int w = 1024;
 	//int h = 768;
@@ -107,7 +107,6 @@ public:
 		//c.cameraPos = camera->getPosition();
 		//c.cameraUp == camera->getUp();
 		//c.LookCenter = getSceneCenter(c.mapw, c.maph);
-		
 		UpdateCamera(c);
 	}
 	Vector3 getSceneCenter(int w,int h) {
@@ -146,7 +145,9 @@ public:
 		static float lasttime = AbsolutTime;
 		float dura = AbsolutTime - lasttime;
 		lasttime = AbsolutTime;
-		c.cameraRoundAngle += rotatespeed*dura;
+		c.cameraRoundAngle += 20*dura;
+		if (c.cameraRoundAngle > 360.0f)
+			c.cameraRoundAngle -= 360.0f;
 		UpdateCamera(c);
 	}
 
@@ -158,7 +159,9 @@ public:
 
 	void Render() {
 		UpdateGUI();
-		if (rotateCamera)
+		/*if (rotateCamera)
+			RotateCamera();*/
+		if (sl->rotateFlag)
 			RotateCamera();
 		
 		sl->UpdateScene();

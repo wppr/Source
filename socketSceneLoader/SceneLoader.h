@@ -107,6 +107,7 @@ namespace Block
 
 	public:
 		bool show_json = false;
+		bool rotateFlag;
 		//default 32 * 16
 		SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height);
 
