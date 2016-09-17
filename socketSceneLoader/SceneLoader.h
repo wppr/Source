@@ -156,12 +156,13 @@ namespace Block
 		}
 
 		//Scene Management
-		void ParseScene(string json);//from json to layoutMatrix
+		void ParseScene(string json, float time);//from json to layoutMatrix
 		void LoadJson();//static load json from file
-		void UpdateScene();
+		void UpdateScene(float curTime);
 		void loadMesh();
 		void InitSceneNode();
 		void InitFloor();
+		void InitCar();
 		void AttachFloar();
 		void UpdateSceneNodes();
 		void GetRandomCars(vector<Vector3>& roadPos, vector<Quaternion>& roadOrien);
@@ -196,13 +197,7 @@ namespace Block
 		void InitClient(string ip, string port);
 
 		//cars
-		void PushCar(Vector3 position, Vector3 direction, float speed, float startTime)
-		{
-			int name = GetCarName();
-			SceneNode* carNode = this->scene->CreateSceneNode("car" + to_string(name));
-			Car car(position, direction, speed, carNode, startTime, name);
-			this->cars.push_back(car);
-		}
+		void PushCar(Vector3 position, Vector3 direction, float speed, float startTime, int meshID);
 
 		//block
 		BlockHelper bh;
@@ -222,6 +217,8 @@ namespace Block
 		SceneNode** sceneNodes;
 		SceneNode** floarNodes;
 		Entity** floarEntities;
+		SceneNode* carRoot;
+		SceneNode* entityRoot;
 
 		string staticJson;
 

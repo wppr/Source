@@ -176,7 +176,7 @@ public:
 			firstRotate = true;
 		}
 		
-		sl->UpdateScene();
+		sl->UpdateScene(AbsolutTime);
 		pipeline->Render();
 		//CarSim.Update();
 	}

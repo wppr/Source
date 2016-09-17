@@ -36,11 +36,12 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 
 	InitSceneNode();
 	InitFloor();
+	//InitCar();
 
 	bh.Init(scene, meshMgr);
 }
 
-void SceneLoader::ParseScene(string json)
+void SceneLoader::ParseScene(string json, float time)
 {
 	//cout << json << endl;
 
@@ -164,9 +165,9 @@ void SceneLoader::ParseScene(string json)
 		float dirZ = cars[i]["direction"]["z"].GetInt();
 
 		float speed = cars[i]["speed"].GetFloat();
-		int name = cars[i]["name"].GetInt();
+		int mesh = cars[i]["mesh"].GetInt();
 
-
+		PushCar(Vector3(posX, 0, posZ), Vector3(dirX, 0, dirZ), speed, time, mesh);
 	}
 
 	//generate street
@@ -260,14 +261,14 @@ void SceneLoader::InitClient(string ip, string port)
 	client.Connect(ip, port);
 }
 
-void SceneLoader::UpdateScene()
+void SceneLoader::UpdateScene(float curTime)
 {
 	string json;
 	mutex m;
 
 	if (show_json)
 	{
-		ParseScene(staticJson);
+		ParseScene(staticJson, curTime);
 		UpdateSceneNodes();
 	}
 	else
@@ -278,7 +279,7 @@ void SceneLoader::UpdateScene()
 		
 		if ("" != json)
 		{
-			ParseScene(json);
+			ParseScene(json, curTime);
 			UpdateSceneNodes();
 		}
 	} 
@@ -287,6 +288,11 @@ void SceneLoader::UpdateScene()
 //Init scene nodes and entities
 void SceneLoader::InitSceneNode()
 {
+	entityRoot = scene->CreateSceneNode("entityRoot");
+	SceneManager* scene_instance = SceneContainer::getInstance().get("scene1");
+	SceneNode* root = scene_instance->GetSceneRoot();
+	root->attachNode(entityRoot);
+
 	//sceneNodes
 	sceneNodes = new SceneNode*[width * height];
 	for (int i = 0; i < height; ++i)
@@ -331,10 +337,21 @@ void SceneLoader::InitFloor()
 
 }
 
+//Init car root node
+void SceneLoader::InitCar()
+{
+	SceneManager* scene_instance = SceneContainer::getInstance().get("scene1");
+	SceneNode* root = scene_instance->GetSceneRoot();
+	carRoot = scene->CreateSceneNode("carRoot");
+	root->attachNode(carRoot);
+}
+
 void SceneLoader::AttachFloar()
 {
 	SceneManager* scene_instance = SceneContainer::getInstance().get("scene1");
 	SceneNode* root = scene_instance->GetSceneRoot();
+	SceneNode* floorRoot = scene->CreateSceneNode("floorRoot");
+	root->attachNode(floorRoot);
 
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; ++j) {
@@ -342,7 +359,7 @@ void SceneLoader::AttachFloar()
 
 			floarEntities[i * width + j]->setMesh(floarFragment);
 			floarNodes[i * width + j]->setTranslation(j, 0, i);
-			root->attachNode(floarNodes[i * width + j]);
+			floorRoot->attachNode(floarNodes[i * width + j]);
 		}
 	}
 }
@@ -351,8 +368,7 @@ void SceneLoader::UpdateSceneNodes()
 {
 	SceneManager* scene = SceneContainer::getInstance().get("scene1");
 	SceneNode* root = scene->GetSceneRoot();
-	root->detachAllNodes();
-	AttachFloar();
+	entityRoot->detachAllNodes();
 
 	for (int i = 0; i < height; i++) {
 
@@ -377,7 +393,7 @@ void SceneLoader::UpdateSceneNodes()
 
 					int orien = block.orientation;
 					string span = block.size;
-					int xPos = span.find_first_of("x");
+					int xPos = span.find_first_of("x"); 
 					int spanX = atoi(span.substr(0, xPos).c_str());
 					int spanY = atoi(span.substr(xPos + 1, span.size()).c_str());
 					int xCalibration = 0, yCalibration = 0;
@@ -426,7 +442,7 @@ void SceneLoader::UpdateSceneNodes()
 						subEntryNode->attachNode(node);
 					}
 
-					root->attachNode(sceneNodes[i * width + j]);
+					entityRoot->attachNode(sceneNodes[i * width + j]);
 				}
 			}
 		}
@@ -481,6 +497,21 @@ int SceneLoader::GetCarName()
 	return name;
 }
 
+void SceneLoader::PushCar(Vector3 position, Vector3 direction, float speed, float startTime, int meshID)
+{
+	int name = GetCarName();
+	SceneNode* carNode = this->scene->CreateSceneNode("car" + to_string(name));
+	this->carRoot->attachNode(carNode);
+	MeshPtr mesh = this->carMeshes[meshID];
+
+	Entity* entity = this->scene->CreateEntity("car" + to_string(name));
+	carNode->attachMovable(entity);
+	entity->setMesh(mesh);
+
+	Car car(position, direction, speed, carNode, startTime, name);
+	this->cars.push_back(car);
+}
+
 void SceneLoader::MoveCars(float curTime)
 {
 	for (list<Car>::iterator it = cars.begin(); it != cars.end(); )
@@ -491,6 +522,8 @@ void SceneLoader::MoveCars(float curTime)
 			int name = it->GetName();
 			this->carNames[name] = false;//name free
 			it = cars.erase(it);
+
+			this->carRoot->detachNode("car" + to_string(name));
 
 			SceneNode* carNode = scene->getSceneNode("car" + to_string(name));
 			if (NULL != carNode)
