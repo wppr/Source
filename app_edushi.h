@@ -164,7 +164,10 @@ public:
 		if (sl->rotateFlag)
 			RotateCamera();
 		else
+		{
 			c.cameraRoundAngle = originConfig.cameraRoundAngle;
+			UpdateCamera(c);
+		}
 		
 		//sl->UpdateScene();
 		pipeline->Render();
