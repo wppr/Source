@@ -143,7 +143,7 @@ public:
 	//}
 	bool firstRotate = true;
 	void RotateCamera() {
-		float lasttime;
+		static float lasttime;
 		if (firstRotate)
 		{
 			lasttime = AbsolutTime;
@@ -176,7 +176,7 @@ public:
 			firstRotate = true;
 		}
 		
-		//sl->UpdateScene();
+		sl->UpdateScene();
 		pipeline->Render();
 		//CarSim.Update();
 	}
