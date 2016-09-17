@@ -472,3 +472,28 @@ int SceneLoader::GetCarName()
 	while (carNames[name++]);
 	return name;
 }
+
+void SceneLoader::MoveCars()
+{
+	for (list<Car>::iterator it = cars.begin(); it != cars.end(); ++it)
+	{
+		
+	}
+}
+
+void Car::Move(float deltaTime)
+{
+	carNode->translate(direction * deltaTime);
+}
+
+bool Car::IsOutOfBound(int l, int r, int t, int b)
+{
+	Vector3 currentPosition = carNode->getTranslation();
+	int x = currentPosition[0];
+	int z = currentPosition[2];
+
+	if (x < r && x >= l && z < t && z >= b)
+		return false;
+	else
+		return true;
+}

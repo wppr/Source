@@ -104,7 +104,26 @@ namespace Block
 		Entry& operator= (const Entry&);
 	};
 
-	class Car;
+	class Car
+	{
+	public:
+		Car() {}
+		Car(Vector3 position, Vector3 direction, float speed, SceneNode* sceneNode)
+			: position(position), direction(direction), speed(speed), carNode(carNode)
+		{
+			carNode->setTranslation(position);
+
+		}
+
+		void Move(float deltaTime);
+		bool IsOutOfBound(int l, int r, int t, int b);
+
+	private:
+		Vector3 position;
+		Vector3 direction;
+		float speed;
+		SceneNode* carNode;
+	};
 
 	class SceneLoader
 	{
@@ -135,6 +154,7 @@ namespace Block
 		void UpdateSceneNodes();
 		void GetRandomCars(vector<Vector3>& roadPos, vector<Quaternion>& roadOrien);
 		int GetCarName();
+		void MoveCars();
 
 		//Getters $ Setters
 		int GetWidth()
@@ -168,7 +188,8 @@ namespace Block
 		{
 			int name = GetCarName();
 			SceneNode* carNode = this->scene->CreateSceneNode("car" + to_string(name));
-			this->cars.push_back(Car(position, direction, speed, carNode));
+			Car car(position, direction, speed, carNode);
+			this->cars.push_back(car);
 		}
 
 		//block
@@ -202,27 +223,5 @@ namespace Block
 		SceneLoader& operator= (const SceneLoader&);
 	};
 
-	class Car
-	{
-	public :
-		Car() {}
-		Car(Vector3 position, Vector3 direction, float speed, SceneNode* sceneNode)
-			: position(position), direction(direction), speed(speed), carNode(carNode)
-		{
-			carNode->setTranslation(position);
-			
-		}
-
-		void Move(float deltaTime)
-		{
-			carNode->translate(direction * deltaTime);
-		}
-
-	private :
-		Vector3 position;
-		Vector3 direction;
-		float speed;
-		SceneNode* carNode;
-	};
 }
 

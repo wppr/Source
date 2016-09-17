@@ -141,8 +141,14 @@ public:
 	//	camera->lookAt(cen + offset, cen, Vector3(0, 1, 0));
 	//	//camera->setPerspective(fovy, float(w) / float(h), 0.01, 200);
 	//}
+	bool firstRotate = true;
 	void RotateCamera() {
-		static float lasttime = AbsolutTime;
+		float lasttime;
+		if (firstRotate)
+		{
+			lasttime = AbsolutTime;
+			firstRotate = !firstRotate;
+		}
 		float dura = AbsolutTime - lasttime;
 		lasttime = AbsolutTime;
 		c.cameraRoundAngle += 20*dura;
@@ -167,6 +173,7 @@ public:
 		{
 			c.cameraRoundAngle = originConfig.cameraRoundAngle;
 			UpdateCamera(c);
+			firstRotate = true;
 		}
 		
 		//sl->UpdateScene();
