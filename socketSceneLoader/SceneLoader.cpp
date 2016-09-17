@@ -81,7 +81,7 @@ void SceneLoader::ParseScene(string json)
 	{
 		int x = entry[i]["x"].GetInt();
 		int y = entry[i]["y"].GetInt();
-		if (x < 6 || x > 26) continue;//clip sides
+		if (x < 6 || x > 25) continue;//clip sides
 
 		if (!(x >= 0 && x < width && y >= 0 && y < height)) continue;//discarded
 		string type = entry[i]["type"].GetString();

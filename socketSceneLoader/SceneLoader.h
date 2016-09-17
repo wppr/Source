@@ -188,5 +188,20 @@ namespace Block
 		SceneLoader& operator= (const SceneLoader&);
 	};
 
+	class Car
+	{
+	public :
+		Car() {}
+		Car(Vector3 position, Vector3 direction, float speed) : position(position), direction(direction), speed(speed)
+		{
+			
+		}
+
+	private :
+		Vector3 position;
+		Vector3 direction;
+		float speed;
+		SceneNode* carNode;
+	};
 }
 
