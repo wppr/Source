@@ -3,6 +3,7 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <iomanip>
 #include <mutex>
 #include "connection.h"
 
@@ -18,6 +19,12 @@ using std::cout;
 using std::mutex;
 using std::map;
 using std::pair;
+
+#define LEFT 6
+#define RIGHT 26
+#define TOP 16
+#define BOTTOM 0
+#define CARNUM 11
 
 namespace Block
 {
@@ -108,21 +115,26 @@ namespace Block
 	{
 	public:
 		Car() {}
-		Car(Vector3 position, Vector3 direction, float speed, SceneNode* sceneNode)
-			: position(position), direction(direction), speed(speed), carNode(carNode)
+		Car(Vector3 position, Vector3 direction, float speed = 20.0f, SceneNode* sceneNode = NULL, float startTime = 0.0f, int name = 0)
+			: position(position), direction(direction), speed(speed), carNode(carNode), startTime(startTime), name(name)
 		{
 			carNode->setTranslation(position);
-
 		}
 
 		void Move(float deltaTime);
 		bool IsOutOfBound(int l, int r, int t, int b);
+		int GetName()
+		{
+			return name;
+		}
 
 	private:
 		Vector3 position;
 		Vector3 direction;
 		float speed;
 		SceneNode* carNode;
+		float startTime;
+		int name;
 	};
 
 	class SceneLoader
@@ -132,7 +144,7 @@ namespace Block
 		bool show_json = false;
 		bool rotateFlag;
 		//default 32 * 16
-		SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height);
+		SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height, int l, int r, int t, int b);
 
 		~SceneLoader()
 		{
@@ -154,7 +166,7 @@ namespace Block
 		void UpdateSceneNodes();
 		void GetRandomCars(vector<Vector3>& roadPos, vector<Quaternion>& roadOrien);
 		int GetCarName();
-		void MoveCars();
+		void MoveCars(float curTime);
 
 		//Getters $ Setters
 		int GetWidth()
@@ -184,18 +196,18 @@ namespace Block
 		void InitClient(string ip, string port);
 
 		//cars
-		void PushCar(Vector3 position, Vector3 direction, float speed)
+		void PushCar(Vector3 position, Vector3 direction, float speed, float startTime)
 		{
 			int name = GetCarName();
 			SceneNode* carNode = this->scene->CreateSceneNode("car" + to_string(name));
-			Car car(position, direction, speed, carNode);
+			Car car(position, direction, speed, carNode, startTime, name);
 			this->cars.push_back(car);
 		}
 
 		//block
 		BlockHelper bh;
 	private :
-		int width, height;//width & height of the layoutMatrix
+		int width, height, l, r, t, b;//width & height of the layoutMatrix
 		Entry* layoutMatrix;
 		vector<int> crosses;
 		vector<Vector3> streetPos;
@@ -205,10 +217,8 @@ namespace Block
 
 		SceneManager * scene;
 		MeshManager * meshMgr;
-		map<string, MeshPtr> buildings;
-		MeshPtr roadFragment;
-		MeshPtr crossFragment;
 		MeshPtr floarFragment;
+		vector<MeshPtr> carMeshes;
 		SceneNode** sceneNodes;
 		SceneNode** floarNodes;
 		Entity** floarEntities;

@@ -16,10 +16,9 @@ using std::stringstream;
 
 #define PI 3.141592654
 
-SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height) : width(width), height(height)
+SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height, int l, int r, int t, int b)
+	: scene(scene), meshMgr(meshMgr), width(width), height(height), l(l), r(r), t(t), b(b)
 {
-	this->scene = scene;
-	this->meshMgr = meshMgr;
 	this->layoutMatrix = new Entry[width * height];
 	this->rotateFlag = false;
 
@@ -72,19 +71,19 @@ void SceneLoader::ParseScene(string json)
 		//cout << crosses.size() << std::endl;
 		crosses.clear();
 	}
-
+	 
 	//clear street info
 	streetPos.clear();
 	streetOrien.clear();
 
 	Value &entry = root["entry"];
 	assert(entry.IsArray());
-	//cout << "num " << entry.Size() << endl;
+	
 	for (SizeType i = 0; i < entry.Size(); ++i)
 	{
 		int x = entry[i]["x"].GetInt();
 		int y = entry[i]["y"].GetInt();
-		if (x < 6 || x > 25) continue;//clip sides
+		if (x < l || x >= r) continue;//clip sides
 
 		if (!(x >= 0 && x < width && y >= 0 && y < height)) continue;//discarded
 		string type = entry[i]["type"].GetString();
@@ -150,6 +149,24 @@ void SceneLoader::ParseScene(string json)
 					}
 				}
 		}
+	}
+
+	//cars
+	Value &cars = root["cars"];
+	assert(cars.IsArray());
+
+	for (SizeType i = 0; i < cars.Size(); ++i)
+	{
+		float posX = cars[i]["position"]["x"].GetInt();
+		float posZ = cars[i]["position"]["z"].GetInt();
+
+		float dirX = cars[i]["direction"]["x"].GetInt();
+		float dirZ = cars[i]["direction"]["z"].GetInt();
+
+		float speed = cars[i]["speed"].GetFloat();
+		int name = cars[i]["name"].GetInt();
+
+
 	}
 
 	//generate street
@@ -264,7 +281,7 @@ void SceneLoader::UpdateScene()
 			ParseScene(json);
 			UpdateSceneNodes();
 		}
-	}
+	} 
 }
 
 //Init scene nodes and entities
@@ -321,7 +338,7 @@ void SceneLoader::AttachFloar()
 
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; ++j) {
-			if (j < 6 || j > 25) continue;//clip sides
+			if (j < l || j >= r) continue;//clip sides
 
 			floarEntities[i * width + j]->setMesh(floarFragment);
 			floarNodes[i * width + j]->setTranslation(j, 0, i);
@@ -341,7 +358,7 @@ void SceneLoader::UpdateSceneNodes()
 
 		for (int j = 0; j < width; ++j)
 		{
-			if (j < 6 || j > 25) continue;//clip sides
+			if (j < l || j >= r) continue;//clip sides
 
 			if (layoutMatrix[i * width + j].IsDrawable())
 			{
@@ -419,28 +436,8 @@ void SceneLoader::UpdateSceneNodes()
 
 void SceneLoader::loadMesh() {
 
-	//BUILDING
-	for (int i = 0; i < 5; ++i)
-	{
-		stringstream ss, ss1;
-		ss << "model/uniform/building0" << i + 1 << ".obj";
-		ss1 << "building0" << i + 1;
-		auto meshPtr = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
-		buildings.insert(std::pair<string, MeshPtr>(ss1.str(), meshPtr));
-	}
-
 	//street
 	stringstream ss, ss1;
-	ss << "model/uniform/road2.obj";
-	ss1 << "street";
-	roadFragment = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
-
-	//cross
-	ss.str("");
-	ss1.str("");
-	ss << "model/uniform/road1.obj";
-	ss1 << "cross";
-	crossFragment = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
 
 	//floor
 	ss.str("");
@@ -450,6 +447,17 @@ void SceneLoader::loadMesh() {
 	floarFragment = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
 
 	AttachFloar();
+
+	for (int i = 1; i <= CARNUM; ++i)
+	{
+		ss.str("");
+		ss << "model/uniform/car/car" << std::setw(2) << std::setfill('0') << i;
+		cout << ss.str() << endl;
+		ss1.str("");
+		ss1 << "car" + to_string(i);
+		MeshPtr carMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
+		carMeshes.push_back(carMesh);
+	}
 }
 
 void SceneLoader::LoadJson()
@@ -473,16 +481,35 @@ int SceneLoader::GetCarName()
 	return name;
 }
 
-void SceneLoader::MoveCars()
+void SceneLoader::MoveCars(float curTime)
 {
-	for (list<Car>::iterator it = cars.begin(); it != cars.end(); ++it)
+	for (list<Car>::iterator it = cars.begin(); it != cars.end(); )
 	{
-		
+		it->Move(curTime);
+		if (it->IsOutOfBound(l, r, t, b))//out of bound
+		{
+			int name = it->GetName();
+			this->carNames[name] = false;//name free
+			it = cars.erase(it);
+
+			SceneNode* carNode = scene->getSceneNode("car" + to_string(name));
+			if (NULL != carNode)
+				scene->destroy(carNode);
+
+			Entity* carEntity = scene->getEntity("car" + to_string(name));
+			if (NULL != carEntity)
+				scene->destroy(carEntity);
+		}
+		else
+		{
+			++it;
+		}
 	}
 }
 
-void Car::Move(float deltaTime)
+void Car::Move(float curTime)
 {
+	float deltaTime = curTime - startTime;
 	carNode->translate(direction * deltaTime);
 }
 
