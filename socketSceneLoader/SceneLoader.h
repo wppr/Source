@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <list>
 #include <iostream>
 #include <mutex>
 #include "connection.h"
@@ -12,6 +13,7 @@
 using std::string;
 using std::stringstream;
 using std::vector;
+using std::list;
 using std::cout;
 using std::mutex;
 using std::map;
@@ -19,7 +21,7 @@ using std::pair;
 
 namespace Block
 {
-
+	
 	class Entry
 	{
 	public :
@@ -102,6 +104,8 @@ namespace Block
 		Entry& operator= (const Entry&);
 	};
 
+	class Car;
+
 	class SceneLoader
 	{
 
@@ -130,6 +134,7 @@ namespace Block
 		void AttachFloar();
 		void UpdateSceneNodes();
 		void GetRandomCars(vector<Vector3>& roadPos, vector<Quaternion>& roadOrien);
+		int GetCarName();
 
 		//Getters $ Setters
 		int GetWidth()
@@ -158,6 +163,13 @@ namespace Block
 		//Server
 		void InitClient(string ip, string port);
 
+		//cars
+		void PushCar(Vector3 position, Vector3 direction, float speed)
+		{
+			int name = GetCarName();
+			SceneNode* carNode = this->scene->CreateSceneNode("car" + to_string(name));
+			this->cars.push_back(Car(position, direction, speed, carNode));
+		}
 
 		//block
 		BlockHelper bh;
@@ -167,6 +179,8 @@ namespace Block
 		vector<int> crosses;
 		vector<Vector3> streetPos;
 		vector<Quaternion> streetOrien;
+		list<Car> cars;
+		bool carNames[200];
 
 		SceneManager * scene;
 		MeshManager * meshMgr;
@@ -192,9 +206,16 @@ namespace Block
 	{
 	public :
 		Car() {}
-		Car(Vector3 position, Vector3 direction, float speed) : position(position), direction(direction), speed(speed)
+		Car(Vector3 position, Vector3 direction, float speed, SceneNode* sceneNode)
+			: position(position), direction(direction), speed(speed), carNode(carNode)
 		{
+			carNode->setTranslation(position);
 			
+		}
+
+		void Move(float deltaTime)
+		{
+			carNode->translate(direction * deltaTime);
 		}
 
 	private :

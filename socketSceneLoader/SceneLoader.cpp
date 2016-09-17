@@ -32,6 +32,9 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 		}
 	}
 
+	for (int i = 0; i < 200; ++i)
+		carNames[i] = 0;
+
 	InitSceneNode();
 	InitFloor();
 
@@ -463,3 +466,9 @@ void SceneLoader::LoadJson()
 	}
 }
 
+int SceneLoader::GetCarName()
+{
+	int name = 0;
+	while (carNames[name++]);
+	return name;
+}

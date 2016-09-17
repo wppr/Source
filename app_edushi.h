@@ -43,7 +43,7 @@ public:
 	float modelrotate = 0;
 	SceneLoader* sl=NULL;
 
-	EdushiConfig c;
+	EdushiConfig c, originConfig;
 
 	float rotatespeed = 0;
 	bool rotateCamera=false;
@@ -163,8 +163,10 @@ public:
 			RotateCamera();*/
 		if (sl->rotateFlag)
 			RotateCamera();
+		else
+			c.cameraRoundAngle = originConfig.cameraRoundAngle;
 		
-		sl->UpdateScene();
+		//sl->UpdateScene();
 		pipeline->Render();
 		//CarSim.Update();
 	}
@@ -197,6 +199,7 @@ public:
 	}
 	void LoadConfig() {
 		serializeLoad("EdushiConfig.txt", c);
+		originConfig = c;
 	}
 	void SaveConfig() {
 		serializeSave("EdushiConfig.txt", c);
