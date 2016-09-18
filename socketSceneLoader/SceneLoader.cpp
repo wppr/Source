@@ -156,18 +156,21 @@ void SceneLoader::ParseScene(string json, float time)
 	Value &cars = root["cars"];
 	assert(cars.IsArray());
 
+	if (cars.Size() > 0)
+		cout << json << endl;
+
 	for (SizeType i = 0; i < cars.Size(); ++i)
 	{
 		float posX = cars[i]["position"]["x"].GetInt();
 		float posZ = cars[i]["position"]["z"].GetInt();
 
-		float dirX = cars[i]["direction"]["x"].GetInt();
-		float dirZ = cars[i]["direction"]["z"].GetInt();
+		int dirX = cars[i]["direction"]["x"].GetInt();
+		int dirZ = cars[i]["direction"]["z"].GetInt();
 
 		float speed = cars[i]["speed"].GetFloat();
 		int mesh = cars[i]["mesh"].GetInt();
 
-		PushCar(Vector3(posX, 0, posZ), Vector3(dirX, 0, dirZ), speed, time, mesh);
+		PushCar(Vector3(posX, 0, posZ), Vector3(0, 0, 0), speed, time, mesh);
 	}
 
 	//generate street
@@ -269,7 +272,7 @@ void SceneLoader::UpdateScene(float curTime)
 	if (show_json)
 	{
 		ParseScene(staticJson, curTime);
-		UpdateSceneNodes();
+		UpdateSceneNodes(curTime);
 	}
 	else
 	{
@@ -280,7 +283,7 @@ void SceneLoader::UpdateScene(float curTime)
 		if ("" != json)
 		{
 			ParseScene(json, curTime);
-			UpdateSceneNodes();
+			UpdateSceneNodes(curTime);
 		}
 	} 
 }
@@ -364,11 +367,13 @@ void SceneLoader::AttachFloar()
 	}
 }
 
-void SceneLoader::UpdateSceneNodes()
+void SceneLoader::UpdateSceneNodes(float curTime)
 {
 	SceneManager* scene = SceneContainer::getInstance().get("scene1");
 	SceneNode* root = scene->GetSceneRoot();
 	entityRoot->detachAllNodes();
+
+	//MoveCars(curTime);
 
 	for (int i = 0; i < height; i++) {
 
@@ -490,10 +495,11 @@ void SceneLoader::LoadJson()
 	}
 }
 
-int SceneLoader::GetCarName()
+int SceneLoader::GetCarName()//find first name not used
 {
 	int name = 0;
 	while (carNames[name++]);
+	carNames[name] = true;
 	return name;
 }
 
@@ -501,6 +507,7 @@ void SceneLoader::PushCar(Vector3 position, Vector3 direction, float speed, floa
 {
 	int name = GetCarName();
 	SceneNode* carNode = this->scene->CreateSceneNode("car" + to_string(name));
+	carNode->setScale(0.01, 0.01, 0.01);
 	this->carRoot->attachNode(carNode);
 	MeshPtr mesh = this->carMeshes[meshID];
 
@@ -517,7 +524,12 @@ void SceneLoader::MoveCars(float curTime)
 	for (list<Car>::iterator it = cars.begin(); it != cars.end(); )
 	{
 		it->Move(curTime);
-		if (it->IsOutOfBound(l, r, t, b))//out of bound
+
+		Vector3 carPos = it->GetPosition();
+		int x = carPos[0];
+		int z = carPos[2];
+		Entry::EntryType type = this->layoutMatrix[z * width + x].GetEntryType();
+		if (it->IsOutOfBound(l, r, t, b) || Entry::EntryType::STREET != type)//out of bound OR not street
 		{
 			int name = it->GetName();
 			this->carNames[name] = false;//name free

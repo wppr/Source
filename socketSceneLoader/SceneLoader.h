@@ -127,6 +127,10 @@ namespace Block
 		{
 			return name;
 		}
+		Vector3 GetPosition()
+		{
+			return this->position;
+		}
 
 	private:
 		Vector3 position;
@@ -164,7 +168,7 @@ namespace Block
 		void InitFloor();
 		void InitCar();
 		void AttachFloar();
-		void UpdateSceneNodes();
+		void UpdateSceneNodes(float curTime);
 		void GetRandomCars(vector<Vector3>& roadPos, vector<Quaternion>& roadOrien);
 		int GetCarName();
 		void MoveCars(float curTime);
