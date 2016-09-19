@@ -115,7 +115,7 @@ namespace Block
 	{
 	public:
 		Car() {}
-		Car(Vector3 position, Vector3 direction, float speed = 20.0f, SceneNode* carNode = NULL, float startTime = 0.0f, int name = 0)
+		Car(Vector3 position, Vector3 direction, float speed = 20.0f, SceneNode* sceneNode = NULL, float startTime = 0.0f, int name = 0)
 			: position(position), direction(direction), speed(speed), carNode(carNode), startTime(startTime), name(name)
 		{
 			carNode->setTranslation(position);
@@ -127,13 +127,9 @@ namespace Block
 		{
 			return name;
 		}
-		Vector3 GetOriginPosition()
+		Vector3 GetPosition()
 		{
 			return this->position;
-		}
-		Vector3 GetCurPosition()
-		{
-			return carNode->getLocalTranslation();
 		}
 
 	private:
@@ -205,7 +201,7 @@ namespace Block
 		void InitClient(string ip, string port);
 
 		//cars
-		void PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID);
+		void PushCar(Vector3 position, Vector3 direction, float speed, float startTime, int meshID);
 
 		//block
 		BlockHelper bh;

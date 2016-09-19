@@ -36,7 +36,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 
 	InitSceneNode();
 	InitFloor();
-	InitCar();
+	//InitCar();
 
 	bh.Init(scene, meshMgr);
 }
@@ -50,6 +50,8 @@ void SceneLoader::ParseScene(string json, float time)
 	root.Parse(json.c_str());
 	if (!root.IsObject())
 	{
+		cout << "json size: " << json.size() << endl;
+		cout << "json str: " << json << endl;
 		return;
 	}
 	assert(root.IsObject());
@@ -162,22 +164,14 @@ void SceneLoader::ParseScene(string json, float time)
 		float posX = cars[i]["position"]["x"].GetInt();
 		float posZ = cars[i]["position"]["z"].GetInt();
 
-		string crossType = cars[i]["crossType"].GetString();
-
-		//fix
-		int orientation = cars[i]["direction"].GetInt();
-		Vector3 direction(0, 0, 1);
-		if (crossType == "lcross")orientation = (orientation + 2) % 4;
-		else if (crossType == "lcross_greenlight") orientation = (orientation + 3) % 4;
-		else if (crossType == "tcross") orientation = (orientation + 1) % 4;
-		if (!orientation) orientation = 4;
+		int dirX = cars[i]["direction"]["x"].GetInt();
+		int dirZ = cars[i]["direction"]["z"].GetInt();
 
 		float speed = cars[i]["speed"].GetFloat();
 		int mesh = cars[i]["mesh"].GetInt();
 
-		PushCar(Vector3(posX, 0, posZ), orientation, speed, time, mesh);
+		PushCar(Vector3(posX, 0, posZ), Vector3(0, 0, 0), speed, time, mesh);
 	}
-	
 
 	//generate street
 	pair<int, int> dirs[4];
@@ -278,7 +272,6 @@ void SceneLoader::UpdateScene(float curTime)
 	if (show_json)
 	{
 		ParseScene(staticJson, curTime);
-		staticJson = "";
 		UpdateSceneNodes(curTime);
 	}
 	else
@@ -380,7 +373,8 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 	SceneNode* root = scene->GetSceneRoot();
 	entityRoot->detachAllNodes();
 
-	MoveCars(curTime);
+	//MoveCars(curTime);
+
 	for (int i = 0; i < height; i++) {
 
 		for (int j = 0; j < width; ++j)
@@ -458,6 +452,7 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 			}
 		}
 	}
+
 }
 
 void SceneLoader::loadMesh() {
@@ -477,7 +472,7 @@ void SceneLoader::loadMesh() {
 	for (int i = 1; i <= CARNUM; ++i)
 	{
 		ss.str("");
-		ss << "model/uniform/car/car" << std::setw(2) << std::setfill('0') << i <<".obj";
+		ss << "model/uniform/car/car" << std::setw(2) << std::setfill('0') << i;
 		cout << ss.str() << endl;
 		ss1.str("");
 		ss1 << "car" + to_string(i);
@@ -492,7 +487,7 @@ void SceneLoader::LoadJson()
 	stringstream ss;
 
 	ss.str("");
-	stream1.open("model/uniform/data/block1.json");
+	stream1.open("model/uniform/data/block.json");
 	if (stream1.is_open())
 	{
 		ss << stream1.rdbuf();
@@ -508,45 +503,19 @@ int SceneLoader::GetCarName()//find first name not used
 	return name;
 }
 
-void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID)
+void SceneLoader::PushCar(Vector3 position, Vector3 direction, float speed, float startTime, int meshID)
 {
 	int name = GetCarName();
-	string carName = "car" + to_string(name);
-	SceneNode* carNode = this->scene->CreateSceneNode(carName);
+	SceneNode* carNode = this->scene->CreateSceneNode("car" + to_string(name));
+	carNode->setScale(0.01, 0.01, 0.01);
 	this->carRoot->attachNode(carNode);
 	MeshPtr mesh = this->carMeshes[meshID];
+
 	Entity* entity = this->scene->CreateEntity("car" + to_string(name));
 	carNode->attachMovable(entity);
 	entity->setMesh(mesh);
-	carNode->setScale(0.04, 0.04, 0.04);
 
-	Quaternion quaternion(0.5 * PI *  (orientation - 1), Vector3(0, 1, 0));
-	carNode->setOrientation(quaternion);
-
-	float totalRoadWidth = 1 / 3.0;
-	float singleRoadWidth = 1 / 12.0;
-	Vector3 direction;
-	Vector3 calibration;
-	switch (orientation)
-	{
-	case 1: 
-		direction = Vector3(0, 0, 1); 
-		calibration = Vector3(totalRoadWidth + singleRoadWidth, 0, totalRoadWidth);
-		break;
-	case 2: 
-		direction = Vector3(1, 0, 0); 
-		calibration = Vector3(2*totalRoadWidth, 0, 2*totalRoadWidth - singleRoadWidth);
-		break;
-	case 3: 
-		direction = Vector3(0, 0, -1); 
-		calibration = Vector3(2 * totalRoadWidth - singleRoadWidth, 0, totalRoadWidth);
-		break;
-	case 4: 
-		direction = Vector3(-1, 0, 0); 
-		calibration = Vector3(0, 0, totalRoadWidth + singleRoadWidth);
-		break;
-	}
-	Car car(position + calibration, direction, speed, carNode, startTime, name);
+	Car car(position, direction, speed, carNode, startTime, name);
 	this->cars.push_back(car);
 }
 
@@ -556,29 +525,23 @@ void SceneLoader::MoveCars(float curTime)
 	{
 		it->Move(curTime);
 
-		Vector3 originPos = it->GetOriginPosition();
-		int oriX = originPos[0];
-		int oriZ = originPos[2];
-		Vector3 curPos = it->GetCurPosition();
-		int curX = curPos[0];
-		int curZ = curPos[2];
-		bool startPoint = (curX == oriX && curZ == oriZ);
-
-		Entry::EntryType type = this->layoutMatrix[curZ * width + curX].GetEntryType();
-		if (it->IsOutOfBound(l, r, t, b) || (Entry::EntryType::STREET != type && !startPoint))//out of bound OR not street
+		Vector3 carPos = it->GetPosition();
+		int x = carPos[0];
+		int z = carPos[2];
+		Entry::EntryType type = this->layoutMatrix[z * width + x].GetEntryType();
+		if (it->IsOutOfBound(l, r, t, b) || Entry::EntryType::STREET != type)//out of bound OR not street
 		{
-			cout << "out of bound" << endl;
 			int name = it->GetName();
 			this->carNames[name] = false;//name free
 			it = cars.erase(it);
 
 			this->carRoot->detachNode("car" + to_string(name));
 
-			SceneNode* carNode = scene->getSceneNode("car" + to_string(name));//destroy sceneNode
+			SceneNode* carNode = scene->getSceneNode("car" + to_string(name));
 			if (NULL != carNode)
 				scene->destroy(carNode);
 
-			Entity* carEntity = scene->getEntity("car" + to_string(name));//destroy entity
+			Entity* carEntity = scene->getEntity("car" + to_string(name));
 			if (NULL != carEntity)
 				scene->destroy(carEntity);
 		}
@@ -592,12 +555,12 @@ void SceneLoader::MoveCars(float curTime)
 void Car::Move(float curTime)
 {
 	float deltaTime = curTime - startTime;
-	carNode->translate(speed * direction * deltaTime);
+	carNode->translate(direction * deltaTime);
 }
 
 bool Car::IsOutOfBound(int l, int r, int t, int b)
 {
-	Vector3 currentPosition = carNode->getLocalTranslation();
+	Vector3 currentPosition = carNode->getTranslation();
 	int x = currentPosition[0];
 	int z = currentPosition[2];
 
