@@ -94,9 +94,9 @@ public:
 		sl->loadMesh();
 		sl->InitClient(c.ip, c.port);
 
-		sl->LoadJson();
+		/*sl->LoadJson();
 		sl->show_json = true;
-		sl->UpdateScene(AbsolutTime);
+		sl->UpdateScene(AbsolutTime);*/
 		//CarSim.Init(this);
 		vector<Vector3> pos;
 		vector<Quaternion> orients;
@@ -172,7 +172,7 @@ public:
 		else
 		{
 			c.cameraRoundAngle = originConfig.cameraRoundAngle;
-			//UpdateCamera(c);
+			UpdateCamera(c);
 			firstRotate = true;
 		}
 		

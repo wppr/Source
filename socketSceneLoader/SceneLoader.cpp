@@ -43,7 +43,6 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 
 void SceneLoader::ParseScene(string json, float time)
 {
-	//cout << json << endl;
 
 	//parse json into sceneMatrix
 	Document root;
@@ -154,9 +153,10 @@ void SceneLoader::ParseScene(string json, float time)
 	Value &cars = root["cars"];
 	assert(cars.IsArray());
 
-	if (cars.Size() > 0)
-		cout << json << endl;
+	/*if (cars.Size() > 0)
+		cout << json << endl;*/
 
+	
 	for (SizeType i = 0; i < cars.Size(); ++i)
 	{
 		float posX = cars[i]["position"]["x"].GetInt();
@@ -177,7 +177,6 @@ void SceneLoader::ParseScene(string json, float time)
 
 		PushCar(Vector3(posX, 0, posZ), orientation, speed, time, mesh);
 	}
-	
 
 	//generate street
 	pair<int, int> dirs[4];
@@ -278,7 +277,6 @@ void SceneLoader::UpdateScene(float curTime)
 	if (show_json)
 	{
 		ParseScene(staticJson, curTime);
-		staticJson = "";
 		UpdateSceneNodes(curTime);
 	}
 	else
@@ -503,7 +501,10 @@ void SceneLoader::LoadJson()
 int SceneLoader::GetCarName()//find first name not used
 {
 	int name = 0;
-	while (carNames[name++]);
+	while (carNames[name]) 
+	{
+		name++;
+	}
 	carNames[name] = true;
 	return name;
 }
@@ -519,7 +520,6 @@ void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float 
 	carNode->attachMovable(entity);
 	entity->setMesh(mesh);
 	carNode->setScale(0.04, 0.04, 0.04);
-
 	Quaternion quaternion(0.5 * PI *  (orientation - 1), Vector3(0, 1, 0));
 	carNode->setOrientation(quaternion);
 
@@ -567,7 +567,6 @@ void SceneLoader::MoveCars(float curTime)
 		Entry::EntryType type = this->layoutMatrix[curZ * width + curX].GetEntryType();
 		if (it->IsOutOfBound(l, r, t, b) || (Entry::EntryType::STREET != type && !startPoint))//out of bound OR not street
 		{
-			cout << "out of bound" << endl;
 			int name = it->GetName();
 			this->carNames[name] = false;//name free
 			it = cars.erase(it);
@@ -592,6 +591,7 @@ void SceneLoader::MoveCars(float curTime)
 void Car::Move(float curTime)
 {
 	float deltaTime = curTime - startTime;
+	startTime = curTime;
 	carNode->translate(speed * direction * deltaTime);
 }
 
@@ -600,6 +600,7 @@ bool Car::IsOutOfBound(int l, int r, int t, int b)
 	Vector3 currentPosition = carNode->getLocalTranslation();
 	int x = currentPosition[0];
 	int z = currentPosition[2];
+	if (currentPosition[2] < 0) z = -1;
 
 	if (x < r && x >= l && z < t && z >= b)
 		return false;
