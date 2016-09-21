@@ -119,6 +119,8 @@ public:
 			modellist[end] = "v2/b" + to_string(i) + ".obj";
 			end++;
 		}
+		modellist[end] = "v2/grass.obj";
+		end++;
 
 		for (int i = 1; i < end; i++) {
 			MeshPtr mesh = meshMgr->loadMesh_assimp_check("", "model/uniform/" + modellist[i]);
