@@ -62,7 +62,7 @@ public:
 		if(!mconfig.bfullscreen)
 			window = glfwCreateWindow(w, h, "Window", NULL, NULL);
 		else {
-			window = glfwCreateWindow(w, h, "Window", monitors[mconfig.monitor_id], NULL);
+			window = glfwCreateWindow(w, h, "Window", NULL, NULL);
 		}
 		
 		if (!window) {

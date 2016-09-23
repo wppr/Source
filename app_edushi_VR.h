@@ -1,5 +1,5 @@
 #pragma once
-#include "EdushiPipeline.h"
+#include "EdushiVRPipeline.h"
 #include "AppFrameWork2.h"
 #include "CarSimulation.h"
 #include "InteractionControler.h"
@@ -12,12 +12,11 @@ struct EdushiConfig {
 	Vector3 cameraUp;
 	Vector3 LookCenter;
 
-
 	float LookDownAngle = 2.7;
 	float UpYAngle = 0;
 	float cameraCenterDist = 10;
 	float cameraRoundAngle = 30;
-	
+
 	//int w = 1024;
 	//int h = 768;
 	float fov = 25;
@@ -28,11 +27,11 @@ struct EdushiConfig {
 	string ip;
 	string port;
 
-	META(N(cameraPos),N(cameraUp),N(LookCenter),N(LookDownAngle),N(UpYAngle),
-		N(cameraCenterDist),N(ip),N(port),N(cameraRoundAngle), N(fov),N(mapw),N(maph));
+	META(N(cameraPos), N(cameraUp), N(LookCenter), N(LookDownAngle), N(UpYAngle),
+		N(cameraCenterDist), N(ip), N(port), N(cameraRoundAngle), N(fov), N(mapw), N(maph));
 };
 
-class App_edushi :public App {
+class App_edushi_VR :public App {
 public:
 	CarSimulation CarSim;
 	bool IsLogCamera = false;
@@ -41,12 +40,12 @@ public:
 	Vector3 modelTranslate = Vector3(0.0);
 	float modelscale = 1.0;
 	float modelrotate = 0;
-	SceneLoader* sl=NULL;
+	SceneLoader* sl = NULL;
 
 	EdushiConfig c, originConfig;
 
 	float rotatespeed = 0;
-	bool rotateCamera=false;
+	bool rotateCamera = false;
 	bool updateCamera = false;
 	void SetCamera1() {
 		c.LookDownAngle = 0;
@@ -103,26 +102,26 @@ public:
 		vector<Quaternion> orients;
 		//sl->GetRandomCars(pos,orients);
 		//CarSim.GenRandomCars(pos, orients);
-		
+
 		//SetCamera1();
 		//c.cameraPos = camera->getPosition();
 		//c.cameraUp == camera->getUp();
 		//c.LookCenter = getSceneCenter(c.mapw, c.maph);
 		UpdateCamera(c);
 	}
-	Vector3 getSceneCenter(int w,int h) {
+	Vector3 getSceneCenter(int w, int h) {
 		Vector3 cen = 0.5*Vector3(w, 0, h)*scenescale + sceneTranlate;
 		return cen;
 	}
 	void UpdateCamera(EdushiConfig& c) {
 		auto cen = getSceneCenter(c.mapw, c.maph);
 		cen.y = c.LookCenter[1];
-		
+
 		float radRound = c.cameraRoundAngle / 180 * PI;
 		float radUp = c.LookDownAngle / 180 * PI;
 		float h = c.cameraCenterDist*sin(radUp);
 		Vector3 offset = Vector3(c.cameraCenterDist*sin(radRound), h, c.cameraCenterDist*cos(radRound));
-		float rady=c.UpYAngle / 180 * PI;
+		float rady = c.UpYAngle / 180 * PI;
 		Quaternion q(rady, -offset);
 		Vector3 up2 = q*Vector3(0, 1, 0);
 		camera->lookAt(cen + offset, cen, up2);
@@ -130,7 +129,7 @@ public:
 		c.cameraPos = cen + offset;
 		c.LookCenter = cen;
 		c.cameraUp = up2;
-		
+
 	}
 	//void SetCamera(float angleUp, float angleRound) {
 	//	auto cen = getSceneCenter(32,16);
@@ -152,7 +151,7 @@ public:
 		}
 		float dura = AbsolutTime - lasttime;
 		lasttime = AbsolutTime;
-		c.cameraRoundAngle += 20*dura;
+		c.cameraRoundAngle += 20 * dura;
 		if (c.cameraRoundAngle > 360.0f)
 			c.cameraRoundAngle -= 360.0f;
 		UpdateCamera(c);
@@ -160,14 +159,14 @@ public:
 
 	void InitPipeline()
 	{
-		pipeline = new EdushiPipeline;
+		pipeline = new EdushiVRPipeline;
 		pipeline->Init();
 	}
 
 	void Render() {
 		UpdateGUI();
 		/*if (rotateCamera)
-			RotateCamera();*/
+		RotateCamera();*/
 		if (sl->rotateFlag)
 			RotateCamera();
 		else
@@ -206,8 +205,8 @@ public:
 		SceneManager* scene = SceneContainer::getInstance().get("scene1");
 		SceneNode* root = scene->GetSceneRoot();
 		root->detachAllNodes();
-		auto nodes=root->getAllChildNodes();
-		
+		auto nodes = root->getAllChildNodes();
+
 	}
 	void LoadConfig() {
 		serializeLoad("EdushiConfig.txt", c);
@@ -218,10 +217,10 @@ public:
 	}
 	void UpdateGUI() {
 		ImGui_ImplGlfwGL3_NewFrame();
-		{ 
+		{
 			ImGui::Begin("Params");
 			ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			auto p =(EdushiPipeline*) pipeline;
+			auto p = (EdushiVRPipeline*)pipeline;
 			ImGui::TextWrapped(p->profile.ToString().c_str());
 			static bool show_load_model = false;
 			if (ImGui::Button("Show Model Window")) show_load_model = !show_load_model;
@@ -243,7 +242,7 @@ public:
 
 				if (ImGui::Button("RemoveAll")) RemoveAllNodes(); ImGui::SameLine();
 				if (ImGui::Button("AttachFloor")) sl->AttachFloar();
-				if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;	
+				if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;
 				ImGui::End();
 			}
 			static bool show_config = true;
@@ -252,7 +251,7 @@ public:
 				ImGui::Begin("config");
 				ImGui::DragFloat("scene scale", &scenescale, 0.001);
 				ImGui::DragFloat3("scene translate", &sceneTranlate[0], 0.01);
-				static bool scene2x=false;
+				static bool scene2x = false;
 				ImGui::Checkbox("2x Scene", &scene2x);
 				{
 					SceneNode* root = scene->GetSceneRoot();
@@ -264,7 +263,7 @@ public:
 				ImGui::Text("Camera");
 				c.cameraPos = camera->getPosition();
 				c.cameraUp = camera->getUp();
-				ImGui::DragFloat3("CameraPos", &c.cameraPos[0],0.01);
+				ImGui::DragFloat3("CameraPos", &c.cameraPos[0], 0.01);
 				ImGui::DragFloat3("CameraCenter", &c.LookCenter[0], 0.01);
 				ImGui::DragFloat3("CameraUp", &c.cameraUp[0], 0.01);
 
@@ -273,12 +272,12 @@ public:
 				ImGui::DragFloat("LookDownAngle", &c.LookDownAngle, 0.1, 0, 89);
 				ImGui::DragFloat("UpYAngle", &c.UpYAngle, 0.1, -89, 89);
 				ImGui::DragFloat("RoundAngle", &c.cameraRoundAngle, 0.2, 0, 360);
-				
+
 				ImGui::DragFloat("cameraCenterDist", &c.cameraCenterDist, 0.1);
 				ImGui::DragFloat("cameraRotateSpeed", &rotatespeed);
 				ImGui::DragFloat("cameraFov", &c.fov, 0.1);
-				
-				static bool updatecamera=false;
+
+				static bool updatecamera = false;
 				ImGui::Checkbox("Use param Camera", &updatecamera);
 				if (updatecamera) UpdateCamera(c);
 

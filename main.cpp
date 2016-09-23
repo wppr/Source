@@ -1,7 +1,7 @@
 #define  _WINSOCKAPI_
 #include "App_SSS.h"
 #include "app_PBR.h"
-#include "app_edushi.h"
+#include "app_edushi_VR.h"
 //#include "app_VR.h"
 #include "GLFWFramework.h"
 //#include "edushiKey.h"
@@ -26,7 +26,8 @@ void main() {
 
 //	auto app3 = new App_VR;
 	
-	auto app4 = new App_edushi;
+	//auto app4 = new App_edushi;
+	auto app4 = new App_edushi_VR;
 	fw.app = app4;
 
 	fw.Init();
