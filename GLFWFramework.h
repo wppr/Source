@@ -26,6 +26,12 @@
 #include "Logger.h"
 using namespace std;
 
+struct MonitorConfig {
+	bool bfullscreen = true;
+	int monitor_id = 0;
+	META(N(bfullscreen), N(monitor_id));
+};
+
 class GLFWFrameWork
 {
 public:
@@ -37,22 +43,32 @@ public:
 	double LastTime;
 	int samples = 4;
 	bool pause = false;
+	MonitorConfig mconfig;
 	GLFWFrameWork()
 	{
+		
 	}
-
+	 
 	void Init() {
 		if (!glfwInit()) {
 			fprintf(stderr, "ERROR: could not start GLFW3\n");
-			return;
+			exit(1);
 		}	
 		//glfwWindowHint(GLFW_SAMPLES, samples);
-		window = glfwCreateWindow(w, h, "Window", glfwGetPrimaryMonitor(), NULL);
+
+		serializeLoad("MonitorConfig.txt", mconfig);
+		int count;
+		GLFWmonitor** monitors = glfwGetMonitors(&count);
+		if(!mconfig.bfullscreen)
+			window = glfwCreateWindow(w, h, "Window", NULL, NULL);
+		else {
+			window = glfwCreateWindow(w, h, "Window", monitors[mconfig.monitor_id], NULL);
+		}
 		
 		if (!window) {
 			fprintf(stderr, "ERROR: could not open window with GLFW3\n");
 			glfwTerminate();
-			return;
+			exit(1);
 		}
 		glfwMakeContextCurrent(window);
 		hwnd = glfwGetWin32Window(window);
