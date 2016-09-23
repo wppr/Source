@@ -96,8 +96,9 @@ public:
 
 		/*sl->LoadJson();
 		sl->show_json = true;
-		sl->UpdateScene();*/
-		CarSim.Init(this);
+
+		sl->UpdateScene(AbsolutTime);*/
+		//CarSim.Init(this);
 		vector<Vector3> pos;
 		vector<Quaternion> orients;
 		//sl->GetRandomCars(pos,orients);
@@ -143,7 +144,7 @@ public:
 	//}
 	bool firstRotate = true;
 	void RotateCamera() {
-		float lasttime;
+		static float lasttime;
 		if (firstRotate)
 		{
 			lasttime = AbsolutTime;
