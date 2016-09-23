@@ -17,6 +17,7 @@ using namespace std;
 using namespace HW;
 
 
+class EdushiVRPipeline :public Pipeline {
 public:
 	virtual void Init();
 	virtual void Render();
