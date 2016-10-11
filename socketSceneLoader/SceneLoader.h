@@ -11,6 +11,7 @@
 #include <map>
 #include "AppFrameWork2.h"
 #include "Block.h"
+#include "EBus.h"
 using std::string;
 using std::stringstream;
 using std::vector;
@@ -44,6 +45,9 @@ namespace Block
 
 	protected :
 		EntryType entryType;
+		string blockName;//name of the covered block.
+						 //if the entry contains mutiple blocks, which must contain chargingStation or busStation or park 
+						 //then this name is the appendant of the street block
 		int x, y;
 		bool drawable;//true if marker exist
 		bool empty;//true if object cover
@@ -104,6 +108,16 @@ namespace Block
 		vector<BlockDef>& GetBlock()
 		{
 			return this->blocks;
+		}
+
+		void SetBlockName(string name)
+		{
+			this->blockName = name;
+		}
+
+		string GetBlockName()
+		{
+			return this->blockName;
 		}
 
 	private:
@@ -206,6 +220,7 @@ namespace Block
 
 		//cars
 		void PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID);
+		void GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus);
 
 		//block
 		BlockHelper bh;
