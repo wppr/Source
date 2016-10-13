@@ -191,6 +191,12 @@ namespace Block
 		int GetCarName();
 		void MoveCars(float curTime);
 
+		// EBus by Jie
+		vector<EBusTrack> GetEBusTrack();
+		void ShowBusLine(vector<EBusTrack>& eBusTrack);
+		void GenerateEBus(vector<EBusTrack>& eBusTrack, EBus& ebus);
+
+
 		//Getters $ Setters
 		int GetWidth()
 		{

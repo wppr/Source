@@ -12,12 +12,13 @@ public :
 		NEW,
 		RUNNING,
 		STOP,
-		REMOVED
+		REMOVED,
+		CHARGING
 	};
 
 	enum VType
 	{
-		BUS,
+		EBUS,
 		TAXI,
 		PRIVATECAR
 	};
