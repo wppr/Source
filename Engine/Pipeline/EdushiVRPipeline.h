@@ -13,6 +13,7 @@
 #include "ShadowMapGenerateEffect.h"
 #include "VarianceShadowMap.h"
 #include "SkyBoxEffect.h"
+#include "EGLTexture.h"
 using namespace std;
 using namespace HW;
 
@@ -22,9 +23,11 @@ public:
 	virtual void Init();
 	virtual void Render();
 
+	//VR related functions
+	void GetStereoTex(GLuint& l, GLuint& r);
 
-	SSAOEffect2 ssao;
-	ToneMappingEffect tonemap;
+	SSAOEffect2 ssao_left, ssao_right;
+	ToneMappingEffect tonemap_left, tonemap_right;
 	int w, h;
 
 	float roughness = 0.8;
@@ -40,9 +43,10 @@ public:
 
 	Vector3 LightPos[2] = { Vector3(5),Vector3(-100,100,-100) };
 	SimpleProfile profile;
-	VarianceShadowMapGenerateEffect shadowmap;
+	VarianceShadowMapGenerateEffect shadowmap_left, shadowmap_right;
 	LightCameraParam LightCamera;
 	SkyBoxEffect skybox;
+	Matrix4 projLeft, viewLeft, projRight, viewRight;
 private:
 	PBREffect2 pbr;
 	Texture* env_diffuse[5], *env[5], *lut;
@@ -51,9 +55,12 @@ private:
 	as_Pass* ShadingPass;
 	ShowTextureEffect showtex;
 	FXAAEffect fxaa;
-	GBufferEffect gbuffer;
+	GBufferEffect gbuffer_left, gbuffer_right;
 	RenderSystem* mRenderSystem;
-	RenderTarget* mainwindow, *rt_render, *rt_resolve;
+	RenderTarget* mainwindow, *rt_render_left, *rt_render_right, *rt_resolve_left, *rt_resolve_right;
+
+	//VR related attr
+	Texture* colorLeft, *colorRight;
 };
 
 

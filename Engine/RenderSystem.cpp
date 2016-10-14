@@ -119,7 +119,7 @@ namespace HW
 			if (pass->UseInstance) {
 				auto splitdQueues = SplitRenderQueue(renderqueue, pass->InstanceBatchNum);
 				for (auto& queue : splitdQueues) {
-
+					//cout << splitdQueues.size() << endl;
 					vector<Matrix4> worldMatrixs;
 					CollectWorldMatrixs(queue, worldMatrixs);
 					auto x = queue[0];

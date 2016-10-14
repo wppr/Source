@@ -118,7 +118,7 @@ public:
 			
 			glfwSwapBuffers(window);
 
-			//CalcFps();
+			CalcFps();
 		}
 
 		imgui.ShutDown();

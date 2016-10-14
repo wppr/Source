@@ -5,7 +5,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "Logger.h"
-using namespace HW;
 
 #ifdef _DEBUG
 #define GLCHECKERROR	
@@ -44,7 +43,7 @@ public:
 			return GL_NEVER;
 		case COMP_LESS:
 			return GL_LESS;
-		case COMP_EQUAL:
+		case HW::COMP_EQUAL:
 			return GL_EQUAL;
 		case COMP_LESS_EQUAL:
 			return GL_LEQUAL;
