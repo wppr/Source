@@ -88,7 +88,7 @@ void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 	// By Wu pengpeng
 }
 
-void SceneLoader::GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus)
+void SceneLoader::GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp)
 {
 	GetMatrix();
 	ebus.vtype = EBus::EBUS;       // vehicle type

@@ -199,7 +199,7 @@ namespace Block
 		void GenerateEBus(vector<EBusTrack>& eBusTrack, EBus& ebus);
 
 
-		//Getters $ Setters
+		//Getters & Setters
 		int GetWidth()
 		{
 			return this->width;
@@ -228,7 +228,7 @@ namespace Block
 
 		//cars
 		void PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID);
-		void GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus);
+		void GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
 
 		//block
 		BlockHelper bh;

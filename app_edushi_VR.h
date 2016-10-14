@@ -176,7 +176,6 @@ public:
 		double beforeRender = glfwGetTime();
 		pipeline->Render();
 		double afterRender = glfwGetTime();
-		printf("render call %.10lf\n", afterRender - beforeRender);
 
 		VRSubmitTexture();
 		//CarSim.Update();
@@ -548,15 +547,14 @@ public:
 		//submit texture
 		GLuint leftID, rightID;
 		
-		/*((EdushiVRPipeline*)(this->sysentry->m_pipeline))->GetStereoTex(leftID, rightID);
+		((EdushiVRPipeline*)(this->sysentry->m_pipeline))->GetStereoTex(leftID, rightID);
 		vr::Texture_t leftEyeTexture = { (void*)leftID, vr::API_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit(vr::Eye_Left, &leftEyeTexture);
 
 		vr::Texture_t rightEyeTexture = { (void*)rightID, vr::API_OpenGL, vr::ColorSpace_Gamma };
-		vr::VRCompositor()->Submit(vr::Eye_Right, &rightEyeTexture);*/
+		vr::VRCompositor()->Submit(vr::Eye_Right, &rightEyeTexture);
 
 		double afterSubmit = glfwGetTime();
-		printf("submitTime %.10lf\n", afterSubmit - beforeSubmit);
 
 		glFlush();
 		//glFinish();
@@ -579,7 +577,6 @@ public:
 		}
 
 		double afterUpdate = glfwGetTime();
-		printf("update time %.10lf\n", afterUpdate - beforeUpdate);
 	}
 
 	private :
