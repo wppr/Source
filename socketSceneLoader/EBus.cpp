@@ -45,20 +45,20 @@ vector<EBusTrack> SceneLoader::GetEBusTrack()
 	{
 		return eBusTrack;
 	}
-	EBusTrack start, end, middle;
+	EBusTrack start, end;
 	start.x = index_L;
 	start.y = index_T;
 	end.x = index_R;
 	end.y = index_B;
 
-	middle.x = index_L;
-	middle.y = index_B;
+	middlePoint.x = index_L;
+	middlePoint.y = index_B;
 
 	// Add the starting point to the EBus line
 	eBusTrack.push_back(start);
 
 	// check the existence of the middle point
-	string BlockName = layoutMatrix[middle.y*(RIGHT - LEFT) + middle.x].GetBlockName();
+	string BlockName = layoutMatrix[middlePoint.y*(RIGHT - LEFT) + middlePoint.x].GetBlockName();
 
 	if ("xcross" == BlockName || "tcross" == BlockName || "lcross" == BlockName || "xcross_greenlight" == BlockName || "tcross_greenlight" == BlockName || "lcross_greenlight" == BlockName)
 	{
@@ -90,11 +90,69 @@ void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 
 void SceneLoader::GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus)
 {
+	GetMatrix();
+	ebus.vtype = EBus::EBUS;       // vehicle type
+	ebus.isShowEnergy = true;      // show energy
+	ebus.speed = 10.0;             // speed
 
+	int x = ebus.location.first;
+	int y = ebus.location.second;
+	// get the position of all bus stations in the BusTrack vector, and store them in a new vector ( vector<EBusTrack> stations ).
+	vector<EBusTrack> stations;         // vector of all stations
+	EBusTrack station_tmp;                  // temporary station
+	//vector<EBusTrack>::iterator iter;
+	
+	for (vector<EBusTrack>::iterator iter = eBusTrack.begin(); iter != eBusTrack.end(); iter ++ )
+	{
+		int row=(*iter).y;
+		int column=(*iter).x;
+		string BlockName = layoutMatrix[row*(RIGHT - LEFT) + column].GetBlockName();
+		if ("station"==BlockName)
+		{
+			station_tmp.x = column;
+			station_tmp.y = row;
+			stations.push_back(station_tmp);
+		}
+	}
+	// determine the status of EBus
+	if (( x == eBusTrack.front().x && y == eBusTrack.front().y) || ( x == eBusTrack.front().x && y == eBusTrack.front().y)) //when EBus is located in starting point and ending point
+	{
+		ebus.status = EBus::CHARGING;
+	}
+	else if (true)
+	{
+		for (vector<EBusTrack>::iterator iter_station = eBusTrack.begin(); iter_station != eBusTrack.end(); iter_station++)
+		{
+			if (x == (*iter_station).x && y == (*iter_station).y)  // when EBus stops in station
+			{
+				ebus.status = EBus::STOP;
+			}
+			else
+			{
+				ebus.status = EBus::RUNNING;
+			}
+		}
+	}
+	// determine the orientation
+	for (vector<EBusTrack>::iterator iter = eBusTrack.begin(); iter != eBusTrack.end(); iter++)
+	{
+		int row = (*iter).y;
+		int column = (*iter).x;
+		if (column==middlePoint.x)
+		{
+			ebus.direction.first = 0;
+			ebus.direction.second = 1;
+		}
+		else if (row==middlePoint.y)
+		{
+			ebus.direction.first = 1;
+			ebus.direction.second = 0;
+		}
+	}
 }
 
 void SceneLoader::GenerateEBus(vector<EBusTrack>& eBusTrack, EBus& ebus)   // Generate Ebus and dynamic energy level
 {
-
+	// By Liang yuzhi
 }
 

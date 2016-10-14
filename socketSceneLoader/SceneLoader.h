@@ -163,6 +163,8 @@ namespace Block
 	{
 
 	public:
+		// Added by Zhao Jie
+		EBusTrack middlePoint;
 		bool show_json = false;
 		bool rotateFlag;
 		//default 32 * 16
