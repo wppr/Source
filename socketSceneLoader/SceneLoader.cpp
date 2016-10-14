@@ -63,6 +63,7 @@ void SceneLoader::ParseScene(string json, float time)
 	{
 		layoutMatrix[i].IsEmpty() = true;
 		layoutMatrix[i].IsDrawable() = false;
+		layoutMatrix[i].SetBlockName("");
 
 		layoutMatrix[i].GetBlock().clear();
 	}
@@ -145,19 +146,19 @@ void SceneLoader::ParseScene(string json, float time)
 					if ((y + j) < height && (x + i) < width)
 					{
 						this->layoutMatrix[(y + j) * width + x + i].IsEmpty() = false;
+						this->layoutMatrix[(y + j) * width + x + i].SetBlockName(name);
 						this->layoutMatrix[(y + j) * width + x + i].SetEntryType(type);
 					}
 				}
 		}
 	}
 
-	//cars
+	//generate cars
 	Value &cars = root["cars"];
 	assert(cars.IsArray());
 
 	/*if (cars.Size() > 0)
 		cout << json << endl;*/
-
 	
 	for (SizeType i = 0; i < cars.Size(); ++i)
 	{

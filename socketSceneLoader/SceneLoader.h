@@ -11,6 +11,7 @@
 #include <map>
 #include "AppFrameWork2.h"
 #include "Block.h"
+#include "EBus.h"
 using std::string;
 using std::stringstream;
 using std::vector;
@@ -44,6 +45,9 @@ namespace Block
 
 	protected :
 		EntryType entryType;
+		string blockName;//name of the covered block.
+						 //if the entry contains mutiple blocks, which must contain chargingStation or busStation or park 
+						 //then this name is the appendant of the street block
 		int x, y;
 		bool drawable;//true if marker exist
 		bool empty;//true if object cover
@@ -106,6 +110,16 @@ namespace Block
 			return this->blocks;
 		}
 
+		void SetBlockName(string name)
+		{
+			this->blockName = name;
+		}
+
+		string GetBlockName()
+		{
+			return this->blockName;
+		}
+
 	private:
 		Entry(const Entry&);
 		Entry& operator= (const Entry&);
@@ -149,6 +163,8 @@ namespace Block
 	{
 
 	public:
+		// Added by Zhao Jie
+		EBusTrack middlePoint;
 		bool show_json = false;
 		bool rotateFlag;
 		//default 32 * 16
@@ -176,6 +192,12 @@ namespace Block
 		void GetRandomCars(vector<Vector3>& roadPos, vector<Quaternion>& roadOrien);
 		int GetCarName();
 		void MoveCars(float curTime);
+
+		// EBus by Jie
+		vector<EBusTrack> GetEBusTrack();
+		void ShowBusLine(vector<EBusTrack>& eBusTrack);
+		void GenerateEBus(vector<EBusTrack>& eBusTrack, EBus& ebus);
+
 
 		//Getters $ Setters
 		int GetWidth()
@@ -206,6 +228,7 @@ namespace Block
 
 		//cars
 		void PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID);
+		void GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus);
 
 		//block
 		BlockHelper bh;
