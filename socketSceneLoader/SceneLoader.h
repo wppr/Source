@@ -228,7 +228,7 @@ namespace Block
 
 		//cars
 		void PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID);
-		void GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
+		int GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
 
 		//block
 		BlockHelper bh;
