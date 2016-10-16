@@ -43,7 +43,6 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 
 void SceneLoader::ParseScene(string json, float time)
 {
-
 	//parse json into sceneMatrix
 	Document root;
 	root.Parse(json.c_str());
@@ -157,8 +156,11 @@ void SceneLoader::ParseScene(string json, float time)
 	Value &cars = root["cars"];
 	assert(cars.IsArray());
 
-	/*if (cars.Size() > 0)
-		cout << json << endl;*/
+	if (cars.Size() > 0)
+	{
+		cout << "cars size > 0"<<endl;
+		cout << json << endl;
+	}
 	
 	for (SizeType i = 0; i < cars.Size(); ++i)
 	{
@@ -285,6 +287,7 @@ void SceneLoader::UpdateScene(float curTime)
 	{
 		m.lock();
 		string json = client.clientJson;
+		client.clientJson = "";
 		m.unlock();
 		
 		if ("" != json)
@@ -354,6 +357,20 @@ void SceneLoader::InitCar()
 	SceneNode* root = scene_instance->GetSceneRoot();
 	carRoot = scene->CreateSceneNode("carRoot");
 	root->attachNode(carRoot);
+}
+
+void SceneLoader::AttachRoom()
+{
+	SceneManager* scene_instance = SceneContainer::getInstance().get("scene1");
+	SceneNode* root = scene_instance->GetSceneRoot();
+	SceneNode* room = scene->CreateSceneNode("room");
+	room->setScale(0.07, 0.07, 0.07);
+
+	Entity* roomEntity = scene->CreateEntity("entity");
+	roomEntity->setMesh(roomMesh);
+	room->attachMovable(roomEntity);
+
+	root->attachNode(room);
 }
 
 void SceneLoader::AttachFloar()
@@ -476,6 +493,15 @@ void SceneLoader::loadMesh() {
 
 	AttachFloar();
 
+	//rooma
+	ss.str("");
+	ss1.str("");
+	ss << "model/uniform/room/room.obj";
+	ss1 << "room";
+	roomMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
+
+	//AttachRoom();
+
 	for (int i = 1; i <= CARNUM; ++i)
 	{
 		ss.str("");
@@ -494,7 +520,7 @@ void SceneLoader::LoadJson()
 	stringstream ss;
 
 	ss.str("");
-	stream1.open("model/uniform/data/block.json");
+	stream1.open("model/uniform/data/block1.json");
 	if (stream1.is_open())
 	{
 		ss << stream1.rdbuf();
@@ -574,8 +600,6 @@ void SceneLoader::MoveCars(float curTime)
 
 		bool isStart = (curX == oriX && curZ == oriZ);
 
-		printf("cur %d %d ori %d %d\n", curX, curZ, oriX, oriZ);
-		printf("is out %d\n", it->IsOutOfBound(l, r, t, b));
 		if (it->IsOutOfBound(l, r, t, b) || (Entry::EntryType::STREET != type && !isStart))//out of bound OR not street
 		{
 			int name = it->GetName();

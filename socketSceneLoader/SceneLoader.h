@@ -188,10 +188,10 @@ namespace Block
 		void InitFloor();
 		void InitCar();
 		void AttachFloar();
+		void AttachRoom();
 		void UpdateSceneNodes(float curTime);
 		void GetRandomCars(vector<Vector3>& roadPos, vector<Quaternion>& roadOrien);
 		int GetCarName();
-		void MoveCars(float curTime);
 
 		// EBus by Jie
 		vector<EBusTrack> GetEBusTrack();
@@ -228,6 +228,7 @@ namespace Block
 
 		//cars
 		void PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID);
+		void MoveCars(float curTime);
 		void GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
 
 		//block
@@ -244,6 +245,7 @@ namespace Block
 		SceneManager * scene;
 		MeshManager * meshMgr;
 		MeshPtr floarFragment;
+		MeshPtr roomMesh;
 		vector<MeshPtr> carMeshes;
 		SceneNode** sceneNodes;
 		SceneNode** floarNodes;
