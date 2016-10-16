@@ -258,7 +258,7 @@ namespace Block
 		void PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID, bool flag);//false : cars; true : newcars
 		void MergeCars();//Merge newcars into cars
 		void MoveCars(float curTime);
-		void GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
+		int GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
 
 		//block
 		BlockHelper bh;
