@@ -374,14 +374,14 @@ public:
 				ImGui::Text("ShadowMap");
 				static bool f2 = false;
 				//ImGui::Checkbox("LinearDepth", &f2); p->shadowmap.LinearDepth = f2 ? 1 : 0;
-				ImGui::DragFloat("ReduceBleeding", &p->shadowmap_left.ReduceBleeding, 0.002, 0.0001, 1.0);
-				ImGui::DragFloat("BlurRadius", &p->shadowmap_left.blureffect.radius, 0.002, 0.0001, 5.0);
+				ImGui::DragFloat("ReduceBleeding", &p->shadowmap.ReduceBleeding, 0.002, 0.0001, 1.0);
+				ImGui::DragFloat("BlurRadius", &p->shadowmap.blureffect.radius, 0.002, 0.0001, 5.0);
 				ImGui::DragFloat("bias", &p->LightCamera.bias, 0.001, -0.1, 0.1);
 				ImGui::DragFloat("near", &p->LightCamera.Near, 0.002, 0.0001);
 				ImGui::DragFloat("far", &p->LightCamera.Far, 0.002, 0.0001);
 				ImGui::DragFloat("width", &p->LightCamera.width, 0.002, 0.0001);
 				ImGui::DragFloat("height", &p->LightCamera.height, 0.002, 0.0001);
-				p->shadowmap_left.SetLightCamera(0, p->LightCamera);
+				p->shadowmap.SetLightCamera(0, p->LightCamera);
 				ImGui::End();
 			}
 			ImGui::End();

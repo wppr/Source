@@ -43,7 +43,7 @@ public:
 
 	Vector3 LightPos[2] = { Vector3(5),Vector3(-100,100,-100) };
 	SimpleProfile profile;
-	VarianceShadowMapGenerateEffect shadowmap_left, shadowmap_right;
+	VarianceShadowMapGenerateEffect shadowmap;
 	LightCameraParam LightCamera;
 	SkyBoxEffect skybox;
 	Matrix4 projLeft, viewLeft, projRight, viewRight;

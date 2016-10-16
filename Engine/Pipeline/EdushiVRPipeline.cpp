@@ -64,25 +64,15 @@ void EdushiVRPipeline::Init()
 	env_diffuse[2] = tm.CreateTextureCubeMap(e_sky, "sky0");
 	pbr.LoadPrefilterEnvMap(env[2], "default_asserts/skybox/diffuse/s");
 	
-	shadowmap_left.input_scenename = SceneName;
-	shadowmap_left.input_cameraname = CameraName;
-	shadowmap_left.LightNum = 1;
-	shadowmap_left.LinearDepth = 1;
-	shadowmap_left.blureffect.radius = 1.2;
-	shadowmap_left.width = 2048;
-	shadowmap_left.height = 2048;
-	shadowmap_left.ReduceBleeding = 0.5;
-	shadowmap_left.Init();
-
-	shadowmap_right.input_scenename = SceneName;
-	shadowmap_right.input_cameraname = CameraName;
-	shadowmap_right.LightNum = 1;
-	shadowmap_right.LinearDepth = 1;
-	shadowmap_right.blureffect.radius = 1.2;
-	shadowmap_right.width = 2048;
-	shadowmap_right.height = 2048;
-	shadowmap_right.ReduceBleeding = 0.5;
-	shadowmap_right.Init();
+	shadowmap.input_scenename = SceneName;
+	shadowmap.input_cameraname = CameraName;
+	shadowmap.LightNum = 1;
+	shadowmap.LinearDepth = 1;
+	shadowmap.blureffect.radius = 1.2;
+	shadowmap.width = 2048;
+	shadowmap.height = 2048;
+	shadowmap.ReduceBleeding = 0.5;
+	shadowmap.Init();
 
 	LightCamera.LightPosition = LightPos[0];
 	LightCamera.LightDir = -LightPos[0];
@@ -92,8 +82,7 @@ void EdushiVRPipeline::Init()
 	LightCamera.height = 4;
 	LightCamera.perspective = false;
 	LightCamera.bias = -0.001;
-	shadowmap_left.SetLightCamera(0, LightCamera);
-	shadowmap_right.SetLightCamera(0, LightCamera);
+	shadowmap.SetLightCamera(0, LightCamera);
 
 	fxaa.input_color = rt_render_left->m_attach_textures["color0"];
 	fxaa.Init();
@@ -142,8 +131,7 @@ void EdushiVRPipeline::Render()
 
 	LightCamera.LightPosition = LightPos[0];
 	LightCamera.LightDir = -LightPos[0];
-	shadowmap_left.SetLightCamera(0, LightCamera);
-	shadowmap_right.SetLightCamera(0, LightCamera);
+	shadowmap.SetLightCamera(0, LightCamera);
 
 	//**********************************************************************************************************************
 	//************************						LEFT										 ***************************
@@ -152,7 +140,7 @@ void EdushiVRPipeline::Render()
 	gp->SetProjectMatrix(projLeft);
 	gp->SetViewMatrix(viewLeft);
 
-	shadowmap_left.Render();
+	shadowmap.Render();
 	profile.Tick("Shadow");
 	////MSAA render scene and resolve to usual texture
 	gbuffer_left.Render();
@@ -185,12 +173,12 @@ void EdushiVRPipeline::Render()
 	p->setProgramConstantData("metalness", &metalness, "float", sizeof(float));
 	p->setProgramConstantData("LightColor", &LightColor[0][0], "vec3", sizeof(Vector3)*lightnum);
 	p->setProgramConstantData("LightPos", &LightPos[0][0], "vec3", sizeof(Vector3)*lightnum);
-	p->setProgramConstantData("shadowMaps[0]", shadowmap_left.out_blur);
+	p->setProgramConstantData("shadowMaps[0]", shadowmap.out_blur);
 	p->setSampler("shadowMaps[0]", SamplerManager::getInstance().get("ClampLinear"));
-	p->setProgramConstantData("shadowMat[0]", &shadowmap_left.out_ShadowMatrix[0][0][0], "mat4", sizeof(Matrix4));
+	p->setProgramConstantData("shadowMat[0]", &shadowmap.out_ShadowMatrix[0][0][0], "mat4", sizeof(Matrix4));
 	p->setProgramConstantData("bias", &LightCamera.bias, "float", sizeof(float));
 
-	p->setProgramConstantData("ReduceBleeding", &shadowmap_left.ReduceBleeding, "float", sizeof(float));
+	p->setProgramConstantData("ReduceBleeding", &shadowmap.ReduceBleeding, "float", sizeof(float));
 	ShadingPass->UseInstance = true;
 	// render to a buffer
 	mRenderSystem->RenderPass(NULL, queue, ShadingPass, rt_render_left);
@@ -208,7 +196,6 @@ void EdushiVRPipeline::Render()
 	gp->SetProjectMatrix(projRight);
 	gp->SetViewMatrix(viewRight);
 
-	shadowmap_right.Render();
 	profile.Tick("Shadow");
 	////MSAA render scene and resolve to usual texture
 	gbuffer_right.Render();
@@ -236,12 +223,12 @@ void EdushiVRPipeline::Render()
 	p->setProgramConstantData("metalness", &metalness, "float", sizeof(float));
 	p->setProgramConstantData("LightColor", &LightColor[0][0], "vec3", sizeof(Vector3)*lightnum);
 	p->setProgramConstantData("LightPos", &LightPos[0][0], "vec3", sizeof(Vector3)*lightnum);
-	p->setProgramConstantData("shadowMaps[0]", shadowmap_right.out_blur);
+	p->setProgramConstantData("shadowMaps[0]", shadowmap.out_blur);
 	p->setSampler("shadowMaps[0]", SamplerManager::getInstance().get("ClampLinear"));
-	p->setProgramConstantData("shadowMat[0]", &shadowmap_right.out_ShadowMatrix[0][0][0], "mat4", sizeof(Matrix4));
+	p->setProgramConstantData("shadowMat[0]", &shadowmap.out_ShadowMatrix[0][0][0], "mat4", sizeof(Matrix4));
 	p->setProgramConstantData("bias", &LightCamera.bias, "float", sizeof(float));
 
-	p->setProgramConstantData("ReduceBleeding", &shadowmap_right.ReduceBleeding, "float", sizeof(float));
+	p->setProgramConstantData("ReduceBleeding", &shadowmap.ReduceBleeding, "float", sizeof(float));
 	ShadingPass->UseInstance = true;
 	// render to a buffer
 	mRenderSystem->RenderPass(NULL, queue, ShadingPass, rt_render_right);
