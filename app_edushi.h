@@ -94,8 +94,8 @@ public:
 		sl->loadMesh();
 		sl->InitClient(c.ip, c.port);
 
-		sl->LoadJson();
-		sl->show_json = true;
+		/*sl->LoadJson();
+		sl->show_json = true;*/
 
 		sl->UpdateScene(AbsolutTime);
 		//CarSim.Init(this);
@@ -177,7 +177,7 @@ public:
 			firstRotate = true;
 		}
 
-		//sl->UpdateScene(AbsolutTime);
+		sl->UpdateScene(AbsolutTime);
 
 		pipeline->Render();
 		//CarSim.Update();

@@ -129,8 +129,8 @@ namespace Block
 	{
 	public:
 		Car() {}
-		Car(Vector3 position, Vector3 direction, float speed = 20.0f, SceneNode* carNode = NULL, float startTime = 0.0f, int name = 0)
-			: position(position), direction(direction), speed(speed), carNode(carNode), startTime(startTime), name(name)
+		Car(Vector3 position, Vector3 direction, int orientation, int meshID, float speed = 20.0f, SceneNode* carNode = NULL, float startTime = 0.0f, int name = 0)
+			: position(position), direction(direction), orientation(orientation), meshID(meshID), speed(speed), carNode(carNode), startTime(startTime), name(name)
 		{
 			carNode->setTranslation(position);
 		}
@@ -149,6 +149,18 @@ namespace Block
 		{
 			return this->carNode->getLocalTranslation();
 		}
+		int GetOrientation()
+		{
+			return orientation;
+		}
+		float GetSpeed()
+		{
+			return speed;
+		}
+		int GetMeshID()
+		{
+			return this->meshID;
+		}
 
 	private:
 		Vector3 position;
@@ -156,7 +168,23 @@ namespace Block
 		float speed;
 		SceneNode* carNode;
 		float startTime;
+		int meshID;
 		int name;
+		int orientation;
+	};
+
+	typedef struct CarDir
+	{
+		int lcrossDir;
+		int tcrossDir;
+		int xcrossDir;
+
+		CarDir()
+		{
+			lcrossDir = 1;
+			tcrossDir = 1;
+			xcrossDir = 1;
+		}
 	};
 
 	class SceneLoader
@@ -227,7 +255,8 @@ namespace Block
 		void InitClient(string ip, string port);
 
 		//cars
-		void PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID);
+		void PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID, bool flag);//false : cars; true : newcars
+		void MergeCars();//Merge newcars into cars
 		void MoveCars(float curTime);
 		void GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
 
@@ -240,7 +269,9 @@ namespace Block
 		vector<Vector3> streetPos;
 		vector<Quaternion> streetOrien;
 		list<Car> cars;
+		list<Car> newCars;
 		bool carNames[200];
+		CarDir carDir;
 
 		SceneManager * scene;
 		MeshManager * meshMgr;

@@ -154,32 +154,37 @@ void SceneLoader::ParseScene(string json, float time)
 
 	//generate cars
 	Value &cars = root["cars"];
-	assert(cars.IsArray());
-
-	if (cars.Size() > 0)
+	if (!cars.IsNull())
 	{
-		cout << "cars size > 0"<<endl;
-		cout << json << endl;
+
+		for (SizeType i = 0; i < cars.Size(); ++i)
+		{
+			float posX = cars[i]["position"]["x"].GetInt();
+			float posZ = cars[i]["position"]["z"].GetInt();
+
+			string crossType = cars[i]["crossType"].GetString();
+
+			//fix
+			int orientation = cars[i]["direction"].GetInt();
+			if (crossType == "lcross")orientation = (orientation + 2) % 4;
+			else if (crossType == "lcross_greenlight") orientation = (orientation + 3) % 4;
+			else if (crossType == "tcross") orientation = (orientation + 1) % 4;
+			if (!orientation) orientation = 4;
+
+			float speed = cars[i]["speed"].GetFloat();
+			int mesh = cars[i]["mesh"].GetInt();
+
+			PushCar(Vector3(posX, 0, posZ), orientation, speed, time, mesh, false);
+		}
 	}
-	
-	for (SizeType i = 0; i < cars.Size(); ++i)
+
+	//carDir
+	Value &carDirElem = root["carDir"];
+	if (!carDirElem.IsNull())
 	{
-		float posX = cars[i]["position"]["x"].GetInt();
-		float posZ = cars[i]["position"]["z"].GetInt();
-
-		string crossType = cars[i]["crossType"].GetString();
-
-		//fix
-		int orientation = cars[i]["direction"].GetInt();
-		if (crossType == "lcross")orientation = (orientation + 2) % 4;
-		else if (crossType == "lcross_greenlight") orientation = (orientation + 3) % 4;
-		else if (crossType == "tcross") orientation = (orientation + 1) % 4;
-		if (!orientation) orientation = 4;
-
-		float speed = cars[i]["speed"].GetFloat();
-		int mesh = cars[i]["mesh"].GetInt();
-
-		PushCar(Vector3(posX, 0, posZ), orientation, speed, time, mesh);
+		carDir.lcrossDir = carDirElem["lcrossDir"].GetInt();
+		carDir.tcrossDir = carDirElem["tcrossDir"].GetInt();
+		carDir.xcrossDir = carDirElem["xcrossDir"].GetInt();
 	}
 
 	//generate street
@@ -399,6 +404,8 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 
 	MoveCars(curTime);
 
+	MergeCars();
+
 	for (int i = 0; i < height; i++) {
 
 		for (int j = 0; j < width; ++j)
@@ -520,7 +527,7 @@ void SceneLoader::LoadJson()
 	stringstream ss;
 
 	ss.str("");
-	stream1.open("model/uniform/data/block1.json");
+	stream1.open("model/uniform/data/block.json");
 	if (stream1.is_open())
 	{
 		ss << stream1.rdbuf();
@@ -539,9 +546,10 @@ int SceneLoader::GetCarName()//find first name not used
 	return name;
 }
 
-void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID)
+void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID, bool flag)
 {
 	int name = GetCarName();
+	printf("name %d\n", name);
 	SceneNode* carNode = this->scene->CreateSceneNode("car" + to_string(name));
 	carNode->setScale(0.01, 0.01, 0.01);
 	this->carRoot->attachNode(carNode);
@@ -563,7 +571,7 @@ void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float 
 	{
 	case 1: 
 		direction = Vector3(0, 0, 1); 
-		calibration = Vector3(totalRoadWidth + singleRoadWidth, 0, totalRoadWidth);
+		calibration = Vector3(totalRoadWidth + singleRoadWidth, 0, 2*totalRoadWidth);
 		break;
 	case 2: 
 		direction = Vector3(1, 0, 0); 
@@ -579,8 +587,22 @@ void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float 
 		break;
 	}
 
-	Car car(position + calibration, direction, speed, carNode, startTime, name);
-	this->cars.push_back(car);
+	Car car(position + calibration, direction, orientation, meshID, speed, carNode, startTime, name);
+
+	if (!flag)//push to old
+		this->cars.push_back(car);
+	else      //push to new
+		this->newCars.push_back(car);
+}
+
+void SceneLoader::MergeCars()
+{
+	for (list<Car>::iterator it = newCars.begin(); it != newCars.end(); ++it)
+	{
+		cars.push_back(*it);
+	}
+
+	newCars.clear();
 }
 
 void SceneLoader::MoveCars(float curTime)
@@ -597,14 +619,15 @@ void SceneLoader::MoveCars(float curTime)
 		int oriX = oriPos[0];
 		int oriZ = oriPos[2];
 		Entry::EntryType type = this->layoutMatrix[curZ * width + curX].GetEntryType();
+		
 
 		bool isStart = (curX == oriX && curZ == oriZ);
 
 		if (it->IsOutOfBound(l, r, t, b) || (Entry::EntryType::STREET != type && !isStart))//out of bound OR not street
-		{
+		{																				   //remove and create new in the selected direction
+			//destroy old
 			int name = it->GetName();
 			this->carNames[name] = false;//name free
-			it = cars.erase(it);
 
 			this->carRoot->detachNode("car" + to_string(name));
 
@@ -615,11 +638,73 @@ void SceneLoader::MoveCars(float curTime)
 			Entity* carEntity = scene->getEntity("car" + to_string(name));
 			if (NULL != carEntity)
 				scene->destroy(carEntity);
+
+			//create new
+			if ((Entry::EntryType::LCROSS == type || Entry::EntryType::TCROSS == type || Entry::EntryType::XCROSS == type) && !isStart)
+			{
+				int crossOrientation = this->layoutMatrix[curZ * width + curX].GetBlock()[0].orientation;
+				int newOrientation;
+				switch (type)
+				{
+					case Entry::EntryType::LCROSS:
+					{
+						int orientation = (it->GetOrientation() + 1) % 4;
+						if (!orientation) orientation = 4;
+						if (orientation == crossOrientation)             // ->    _|
+							newOrientation = crossOrientation;       //       _
+						else                                             // ->     |
+							newOrientation = crossOrientation + 1;
+						break;
+					}
+					case Entry::EntryType::TCROSS:
+					{
+						int orientation = it->GetOrientation();
+						if (orientation == crossOrientation)			 // ->    _|_
+							newOrientation = crossOrientation;
+					
+						orientation = (it->GetOrientation() + 1) % 4;    // ->    -|
+						if (!orientation) orientation = 4;               
+						if (orientation == crossOrientation)
+						{
+							if(carDir.tcrossDir == 0)// up
+								newOrientation = crossOrientation;
+							else                     // down
+								newOrientation = crossOrientation + 2;
+						}
+																		 //	      _ _
+						orientation = (it->GetOrientation() + 2) % 4;    // ->     |
+						if (!orientation) orientation = 4;
+						if (orientation == crossOrientation)
+						{
+							if (carDir.tcrossDir == 0)// down
+								newOrientation = crossOrientation + 1;
+							else                      // right
+								newOrientation = crossOrientation + 2;
+						}
+
+						break;
+					}
+					case Entry::EntryType::XCROSS:
+					{
+						newOrientation = it->GetOrientation() + 2 + carDir.xcrossDir + 1;
+						break;
+					}
+				}
+				newOrientation = newOrientation % 4;
+				if (!newOrientation) newOrientation = 4;
+
+				Vector3 curPos = Vector3(int(it->GetCurPosition()[0]), 0, int(it->GetCurPosition()[2]));
+				PushCar(curPos, newOrientation, it->GetSpeed(), curTime, it->GetMeshID(), true);//push to new
+			}
+
+			it = cars.erase(it);
 		}
 		else
 		{
 			++it;
 		}
+
+		
 	}
 }
 
