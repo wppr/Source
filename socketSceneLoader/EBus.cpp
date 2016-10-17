@@ -98,18 +98,32 @@ int last_start_y=-1;
 int last_end_x=-1;
 int last_end_y=-1;
 
+int station_flag = 0;   // flag of station
+double stop_time = 0.0;  // the start time when entering the station 
+
 // the bus line is empty, return 1
 // the bus line changes, return 2
 // the bus is in starting point, return 3
 // usual case, return 4
-//
+// the bus is in station. return 5
 int SceneLoader::GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp)
 {	
 	
 	vector<EBusTrack> stations;         // vector of all stations
 	eBusTrack = GetEBusTrack();  // Get the EBus Line
-	if (eBusTrack.empty())  //if the Bus Line exist
+	if (eBusTrack.empty())  //if the Bus Line exist or not
 	{
+		start_time = 0.0;    // initialize the global variables
+		time_prior = 0.0;   
+		last_position_x = 0.0;
+		last_position_y = 0.0;
+		last_start_x = -1;
+		last_start_y = -1;
+		last_end_x = -1;
+		last_end_y = -1;
+
+		station_flag = 0;   
+		stop_time = 0.0;  
 		return 1;
 	}
 	else		// get the position of all bus stations in the BusTrack vector, and store them in a new vector ( vector<EBusTrack> stations ).
@@ -128,6 +142,40 @@ int SceneLoader::GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double ti
 			}
 		}
 	}
+	// stop when the bus is located in the station
+	if (station_flag==1 && (timeStamp<(stop_time+3.0)) )      // in station and moving to the right, the stopping time is defined as 3 seconds
+	{
+		ebus.location.first = last_position_x;
+		ebus.location.second = last_position_y;
+		ebus.direction.first = 1;                       // Direction
+		ebus.direction.second = 0;
+		ebus.status = EBus::STOP;  // status
+		ebus.speed = 0.0;              // Charging speed
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+
+		last_position_x = ebus.location.first;
+		last_position_y = ebus.location.second;
+		time_prior = timeStamp;       // Save the timeStamp of last loop
+		return 5;
+	}
+	else if (station_flag == 2 && (timeStamp<(stop_time + 3.0)))      // in station and moving to the bottom, the stopping time is defined as 3 seconds
+	{
+		ebus.location.first = last_position_x;
+		ebus.location.second = last_position_y;
+		ebus.direction.first = 0;                       // Direction
+		ebus.direction.second = 1;
+		ebus.status = EBus::STOP;  // status
+		ebus.speed = 0.0;              // Charging speed
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+
+		last_position_x = ebus.location.first;
+		last_position_y = ebus.location.second;
+		time_prior = timeStamp;       // Save the timeStamp of last loop
+		return 5;
+	}
+
 
 	if (last_start_x==-1 && last_start_y==-1)  // save the starting and ending point
 	{
@@ -189,7 +237,7 @@ int SceneLoader::GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double ti
 			ebus.status = EBus::RUNNING;  // Status
 			ebus.vtype = EBus::EBUS;       // vehicle type
 			ebus.isShowEnergy = true;      // show energy
-			if (ebus.location.second > (eBusTrack.back().y + 5 / 12))  // reach the middle point and change the direction
+			if (ebus.location.second > (eBusTrack.back().y + 1 / 2))  // reach the middle point and change the direction
 			{
 				ebus.location.first = eBusTrack.front().x + 1 / 2;   // location
 				ebus.location.second = eBusTrack.back().y + 7 / 12;
@@ -240,39 +288,72 @@ int SceneLoader::GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double ti
 				last_start_y = -1;
 				last_end_x = -1;
 				last_end_y = -1;
+
+				station_flag = 0;
+				stop_time = 0.0;
 			}
 		}
 
 	}
 	else  //the bus line changes
 	{
-		last_start_x = -1;    // initialize the busInfo
+		// initialize parameters
+		start_time = 0.0;
+		time_prior = 0.0;   // global time (last call) time_prior
+		last_position_x = 0.0;
+		last_position_y = 0.0;
+		last_start_x = -1;
 		last_start_y = -1;
 		last_end_x = -1;
 		last_end_y = -1;
-		time_prior = 0.0;
+
+		station_flag = 0;
+		stop_time = 0.0;
 		return 2;
 	}
 
 
-	// Check whether the EBus reach the Station (the position is already obtained)
-	//for (vector<EBusTrack>::iterator iter_station = stations.begin(); iter_station != stations.end(); iter_station++)
-	//{
-	//	if (abs(ebus.location.first - ((*iter_station).x + 1 / 2))<0.01)  // 向左运动的时候 !!!!!! 这里这个0.01需要根据实际情况进行调整，直到调整到正常停止3s为止。
-	//	{
-	//		ebus.location.first = (*iter_station).x + 1 / 2;
-	//		ebus.location.second = (*iter_station).y + 7 / 12;
-	//
-	//	}
-	//	if (abs(ebus.location.second - ((*iter_station).y + 1 / 2))<0.01)  // 向下运动的时候 !!!!!! 这里这个0.01需要根据实际情况进行调整，直到调整到正常停止3s为止。
-	//	{
-	//	}
-	//	else
-	//	{
-	//		ebus.status = EBus::RUNNING;
-	//		ebus.speed = 3.0;             // Running speed
-	//	}
-	//}
+	//   Check whether the EBus reach the Station (the position is already obtained)
+	for (vector<EBusTrack>::iterator iter_station = stations.begin(); iter_station != stations.end(); iter_station++)
+	{
+		if (abs(ebus.location.first - ((*iter_station).x + 1 / 2))<0.01)  // 向右运动的时候 !!!!!! 这里这个0.01需要根据实际情况进行调整，直到调整到正常停止n秒为止。
+		{
+			ebus.location.first = (*iter_station).x + 1 / 2;
+			ebus.location.second = (*iter_station).y + 7 / 12;
+			last_position_x = ebus.location.first;
+			last_position_y = ebus.location.second;
+			ebus.direction.first = 1;      // direction
+			ebus.direction.second = 0;
+			ebus.status = EBus::STOP;  // Status
+			ebus.speed = 0.0;              // speed
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+
+			station_flag = 1;
+			start_time = timeStamp;
+
+		}
+		else if (abs(ebus.location.second - ((*iter_station).y + 1 / 2))<0.01)  // 向下运动的时候 !!!!!! 这里这个0.01需要根据实际情况进行调整，直到调整到正常停止n秒为止。
+		{
+			ebus.location.first = (*iter_station).x + 5 / 12;
+			ebus.location.second = (*iter_station).y + 1 / 2;
+			last_position_x = ebus.location.first;
+			last_position_y = ebus.location.second;
+			ebus.direction.first = 0;      // direction
+			ebus.direction.second = 1;
+			ebus.status = EBus::STOP;  // Status
+			ebus.speed = 0.0;              // speed
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+
+			station_flag = 2;
+			start_time = timeStamp;
+		}
+		else  // not in the station
+		{
+			station_flag = 0;
+		}
+	}
 	return 4;
 }
 
