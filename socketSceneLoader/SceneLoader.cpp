@@ -800,11 +800,11 @@ void Car::Move(float curTime)
 		float theta = deltaTime * angularSpeed;
 		carNode->rotate(Vector3(0, 1, 0), theta);//rotate local
 		
-		Matrix3 m(cos(-theta), 0, -sin(-theta),
+		Matrix3 m(cos(theta), 0, -sin(theta),
 				  0,          1,           0, 
-				  sin(-theta), 0,  cos(-theta));
+				  sin(theta), 0,  cos(theta));
 		Vector3 pivotToNode = carNode->getLocalTranslation() - pivot;
-		pivotToNode = m * pivotToNode;
+		pivotToNode = m.transpose() * pivotToNode;
 		carNode->setTranslation(pivot + pivotToNode);
 		
 		printf("angularSpeed %.2f\n", angularSpeed);
