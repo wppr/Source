@@ -133,6 +133,8 @@ namespace Block
 			: position(position), direction(direction), orientation(orientation), meshID(meshID), speed(speed), carNode(carNode), startTime(startTime), name(name)
 		{
 			carNode->setTranslation(position);
+			turn = false;
+			rotatedAngle = 0.0f;
 		}
 
 		void Move(float deltaTime);
@@ -161,29 +163,43 @@ namespace Block
 		{
 			return this->meshID;
 		}
+		void SetTurn(bool turn, float angularSpeed = 0.0f, Vector3 pivot = Vector3())
+		{
+			this->turn = turn;
+			this->angularSpeed = angularSpeed;
+			this->pivot = pivot;
+		}
+		bool GetTurn()
+		{
+			return this->turn;
+		}
 
 	private:
 		Vector3 position;
 		Vector3 direction;
+		Vector3 pivot;
 		float speed;
 		SceneNode* carNode;
 		float startTime;
 		int meshID;
 		int name;
 		int orientation;
+		bool turn;
+		float angularSpeed;
+		float rotatedAngle;
 	};
 
 	typedef struct CarDir
 	{
 		int lcrossDir;
-		int tcrossDir;
-		int xcrossDir;
+		int tcrossDir;// 0, 1
+		int xcrossDir;// 0, 1, 2
 
 		CarDir()
 		{
 			lcrossDir = 1;
 			tcrossDir = 1;
-			xcrossDir = 1;
+			xcrossDir = 0;
 		}
 	};
 

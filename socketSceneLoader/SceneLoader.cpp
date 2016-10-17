@@ -15,6 +15,7 @@ using std::ifstream;
 using std::stringstream;
 
 #define PI 3.141592654
+Vector3 Calibration(int orientation);
 
 SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height, int l, int r, int t, int b)
 	: scene(scene), meshMgr(meshMgr), width(width), height(height), l(l), r(r), t(t), b(b)
@@ -404,7 +405,7 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 
 	MoveCars(curTime);
 
-	MergeCars();
+	//MergeCars();
 
 	for (int i = 0; i < height; i++) {
 
@@ -571,22 +572,19 @@ void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float 
 	{
 	case 1: 
 		direction = Vector3(0, 0, 1); 
-		calibration = Vector3(totalRoadWidth + singleRoadWidth, 0, 2*totalRoadWidth);
 		break;
 	case 2: 
 		direction = Vector3(1, 0, 0); 
-		calibration = Vector3(2*totalRoadWidth, 0, 2*totalRoadWidth - singleRoadWidth);
 		break;
 	case 3: 
 		direction = Vector3(0, 0, -1); 
-		calibration = Vector3(2 * totalRoadWidth - singleRoadWidth, 0, totalRoadWidth);
 		break;
 	case 4: 
 		direction = Vector3(-1, 0, 0); 
-		calibration = Vector3(0, 0, totalRoadWidth + singleRoadWidth);
 		break;
 	}
 
+	calibration = Calibration(orientation);
 	Car car(position + calibration, direction, orientation, meshID, speed, carNode, startTime, name);
 
 	if (!flag)//push to old
@@ -607,112 +605,270 @@ void SceneLoader::MergeCars()
 
 void SceneLoader::MoveCars(float curTime)
 {
+	printf("move cars\n");
 	for (list<Car>::iterator it = cars.begin(); it != cars.end(); )
 	{
 		it->Move(curTime);
+		if (!it->GetTurn())//straight
+		{
+			Vector3 curPos = it->GetCurPosition();
+			int curX = curPos[0];
+			int curZ = curPos[2];
 
-		Vector3 curPos = it->GetCurPosition();
-		int curX = curPos[0];
-		int curZ = curPos[2];
+			Vector3 oriPos = it->GetOriginPosition();
+			int oriX = oriPos[0];
+			int oriZ = oriPos[2];
+			Entry::EntryType type = this->layoutMatrix[curZ * width + curX].GetEntryType();
 
-		Vector3 oriPos = it->GetOriginPosition();
-		int oriX = oriPos[0];
-		int oriZ = oriPos[2];
-		Entry::EntryType type = this->layoutMatrix[curZ * width + curX].GetEntryType();
-		
 
-		bool isStart = (curX == oriX && curZ == oriZ);
+			bool isStart = (curX == oriX && curZ == oriZ);
 
-		if (it->IsOutOfBound(l, r, t, b) || (Entry::EntryType::STREET != type && !isStart))//out of bound OR not street
-		{																				   //remove and create new in the selected direction
-			//destroy old
-			int name = it->GetName();
-			this->carNames[name] = false;//name free
-
-			this->carRoot->detachNode("car" + to_string(name));
-
-			SceneNode* carNode = scene->getSceneNode("car" + to_string(name));
-			if (NULL != carNode)
-				scene->destroy(carNode);
-
-			Entity* carEntity = scene->getEntity("car" + to_string(name));
-			if (NULL != carEntity)
-				scene->destroy(carEntity);
-
-			//create new
-			if ((Entry::EntryType::LCROSS == type || Entry::EntryType::TCROSS == type || Entry::EntryType::XCROSS == type) && !isStart)
+			if (it->IsOutOfBound(l, r, t, b) || Entry::EntryType::BLOCK == type)// out of bound or run into a building
 			{
+				//destroy old
+				int name = it->GetName();
+				this->carNames[name] = false;//name free
+
+				this->carRoot->detachNode("car" + to_string(name));
+
+				SceneNode* carNode = scene->getSceneNode("car" + to_string(name));
+				if (NULL != carNode)
+					scene->destroy(carNode);
+
+				Entity* carEntity = scene->getEntity("car" + to_string(name));
+				if (NULL != carEntity)
+					scene->destroy(carEntity);
+
+				it = cars.erase(it);
+			}
+			else if ((Entry::EntryType::LCROSS == type || Entry::EntryType::TCROSS == type || Entry::EntryType::XCROSS == type) && !isStart)
+			{
+				float delta;
+				Vector3 pos = it->GetCurPosition();
 				int crossOrientation = this->layoutMatrix[curZ * width + curX].GetBlock()[0].orientation;
-				int newOrientation;
-				switch (type)
+				switch (it->GetOrientation())
 				{
-					case Entry::EntryType::LCROSS:
-					{
-						int orientation = (it->GetOrientation() + 1) % 4;
-						if (!orientation) orientation = 4;
-						if (orientation == crossOrientation)             // ->    _|
-							newOrientation = crossOrientation;       //       _
-						else                                             // ->     |
-							newOrientation = crossOrientation + 1;
-						break;
-					}
-					case Entry::EntryType::TCROSS:
-					{
-						int orientation = it->GetOrientation();
-						if (orientation == crossOrientation)			 // ->    _|_
-							newOrientation = crossOrientation;
-					
-						orientation = (it->GetOrientation() + 1) % 4;    // ->    -|
-						if (!orientation) orientation = 4;               
-						if (orientation == crossOrientation)
-						{
-							if(carDir.tcrossDir == 0)// up
-								newOrientation = crossOrientation;
-							else                     // down
-								newOrientation = crossOrientation + 2;
-						}
-																		 //	      _ _
-						orientation = (it->GetOrientation() + 2) % 4;    // ->     |
-						if (!orientation) orientation = 4;
-						if (orientation == crossOrientation)
-						{
-							if (carDir.tcrossDir == 0)// down
-								newOrientation = crossOrientation + 1;
-							else                      // right
-								newOrientation = crossOrientation + 2;
-						}
-
-						break;
-					}
-					case Entry::EntryType::XCROSS:
-					{
-						newOrientation = it->GetOrientation() + 2 + carDir.xcrossDir + 1;
-						break;
-					}
+				case 1://down
+					delta = pos[2] - curZ;
+					break;
+				case 2://right
+					delta = pos[0] - curX;
+					break;
+				case 3://up
+					delta = 1 + curZ - pos[2];
+					break;
+				case 4://left
+					delta = 1 + curX - pos[0];
+					break;
 				}
-				newOrientation = newOrientation % 4;
-				if (!newOrientation) newOrientation = 4;
 
-				Vector3 curPos = Vector3(int(it->GetCurPosition()[0]), 0, int(it->GetCurPosition()[2]));
-				PushCar(curPos, newOrientation, it->GetSpeed(), curTime, it->GetMeshID(), true);//push to new
+				if (delta > 1 / 3.0f)//turn
+				{
+					bool turnTag = true;
+					
+					float angularSpeed;
+					Vector3 pivot;
+					Vector3 curPos = it->GetCurPosition();
+					Vector3 base = Vector3(int(curPos[0]), 0, int(curPos[2]));
+					int preOrien = it->GetOrientation();
+					int newOrien, orien;
+					bool clockWise;
+
+					switch (type)
+					{
+					case Entry::EntryType::LCROSS :
+					
+						orien = preOrien + 1;// -> _|
+						if (!orien) orien = 4;
+						if (orien == crossOrientation)
+						{
+							newOrien = crossOrientation;
+							clockWise = false;
+						}
+											 //    _
+						orien = preOrien + 2;// ->  |
+						if (!orien) orien = 4;
+						if (orien == crossOrientation)
+						{
+							newOrien = crossOrientation + 1;
+							clockWise = true;
+						}
+						break;
+					
+					case Entry::EntryType::TCROSS:
+
+						orien = preOrien;// -> _|_
+						if (!orien) orien = 4;
+						if (orien == crossOrientation)
+						{
+							if (carDir.tcrossDir == 0)
+								newOrien = crossOrientation;
+							else
+							{
+								newOrien = crossOrientation + 1;
+								clockWise = false;
+							}
+						}
+											 
+						orien = preOrien + 1;// ->  -|
+						if (!orien) orien = 4;
+						if (orien == crossOrientation)
+						{
+							if (carDir.tcrossDir == 0)
+							{
+								newOrien = crossOrientation;
+								clockWise = false;
+							}
+							else
+							{
+								newOrien = crossOrientation + 2;
+								clockWise = true;
+							}
+						}
+											 //    _ _
+						orien = preOrien + 2;// ->  |
+						if (!orien) orien = 4;
+						if (orien == crossOrientation)
+						{
+							if (carDir.tcrossDir == 0)
+							{
+								newOrien = crossOrientation + 1;
+								clockWise = true;
+							}
+							else
+								newOrien = crossOrientation + 2;
+						}
+
+						break;
+
+					case Entry::EntryType::XCROSS:
+
+						newOrien = preOrien + 2 + carDir.xcrossDir + 1;
+
+						break;
+					}
+
+					newOrien = newOrien % 4;
+					if (!newOrien) newOrien = 4;
+					printf("newOrien %d\n", newOrien);
+					if (newOrien == preOrien)//straight
+						turnTag = false;
+
+					pivot = base + Calibration(newOrien);
+
+					if (clockWise)
+					{
+						float radius = 1 / 12.0f;
+						angularSpeed = - it->GetSpeed() / radius;// negative
+					}
+					else
+					{
+						float radius = 1 / 4.0f;
+						angularSpeed = it->GetSpeed() / radius;// positive
+					}
+
+					it->SetTurn(turnTag, angularSpeed, pivot);
+				}
+
+				++it;
+			}
+			else
+			{
+				++it;
 			}
 
-			it = cars.erase(it);
 		}
 		else
 		{
 			++it;
 		}
-
-		
 	}
 }
 
 void Car::Move(float curTime)
 {
 	float deltaTime = curTime - startTime;
+	if (!turn)//straight
+	{
+		carNode->translate(speed * direction * deltaTime);
+	}
+	else//turn
+	{
+		carNode->rotate(Vector3(0, 1, 0), deltaTime * angularSpeed);//rotate local
+		
+		printf("rotatedAngle %.2f\n", rotatedAngle);
+		printf("deltaTime %.2f\n", deltaTime);
+		rotatedAngle += deltaTime * angularSpeed;
+		if (rotatedAngle > PI / 2 || rotatedAngle < -PI / 2)// rotate a quater, back to straight
+		{
+			this->turn = false;
+			float totalRoadWidth = 1 / 3.0f;
+			float singleRoadWidth = 1 / 12.0f;
+			Vector3 base = Vector3(int(position[0]), 0, int(position[2]));
+			Vector3 calibration;
+
+			switch (orientation)
+			{
+			case 1:
+				if (angularSpeed < 0)// down right turn
+				{
+					direction = Vector3(1, 0, 0);
+					orientation = 2;
+					break;
+				}
+				else// down left turn
+				{
+					direction = Vector3(-1, 0, 0);
+					orientation = 4;
+					break;
+				}
+			case 2:
+				if (angularSpeed < 0)// right up turn
+				{
+					direction = Vector3(0, 0, -1);
+					orientation = 3;
+					break;
+				}
+				else// right down turn
+				{
+					direction = Vector3(0, 0, 1);
+					orientation = 1;
+					break;
+				}
+			case 3:
+				if (angularSpeed < 0)// up left turn
+				{
+					direction = Vector3(-1, 0, 0);
+					orientation = 4;
+					break;
+				}
+				else// up right turn
+				{
+					direction = Vector3(1, 0, 0);
+					orientation = 2;
+					break;
+				}
+			case 4:
+				if (angularSpeed < 0)// left down turn
+				{
+					direction = Vector3(0, 0, 1);
+					orientation = 1;
+					break;
+				}
+				else// left up turn
+				{
+					direction = Vector3(0, 0, -1);
+					orientation = 3;
+					break;
+				}
+			}
+
+			calibration = Calibration(orientation);
+			position = base + calibration;
+			rotatedAngle = 0.0f;
+		}
+	}
 	startTime = curTime;
-	carNode->translate(speed * direction * deltaTime);
 }
 
 bool Car::IsOutOfBound(int l, int r, int t, int b)
@@ -726,4 +882,30 @@ bool Car::IsOutOfBound(int l, int r, int t, int b)
 		return false;
 	else
 		return true;
+}
+
+//helper functions
+Vector3 Calibration(int orientation)
+{
+	Vector3 calibration;
+	float totalRoadWidth = 1 / 3.0f;
+	float singleRoadWidth = 1 / 12.0f;
+
+	switch (orientation)
+	{
+	case 1:
+		calibration = Vector3(totalRoadWidth + singleRoadWidth, 0, 2 * totalRoadWidth);
+		break;
+	case 2:
+		calibration = Vector3(2 * totalRoadWidth, 0, 2 * totalRoadWidth - singleRoadWidth);
+		break;
+	case 3:
+		calibration = Vector3(2 * totalRoadWidth - singleRoadWidth, 0, totalRoadWidth);
+		break;
+	case 4:
+		calibration = Vector3(0, 0, totalRoadWidth + singleRoadWidth);
+		break;
+	}
+
+	return calibration;
 }
