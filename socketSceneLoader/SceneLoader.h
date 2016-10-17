@@ -198,7 +198,7 @@ namespace Block
 		CarDir()
 		{
 			lcrossDir = 1;
-			tcrossDir = 1;
+			tcrossDir = 0;
 			xcrossDir = 0;
 		}
 	};

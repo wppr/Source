@@ -16,6 +16,7 @@ using std::stringstream;
 
 #define PI 3.141592654
 Vector3 Calibration(int orientation);
+Vector3 PivotCalibration(int orientation, bool clockWise);
 
 SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height, int l, int r, int t, int b)
 	: scene(scene), meshMgr(meshMgr), width(width), height(height), l(l), r(r), t(t), b(b)
@@ -643,6 +644,8 @@ void SceneLoader::MoveCars(float curTime)
 			}
 			else if ((Entry::EntryType::LCROSS == type || Entry::EntryType::TCROSS == type || Entry::EntryType::XCROSS == type) && !isStart)
 			{
+				printf("curX curZ %d %d\n", curX, curZ);
+				printf("oriX oriZ %d %d\n", oriX, oriZ);
 				float delta;
 				Vector3 pos = it->GetCurPosition();
 				int crossOrientation = this->layoutMatrix[curZ * width + curX].GetBlock()[0].orientation;
@@ -754,7 +757,7 @@ void SceneLoader::MoveCars(float curTime)
 					if (newOrien == preOrien)//straight
 						turnTag = false;
 
-					pivot = base + Calibration(newOrien);
+					pivot = base + PivotCalibration(preOrien, clockWise);
 
 					if (clockWise)
 					{
@@ -794,23 +797,35 @@ void Car::Move(float curTime)
 	}
 	else//turn
 	{
-		carNode->rotate(Vector3(0, 1, 0), deltaTime * angularSpeed);//rotate local
+		float theta = deltaTime * angularSpeed;
+		carNode->rotate(Vector3(0, 1, 0), theta);//rotate local
 		
-		printf("rotatedAngle %.2f\n", rotatedAngle);
-		printf("deltaTime %.2f\n", deltaTime);
+		Matrix3 m(cos(-theta), 0, -sin(-theta),
+				  0,          1,           0, 
+				  sin(-theta), 0,  cos(-theta));
+		Vector3 pivotToNode = carNode->getLocalTranslation() - pivot;
+		pivotToNode = m * pivotToNode;
+		carNode->setTranslation(pivot + pivotToNode);
+		
+		printf("angularSpeed %.2f\n", angularSpeed);
+		printf("getLocalTranslation %.2f %.2f %.2f\n", carNode->getLocalTranslation()[0], carNode->getLocalTranslation()[1], carNode->getLocalTranslation()[2]);
+		printf("pivot %.2f %.2f %.2f\n", pivot[0], pivot[1], pivot[2]);
+		//system("pause");
+
 		rotatedAngle += deltaTime * angularSpeed;
 		if (rotatedAngle > PI / 2 || rotatedAngle < -PI / 2)// rotate a quater, back to straight
 		{
 			this->turn = false;
 			float totalRoadWidth = 1 / 3.0f;
 			float singleRoadWidth = 1 / 12.0f;
-			Vector3 base = Vector3(int(position[0]), 0, int(position[2]));
+			Vector3 curPos = carNode->getLocalTranslation();
+			Vector3 base = Vector3(int(curPos[0]), 0, int(curPos[2]));
 			Vector3 calibration;
 
 			switch (orientation)
 			{
 			case 1:
-				if (angularSpeed < 0)// down right turn
+				if (angularSpeed > 0)// down right turn
 				{
 					direction = Vector3(1, 0, 0);
 					orientation = 2;
@@ -823,7 +838,7 @@ void Car::Move(float curTime)
 					break;
 				}
 			case 2:
-				if (angularSpeed < 0)// right up turn
+				if (angularSpeed > 0)// right up turn
 				{
 					direction = Vector3(0, 0, -1);
 					orientation = 3;
@@ -836,7 +851,7 @@ void Car::Move(float curTime)
 					break;
 				}
 			case 3:
-				if (angularSpeed < 0)// up left turn
+				if (angularSpeed > 0)// up left turn
 				{
 					direction = Vector3(-1, 0, 0);
 					orientation = 4;
@@ -849,7 +864,7 @@ void Car::Move(float curTime)
 					break;
 				}
 			case 4:
-				if (angularSpeed < 0)// left down turn
+				if (angularSpeed > 0)// left down turn
 				{
 					direction = Vector3(0, 0, 1);
 					orientation = 1;
@@ -865,6 +880,7 @@ void Car::Move(float curTime)
 
 			calibration = Calibration(orientation);
 			position = base + calibration;
+			carNode->setTranslation(position);
 			rotatedAngle = 0.0f;
 		}
 	}
@@ -904,6 +920,42 @@ Vector3 Calibration(int orientation)
 		break;
 	case 4:
 		calibration = Vector3(0, 0, totalRoadWidth + singleRoadWidth);
+		break;
+	}
+
+	return calibration;
+}
+
+Vector3 PivotCalibration(int orientation, bool clockWise)
+{
+	Vector3 calibration;
+	float totalRoadWidth = 1 / 3.0f;
+
+	switch (orientation)
+	{
+	case 1:
+		if (clockWise)
+			calibration = Vector3(totalRoadWidth, 0, totalRoadWidth);
+		else
+			calibration = Vector3(2 * totalRoadWidth, 0, totalRoadWidth);
+		break;
+	case 2:
+		if (clockWise)
+			calibration = Vector3(totalRoadWidth, 0, 2 * totalRoadWidth);
+		else
+			calibration = Vector3(totalRoadWidth, 0, totalRoadWidth);
+		break;
+	case 3:
+		if (clockWise)
+			calibration = Vector3(2 * totalRoadWidth, 0, 2 * totalRoadWidth);
+		else
+			calibration = Vector3(totalRoadWidth, 0, 2 * totalRoadWidth);
+		break;
+	case 4:
+		if (clockWise)
+			calibration = Vector3(2 * totalRoadWidth, 0, totalRoadWidth);
+		else
+			calibration = Vector3(2 * totalRoadWidth, 0, 2 * totalRoadWidth);
 		break;
 	}
 
