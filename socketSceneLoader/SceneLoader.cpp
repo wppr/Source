@@ -71,7 +71,6 @@ void SceneLoader::ParseScene(string json, float time)
 	}
 	if (!crosses.empty())
 	{
-		//cout << crosses.size() << std::endl;
 		crosses.clear();
 	}
 	 
@@ -552,7 +551,6 @@ int SceneLoader::GetCarName()//find first name not used
 void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID, bool flag)
 {
 	int name = GetCarName();
-	printf("name %d\n", name);
 	SceneNode* carNode = this->scene->CreateSceneNode("car" + to_string(name));
 	carNode->setScale(0.01, 0.01, 0.01);
 	this->carRoot->attachNode(carNode);
@@ -595,19 +593,8 @@ void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float 
 		this->newCars.push_back(car);
 }
 
-void SceneLoader::MergeCars()
-{
-	for (list<Car>::iterator it = newCars.begin(); it != newCars.end(); ++it)
-	{
-		cars.push_back(*it);
-	}
-
-	newCars.clear();
-}
-
 void SceneLoader::MoveCars(float curTime)
 {
-	printf("move cars\n");
 	for (list<Car>::iterator it = cars.begin(); it != cars.end(); )
 	{
 		it->Move(curTime);
@@ -645,8 +632,6 @@ void SceneLoader::MoveCars(float curTime)
 			}
 			else if ((Entry::EntryType::LCROSS == type || Entry::EntryType::TCROSS == type || Entry::EntryType::XCROSS == type) && !isStart)
 			{
-				printf("curX curZ %d %d\n", curX, curZ);
-				printf("oriX oriZ %d %d\n", oriX, oriZ);
 				float delta;
 				Vector3 pos = it->GetCurPosition();
 				int crossOrientation = this->layoutMatrix[curZ * width + curX].GetBlock()[0].orientation;
@@ -682,15 +667,15 @@ void SceneLoader::MoveCars(float curTime)
 					{
 					case Entry::EntryType::LCROSS :
 					
-						orien = preOrien + 1;// -> _|
+						orien = (preOrien + 1) % 4;// -> _|
 						if (!orien) orien = 4;
 						if (orien == crossOrientation)
 						{
 							newOrien = crossOrientation;
 							clockWise = false;
 						}
-											 //    _
-						orien = preOrien + 2;// ->  |
+											       //    _
+						orien = (preOrien + 2) % 4;// ->  |
 						if (!orien) orien = 4;
 						if (orien == crossOrientation)
 						{
@@ -714,7 +699,7 @@ void SceneLoader::MoveCars(float curTime)
 							}
 						}
 											 
-						orien = preOrien + 1;// ->  -|
+						orien = (preOrien + 1) % 4;// ->  -|
 						if (!orien) orien = 4;
 						if (orien == crossOrientation)
 						{
@@ -729,8 +714,8 @@ void SceneLoader::MoveCars(float curTime)
 								clockWise = true;
 							}
 						}
-											 //    _ _
-						orien = preOrien + 2;// ->  |
+											       //    _ _
+						orien = (preOrien + 2) % 4;// ->  |
 						if (!orien) orien = 4;
 						if (orien == crossOrientation)
 						{
@@ -754,7 +739,6 @@ void SceneLoader::MoveCars(float curTime)
 
 					newOrien = newOrien % 4;
 					if (!newOrien) newOrien = 4;
-					printf("newOrien %d\n", newOrien);
 					if (newOrien == preOrien)//straight
 						turnTag = false;
 
@@ -808,9 +792,6 @@ void Car::Move(float curTime)
 		pivotToNode = m.transpose() * pivotToNode;
 		carNode->setTranslation(pivot + pivotToNode);
 		
-		printf("angularSpeed %.2f\n", angularSpeed);
-		printf("getLocalTranslation %.2f %.2f %.2f\n", carNode->getLocalTranslation()[0], carNode->getLocalTranslation()[1], carNode->getLocalTranslation()[2]);
-		printf("pivot %.2f %.2f %.2f\n", pivot[0], pivot[1], pivot[2]);
 		//system("pause");
 
 		rotatedAngle += deltaTime * angularSpeed;
@@ -882,6 +863,9 @@ void Car::Move(float curTime)
 			calibration = Calibration(orientation);
 			position = base + calibration;
 			carNode->setTranslation(position);
+
+			Quaternion quaternion((orientation - 1) * 0.5f * PI, Vector3(0, 1, 0));
+			carNode->setOrientation(quaternion);
 			rotatedAngle = 0.0f;
 		}
 	}
