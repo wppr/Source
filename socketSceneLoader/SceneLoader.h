@@ -237,11 +237,13 @@ namespace Block
 		void GetRandomCars(vector<Vector3>& roadPos, vector<Quaternion>& roadOrien);
 		int GetCarName();
 
-		// EBus by Jie
+		// EBus 
+		//by Jie
 		vector<EBusTrack> GetEBusTrack();
 		void ShowBusLine(vector<EBusTrack>& eBusTrack);
-		void GenerateEBus(vector<EBusTrack>& eBusTrack, EBus& ebus);
-
+		void GenerateEBus(EBus& ebus);
+		//by leong
+		void InitEbus();
 
 		//Getters & Setters
 		int GetWidth()
@@ -296,8 +298,10 @@ namespace Block
 		SceneNode** sceneNodes;
 		SceneNode** floarNodes;
 		Entity** floarEntities;
+		SceneNode* floorRoot;
 		SceneNode* carRoot;
 		SceneNode* entityRoot;
+		SceneNode* eBusNode;
 
 		string staticJson;
 

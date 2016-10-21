@@ -21,20 +21,20 @@ vector<EBusTrack> SceneLoader::GetEBusTrack()
 	{
 		for (int j = 0; j < (RIGHT - LEFT); j++)
 		{
-			string BlockName=layoutMatrix[i*width + j].GetBlockName(); //  xcross, tcross, lcross, xcross_greenlight, tcross_greenlight, lcross_greenlight, 站台是个啥
+			string BlockName=layoutMatrix[i*width + j + LEFT].GetBlockName().substr(0, 6); //  xcross, tcross, lcross, xcross_greenlight, tcross_greenlight, lcross_greenlight, 站台是个啥
 			if ("xcross" == BlockName || "tcross" == BlockName || "lcross" == BlockName || "xcross_greenlight" == BlockName || "tcross_greenlight" == BlockName || "lcross_greenlight" == BlockName)
 			{
 				if ((i+j)<index_LT)
 				{
 					index_LT = i + j;
-					index_L = j;
+					index_L = j + LEFT;
 					index_T = i;
 				}
 
 				if ((i+j)>index_RB)
 				{
 					index_RB = i + j;
-					index_R = j;
+					index_R = j + LEFT;
 					index_B = i;
 				}
 			}
@@ -58,9 +58,9 @@ vector<EBusTrack> SceneLoader::GetEBusTrack()
 	eBusTrack.push_back(start);
 
 	// check the existence of the middle point
-	string BlockName = layoutMatrix[middlePoint.y*(RIGHT - LEFT) + middlePoint.x].GetBlockName();
+	string BlockName = layoutMatrix[middlePoint.y*width + middlePoint.x].GetBlockName().substr(0, 6);
 
-	if ("xcross" == BlockName || "tcross" == BlockName || "lcross" == BlockName || "xcross_greenlight" == BlockName || "tcross_greenlight" == BlockName || "lcross_greenlight" == BlockName)
+	if ("xcross" == BlockName || "tcross" == BlockName || "lcross" == BlockName)
 	{
 		// Join the way from the starting point to ending point
 		for (int i = start.y + 1; i < end.y; i++)
@@ -85,7 +85,24 @@ vector<EBusTrack> SceneLoader::GetEBusTrack()
 
 void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 {
-	// By Wu pengpeng
+	// By Leong
+	for (vector<EBusTrack>::iterator it = eBusTrack.begin(); it != eBusTrack.end(); ++it)
+	{
+		int x = it->x;
+		int y = it->y;
+		vector<BlockDef>& blocks = layoutMatrix[y * width + x].GetBlock();
+		for (int i = 0; i < blocks.size(); ++i)
+		{
+			vector<int>& meshIDs = blocks[i].meshID;
+			for (int j = 0; j < meshIDs.size(); ++j)
+			{
+				if (meshIDs[j] == bh.meshMap["road1"])
+					meshIDs[j] = bh.meshMap["road1red"];
+				if (meshIDs[j] == bh.meshMap["road2"])
+					meshIDs[j] = bh.meshMap["road2red"];
+			}
+		}
+	}
 }
 
 // all global variables in GetBusInfo
@@ -357,8 +374,14 @@ int SceneLoader::GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double ti
 	return 4;
 }
 
-void SceneLoader::GenerateEBus(vector<EBusTrack>& eBusTrack, EBus& ebus)   // Generate Ebus and dynamic energy level
+void SceneLoader::GenerateEBus(EBus& ebus)   // Generate Ebus and dynamic energy level
 {
 	// By Liang yuzhi
+
+}
+
+void SceneLoader::InitEbus()
+{
+	this->eBusNode = scene->CreateSceneNode("ebusNode");
 }
 

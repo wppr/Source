@@ -9,7 +9,7 @@
 using namespace Block;
 using namespace rapidjson;
 using std::pair;
-using std::cout;
+using std::cout; 
 using std::endl;
 using std::pair;
 using std::ifstream;
@@ -254,6 +254,10 @@ void SceneLoader::ParseScene(string json, float time)
 			}
 		}
 	}
+
+	//ebus
+	vector<EBusTrack> eBusTrack;
+
 }
 
 void SceneLoader::GetRandomCars(vector<Vector3>& streetPos, vector<Quaternion>& streetOrien)
@@ -384,7 +388,7 @@ void SceneLoader::AttachFloar()
 {
 	SceneManager* scene_instance = SceneContainer::getInstance().get("scene1");
 	SceneNode* root = scene_instance->GetSceneRoot();
-	SceneNode* floorRoot = scene->CreateSceneNode("floorRoot");
+	floorRoot = scene->CreateSceneNode("floorRoot");
 	root->attachNode(floorRoot);
 
 	for (int i = 0; i < height; i++) {
@@ -400,13 +404,18 @@ void SceneLoader::AttachFloar()
 
 void SceneLoader::UpdateSceneNodes(float curTime)
 {
+	//ebus
+	vector<EBusTrack> eBusTrack;
+	EBus ebus;
+	GetEBusInfo(eBusTrack, ebus, curTime);
+	ShowBusLine(eBusTrack);
+
+	//modify sceneNodes
 	SceneManager* scene = SceneContainer::getInstance().get("scene1");
 	SceneNode* root = scene->GetSceneRoot();
 	entityRoot->detachAllNodes();
 
 	MoveCars(curTime);
-
-	//MergeCars();
 
 	for (int i = 0; i < height; i++) {
 
@@ -529,7 +538,7 @@ void SceneLoader::LoadJson()
 	stringstream ss;
 
 	ss.str("");
-	stream1.open("model/uniform/data/block.json");
+	stream1.open("model/uniform/data/block1.json");
 	if (stream1.is_open())
 	{
 		ss << stream1.rdbuf();

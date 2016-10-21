@@ -24,6 +24,7 @@ struct BlockDef
 class BlockHelper {
 public:
 	map<string, BlockDef> blockPresets;
+	map<string, int> meshMap;
 	vector<MeshPtr> meshs;
 	SceneManager* scene=NULL;
 	MeshManager* meshMgr=NULL;
@@ -101,8 +102,8 @@ public:
 		for (int i = 10; i <= 15; i++) {
 			modellist[i] = "building" + to_string(i) + ".obj";
 		}
-		modellist[16] = "road1.obj";
-		modellist[17] = "road2.obj";
+		modellist[16] = "road1.obj";//15
+		modellist[17] = "road2.obj";//16
 		modellist[18] = "lightGreen2.obj";
 		modellist[19] = "lightRed2.obj";
 		modellist[20] = "lightYellow2.obj";
@@ -119,14 +120,19 @@ public:
 			modellist[end] = "v2/b" + to_string(i) + ".obj";
 			end++;
 		}
-		modellist[end] = "v2/grass.obj";
-		end++;
+		modellist[end++] = "v2/grass.obj";
+		modellist[end++] = "road1red.obj";//68
+		modellist[end++] = "road2red.obj";//69
 
 		for (int i = 1; i < end; i++) {
 			MeshPtr mesh = meshMgr->loadMesh_assimp_check("", "model/uniform/" + modellist[i]);
 			meshs.push_back(mesh);
 		}
 
+		meshMap["road1"] = 15;
+		meshMap["road2"] = 16;
+		meshMap["road1red"] = 68;
+		meshMap["road2red"] = 69;
 		FillBlockData();
 	}
 	void AttachBlock(string blockname, string nodename, Vector3 pos) {
