@@ -158,7 +158,7 @@ void SceneLoader::ParseScene(string json, float time)
 	Value &cars = root["cars"];
 	if (!cars.IsNull())
 	{
-
+		printf("size %d\n", cars.Size());
 		for (SizeType i = 0; i < cars.Size(); ++i)
 		{
 			float posX = cars[i]["position"]["x"].GetInt();
@@ -404,11 +404,13 @@ void SceneLoader::AttachFloar()
 
 void SceneLoader::UpdateSceneNodes(float curTime)
 {
-	//ebus
+	//ebus track
 	vector<EBusTrack> eBusTrack;
 	EBus ebus;
 	GetEBusInfo(eBusTrack, ebus, curTime);
 	ShowBusLine(eBusTrack);
+	//draw ebus
+	GenerateEBus(ebus);
 
 	//modify sceneNodes
 	SceneManager* scene = SceneContainer::getInstance().get("scene1");
@@ -561,7 +563,6 @@ void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float 
 {
 	int name = GetCarName();
 	SceneNode* carNode = this->scene->CreateSceneNode("car" + to_string(name));
-	carNode->setScale(0.01, 0.01, 0.01);
 	this->carRoot->attachNode(carNode);
 	MeshPtr mesh = this->carMeshes[meshID];
 
@@ -588,18 +589,14 @@ void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float 
 	case 3: 
 		direction = Vector3(0, 0, -1); 
 		break;
-	case 4: 
+	case 4:
 		direction = Vector3(-1, 0, 0); 
 		break;
 	}
 
 	calibration = Calibration(orientation);
 	Car car(position + calibration, direction, orientation, meshID, speed, carNode, startTime, name);
-
-	if (!flag)//push to old
-		this->cars.push_back(car);
-	else      //push to new
-		this->newCars.push_back(car);
+	this->cars.push_back(car);
 }
 
 void SceneLoader::MoveCars(float curTime)
@@ -617,7 +614,6 @@ void SceneLoader::MoveCars(float curTime)
 			int oriX = oriPos[0];
 			int oriZ = oriPos[2];
 			Entry::EntryType type = this->layoutMatrix[curZ * width + curX].GetEntryType();
-
 
 			bool isStart = (curX == oriX && curZ == oriZ);
 
@@ -913,7 +909,7 @@ Vector3 Calibration(int orientation)
 		calibration = Vector3(2 * totalRoadWidth - singleRoadWidth, 0, totalRoadWidth);
 		break;
 	case 4:
-		calibration = Vector3(0, 0, totalRoadWidth + singleRoadWidth);
+		calibration = Vector3(totalRoadWidth, 0, totalRoadWidth + singleRoadWidth);
 		break;
 	}
 

@@ -240,10 +240,15 @@ namespace Block
 		// EBus 
 		//by Jie
 		vector<EBusTrack> GetEBusTrack();
-		void ShowBusLine(vector<EBusTrack>& eBusTrack);
-		void GenerateEBus(EBus& ebus);
+		int GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
 		//by leong
 		void InitEbus();
+		void ShowBusLine(vector<EBusTrack>& eBusTrack);
+		void GenerateEBus(EBus& ebus);
+
+		//cars
+		void PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID, bool flag);//false : cars; true : newcars
+		void MoveCars(float curTime);
 
 		//Getters & Setters
 		int GetWidth()
@@ -272,11 +277,6 @@ namespace Block
 		//Server
 		void InitClient(string ip, string port);
 
-		//cars
-		void PushCar(Vector3 position, int orientation, float speed, float startTime, int meshID, bool flag);//false : cars; true : newcars
-		void MoveCars(float curTime);
-		int GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
-
 		//block
 		BlockHelper bh;
 	private :
@@ -286,7 +286,6 @@ namespace Block
 		vector<Vector3> streetPos;
 		vector<Quaternion> streetOrien;
 		list<Car> cars;
-		list<Car> newCars;
 		bool carNames[200];
 		CarDir carDir;
 

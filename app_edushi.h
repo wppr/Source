@@ -93,21 +93,15 @@ public:
 		sl = new SceneLoader(scene, meshMgr, 32, 16, LEFT, RIGHT, TOP, BOTTOM);
 		sl->loadMesh();
 		sl->InitClient(c.ip, c.port);
+		sl->InitEbus();
 
 		sl->LoadJson();
 		sl->show_json = true;
 
 		sl->UpdateScene(AbsolutTime);
-		//CarSim.Init(this);
 		vector<Vector3> pos;
 		vector<Quaternion> orients;
-		//sl->GetRandomCars(pos,orients);
-		//CarSim.GenRandomCars(pos, orients);
 		
-		//SetCamera1();
-		//c.cameraPos = camera->getPosition();
-		//c.cameraUp == camera->getUp();
-		//c.LookCenter = getSceneCenter(c.mapw, c.maph);
 		UpdateCamera(c);
 	}
 	Vector3 getSceneCenter(int w,int h) {
@@ -173,7 +167,6 @@ public:
 		else
 		{
 			c.cameraRoundAngle = originConfig.cameraRoundAngle;
-			//UpdateCamera(c);
 			firstRotate = true;
 		}
 

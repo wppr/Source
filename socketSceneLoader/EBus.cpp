@@ -376,12 +376,36 @@ int SceneLoader::GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double ti
 
 void SceneLoader::GenerateEBus(EBus& ebus)   // Generate Ebus and dynamic energy level
 {
-	// By Liang yuzhi
+	printf("ebus %.2f %.2f\n", ebus.location.first, ebus.location.second);
 
+	// By Leong
+	Vector3 trans = Vector3(ebus.location.first, 0, ebus.location.second);
+
+	int orien;
+	if (ebus.direction == pair<int, int>(0, 1))
+		orien = 1;
+	else if (ebus.direction == pair<int, int>(1, 0))
+		orien = 2;
+	else if (ebus.direction == pair<int, int>(0, -1))
+		orien = 3;
+	else if (ebus.direction == pair<int, int>(-1, 0))
+		orien = 4;
+	Quaternion quaternion((orien - 1) * 0.5f * PI, Vector3(0, 1, 0));
+
+	eBusNode->setTranslation(trans);
+	eBusNode->setOrientation(quaternion);
 }
 
 void SceneLoader::InitEbus()
 {
 	this->eBusNode = scene->CreateSceneNode("ebusNode");
+	this->carRoot->attachNode(eBusNode);
+	MeshPtr mesh = this->carMeshes[1];//default
+
+	eBusNode->setScale(0.04, 0.04, 0.04);
+	Entity* entity = this->scene->CreateEntity("ebusEntity");
+	eBusNode->attachMovable(entity);
+	entity->setMesh(mesh);
+
 }
 
