@@ -29,7 +29,9 @@ using namespace std;
 struct MonitorConfig {
 	bool bfullscreen = true;
 	int monitor_id = 0;
-	META(N(bfullscreen), N(monitor_id));
+	bool windowEdge=false;
+	int posx = 100, posy = 100;
+	META(N(windowEdge), N(posx), N(posy));
 };
 
 class GLFWFrameWork
@@ -56,15 +58,13 @@ public:
 		}	
 		//glfwWindowHint(GLFW_SAMPLES, samples);
 
-		serializeLoad("MonitorConfig.txt", mconfig);
-		int count;
-		GLFWmonitor** monitors = glfwGetMonitors(&count);
-		if(!mconfig.bfullscreen)
-			window = glfwCreateWindow(w, h, "Window", NULL, NULL);
-		else {
-			window = glfwCreateWindow(w, h, "Window", NULL, NULL);
-		}
-		
+
+		//serializeLoad("MonitorConfig.txt", mconfig);
+		glfwWindowHint(GLFW_DECORATED, mconfig.windowEdge);
+		window = glfwCreateWindow(w, h, "Window", NULL, NULL);
+		//设置窗口位置，如果第一个显示器是1080p，第二个初始位置是1080
+		glfwSetWindowPos(window, mconfig.posx, mconfig.posy);
+
 		if (!window) {
 			fprintf(stderr, "ERROR: could not open window with GLFW3\n");
 			glfwTerminate();
@@ -101,7 +101,7 @@ public:
 		glfwSetCharCallback(window, InteractionControler::char_callback);
 
 		LastTime = glfwGetTime();
-		glfwSwapInterval(0);
+		glfwSwapInterval(2);
 	}
 
 	void Loop() {
