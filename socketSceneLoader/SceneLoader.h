@@ -196,10 +196,10 @@ namespace Block
 		int xcrossDir;// 0, 1, 2
 
 		CarDir()
-		{
+		{ 
 			lcrossDir = 1;
 			tcrossDir = 0;
-			xcrossDir = 0;
+			xcrossDir = 2;
 		}
 	};
 

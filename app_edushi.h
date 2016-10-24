@@ -95,8 +95,8 @@ public:
 		sl->InitClient(c.ip, c.port);
 		sl->InitEbus();
 
-		sl->LoadJson();
-		sl->show_json = true;
+		/*sl->LoadJson();
+		sl->show_json = true;*/
 
 		sl->UpdateScene(AbsolutTime);
 		vector<Vector3> pos;

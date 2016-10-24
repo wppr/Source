@@ -736,16 +736,18 @@ void SceneLoader::MoveCars(float curTime)
 						break;
 
 					case Entry::EntryType::XCROSS:
-
-						newOrien = preOrien + 2 + carDir.xcrossDir + 1;
+						newOrien = preOrien + carDir.xcrossDir - 1;
 
 						break;
 					}
 
-					newOrien = newOrien % 4;
-					if (!newOrien) newOrien = 4;
-					if (newOrien == preOrien)//straight
+					int orienChange = (newOrien + 4 - preOrien) % 4;
+					if (orienChange == 3)
+						clockWise = true;
+					else if (orienChange == 0)
 						turnTag = false;
+					else if (orienChange == 1)
+						clockWise = false;
 
 					pivot = base + PivotCalibration(preOrien, clockWise);
 
