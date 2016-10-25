@@ -25,6 +25,8 @@ public :
 		TAXI,
 		PRIVATECAR
 	};
+
+	inline EBus() {}
 	//void GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus);
 public :
 	int id;
@@ -43,7 +45,7 @@ public :
 	int meet(vector<EBusTrack>& stations);
 	inline EBus(double timeStamp)
 	{
-		startStopTime = 0;
+		startStopTime = timeStamp;
 		status = EBus::CHARGING;
 		speed = 0.0;
 		runningStage = 1;
@@ -57,7 +59,7 @@ public :
 	}
 	inline void reset(double timeStamp)
 	{
-		startStopTime = 0;
+		startStopTime = timeStamp;
 		status = EBus::CHARGING;
 		speed = 0.0;
 		runningStage = 1;
