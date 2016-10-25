@@ -239,8 +239,11 @@ namespace Block
 
 		// EBus 
 		//by Jie
-		vector<EBusTrack> GetEBusTrack();
-		int GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
+		vector<EBusTrack> GetEBusTrack_Unfixed();
+		int GetEBusInfo_Unfixed(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
+
+		vector<EBusTrack> GetEBusTrack_Fixed();
+		int GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
 		//by leong
 		void InitEbus();
 		void ShowBusLine(vector<EBusTrack>& eBusTrack);

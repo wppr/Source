@@ -2,7 +2,62 @@
 #include "SceneLoader.h"
 using namespace Block;
 
-vector<EBusTrack> SceneLoader::GetEBusTrack()
+vector<EBusTrack> SceneLoader::GetEBusTrack_Fixed()
+{
+	vector <EBusTrack> eBusTrack;
+
+	EBusTrack track1(3+6,1);
+	EBusTrack track2(3+6, 2);
+	EBusTrack track3(3+6, 3);
+	EBusTrack track4(4+6, 3);
+	EBusTrack track5(5+6, 3);
+	EBusTrack track6(5+6, 4);
+	EBusTrack track7(5+6, 5);
+	EBusTrack track8(6+6, 5);
+	EBusTrack track9(7+6, 5);
+	EBusTrack track10(8+6, 5);
+	EBusTrack track11(9+6, 5);
+	EBusTrack track12(9+6, 4);
+	EBusTrack track13(9+6, 3);
+	EBusTrack track14(9+6, 2);
+	EBusTrack track15(9+6, 1);
+	EBusTrack track16(10+6, 1);
+	EBusTrack track17(11+6, 1);
+	EBusTrack track18(12+6, 1);
+	EBusTrack track19(12+6, 2);
+	EBusTrack track20(12+6, 3);
+	EBusTrack track21(12+6, 4);
+	EBusTrack track22(12+6, 5);
+	EBusTrack track23(12+6, 6);
+
+	eBusTrack.push_back(track1);
+	eBusTrack.push_back(track2);
+	eBusTrack.push_back(track3);
+	eBusTrack.push_back(track4);
+	eBusTrack.push_back(track5);
+	eBusTrack.push_back(track6);
+	eBusTrack.push_back(track7);
+	eBusTrack.push_back(track8);
+	eBusTrack.push_back(track9);
+	eBusTrack.push_back(track10);
+	eBusTrack.push_back(track11);
+	eBusTrack.push_back(track12);
+	eBusTrack.push_back(track13);
+	eBusTrack.push_back(track14);
+	eBusTrack.push_back(track15);
+	eBusTrack.push_back(track16);
+	eBusTrack.push_back(track17);
+	eBusTrack.push_back(track18);
+	eBusTrack.push_back(track19);
+	eBusTrack.push_back(track20);
+	eBusTrack.push_back(track21);
+	eBusTrack.push_back(track22);
+	eBusTrack.push_back(track23);
+
+	return eBusTrack;
+
+}
+vector<EBusTrack> SceneLoader::GetEBusTrack_Unfixed()
 {
 	int index_LT = 100;   // sum of Left-Top index
 	int index_L = 100;    // x
@@ -156,16 +211,296 @@ int last_end_y=-1;
 int station_flag = 0;   // flag of station
 double stop_time = 0.0;  // the start time when entering the station 
 
+int stage = 0;
+double timeShift = 0.0;
+
+
+// in starting point, return 1;
+
+
+int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp)
+{
+	vector<EBusTrack> stations;         // vector of all stations
+	eBusTrack = GetEBusTrack_Fixed();  // Get the EBus Line
+    // get the position of all bus stations in the BusTrack vector, and store them in a new vector ( vector<EBusTrack> stations ).
+	for (vector<EBusTrack>::iterator iter = eBusTrack.begin(); iter != eBusTrack.end(); iter++)
+	{
+		EBusTrack station_tmp;                  // temporary station
+		int row = (*iter).y;
+		int column = (*iter).x;
+		string BlockName = layoutMatrix[row*width + column].GetBlockName();
+		if ("station" == BlockName || "newChargingStation"==BlockName)
+		{
+			station_tmp.x = column;
+			station_tmp.y = row;
+			stations.push_back(station_tmp);
+		}
+	}
+
+	// main part
+	if ((time_prior - 0.0) < 1e-8)      // when time_prior=0.0, the bus is located in starting point
+	{
+		ebus.location.first = 3.0 + 12 / 5.0 + 6;      // Location
+		ebus.location.second = 1 + 1 / 6.0;
+		ebus.direction.first = 0;                       // Direction
+		ebus.direction.second = 1;
+		ebus.status = EBus::CHARGING;  // status
+		ebus.speed = 0.0;              // Charging speed
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+
+		last_position_x = ebus.location.first;
+		last_position_y = ebus.location.second;
+		start_time = timeStamp;
+		time_prior = timeStamp;       // Save the timeStamp of last loop
+		return 1;
+	}
+
+	if (timeStamp < (start_time + 5.0))   // Charging for 5.0 seconds
+	{
+		ebus.location.first = 3.0 + 12 / 5.0 + 6;      // Location
+		ebus.location.second = 1 + 1 / 6.0;
+		ebus.direction.first = 0;                       // Direction
+		ebus.direction.second = 1;
+		ebus.status = EBus::CHARGING;  // Status
+		ebus.speed = 0.0;              // Charging speed
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+
+		last_position_x = ebus.location.first;
+		last_position_y = ebus.location.second;
+		time_prior = timeStamp;       // Save the timeStamp of last loop
+
+		stage = 1;
+		return 1;
+	}
+
+	switch (stage)
+	{
+	case 1:   // stage 1
+		ebus.direction.first = 0;   //direction
+		ebus.direction.second = 1;
+		timeShift = timeStamp - time_prior;
+		time_prior = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+		ebus.location.first = last_position_x;   // location
+		ebus.location.second = last_position_y + timeShift*ebus.speed;
+		last_position_x = ebus.location.first;
+		last_position_y = ebus.location.second;
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (last_position_y > (3 + 1 / 2.0))
+		{
+			ebus.direction.first = 1;   //direction
+			ebus.direction.second = 0;
+			ebus.location.first = 3 + 1 / 2.0 + 6.0;
+			ebus.location.second = 3 + 7 / 12.0;
+
+			ebus.speed = 3.0;              // speed
+			last_position_x = ebus.location.first;
+			last_position_y = ebus.location.second;
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+			stage = 2;
+		}
+		break;
+	case 2:  // stage 2
+		ebus.direction.first = 1;   //direction
+		ebus.direction.second = 0;
+		timeShift = timeStamp - time_prior;
+		time_prior = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+		ebus.location.first = last_position_x + timeShift*ebus.speed;   // location
+		ebus.location.second = last_position_y;
+		last_position_x = ebus.location.first;
+		last_position_y = ebus.location.second;
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (last_position_x > (5 + 1 / 2.0+6.0))
+		{
+			ebus.direction.first = 0;   //direction
+			ebus.direction.second = 1;
+			ebus.location.first = 5 + 5 / 12.0 + 6.0;
+			ebus.location.second = 3 + 1 / 2.0;
+
+			ebus.speed = 3.0;              // speed
+			last_position_x = ebus.location.first;
+			last_position_y = ebus.location.second;
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+			stage = 3;
+		}
+		break;
+	case 3:  // stage 3
+		ebus.direction.first = 0;   //direction
+		ebus.direction.second = 1;
+		timeShift = timeStamp - time_prior;
+		time_prior = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+		ebus.location.first = last_position_x;   // location
+		ebus.location.second = last_position_y + timeShift*ebus.speed;
+		last_position_x = ebus.location.first;
+		last_position_y = ebus.location.second;
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (last_position_y > (5 + 1 / 2.0))
+		{
+			ebus.direction.first = 1;   //direction
+			ebus.direction.second = 0;
+			ebus.location.first = 5 + 1 / 2.0 + 6.0;
+			ebus.location.second = 5 + 7 / 12.0;
+
+			ebus.speed = 1.0;              // speed
+			last_position_x = ebus.location.first;
+			last_position_y = ebus.location.second;
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+			stage = 4;
+		}
+		break;
+	case 4:  // stage 4
+		ebus.direction.first = 1;   //direction
+		ebus.direction.second = 0;
+		timeShift = timeStamp - time_prior;
+		time_prior = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+		ebus.location.first = last_position_x + timeShift*ebus.speed;   // location
+		ebus.location.second = last_position_y;
+		last_position_x = ebus.location.first;
+		last_position_y = ebus.location.second;
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (last_position_x > (9 + 1 / 2.0 + 6.0))
+		{
+			ebus.direction.first = 0;   //direction
+			ebus.direction.second = -1;
+			ebus.location.first = 9 + 7 / 12.0 + 6.0;
+			ebus.location.second = 5 + 1 / 2.0;
+
+			ebus.speed = 1.0;              // speed
+			last_position_x = ebus.location.first;
+			last_position_y = ebus.location.second;
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+			stage = 5;
+		}
+		break;
+	case 5:  // stage 5
+		ebus.direction.first = 0;   //direction
+		ebus.direction.second = -1;
+		timeShift = timeStamp - time_prior;
+		time_prior = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+		ebus.location.first = last_position_x;   // location
+		ebus.location.second = last_position_y - timeShift*ebus.speed;
+		last_position_x = ebus.location.first;
+		last_position_y = ebus.location.second;
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (last_position_y < (1 + 1 / 2.0))
+		{
+			ebus.direction.first = 1;   //direction
+			ebus.direction.second = 0;
+			ebus.location.first = 9 + 1 / 2.0 + 6.0;
+			ebus.location.second = 1 + 7 / 12.0;
+
+			ebus.speed = 1.0;              // speed
+			last_position_x = ebus.location.first;
+			last_position_y = ebus.location.second;
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+			stage = 6;
+		}
+		break;
+	case 6:  // stage 6
+		ebus.direction.first = 1;   //direction
+		ebus.direction.second = 0;
+		timeShift = timeStamp - time_prior;
+		time_prior = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+		ebus.location.first = last_position_x + timeShift*ebus.speed;   // location
+		ebus.location.second = last_position_y;
+		last_position_x = ebus.location.first;
+		last_position_y = ebus.location.second;
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (last_position_x > (12 + 1 / 2.0 + 6.0))
+		{
+			ebus.direction.first = 0;   //direction
+			ebus.direction.second = 1;
+			ebus.location.first = 12 + 5 / 12.0 + 6.0;
+			ebus.location.second = 1 + 1 / 2.0;
+
+			ebus.speed = 1.0;              // speed
+			last_position_x = ebus.location.first;
+			last_position_y = ebus.location.second;
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+			stage = 7;
+		}
+		break;
+	case 7:  // stage 7
+		ebus.direction.first = 0;   //direction
+		ebus.direction.second = 1;
+		timeShift = timeStamp - time_prior;
+		time_prior = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+		ebus.location.first = last_position_x;   // location
+		ebus.location.second = last_position_y + timeShift*ebus.speed;
+		last_position_x = ebus.location.first;
+		last_position_y = ebus.location.second;
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (last_position_y > (6 + 1 / 2.0))
+		{
+			ebus.direction.first = 1;   //direction
+			ebus.direction.second = 0;
+			ebus.location.first = 12 + 5 / 12.0 + 6.0;
+			ebus.location.second = 6 + 1 / 2.0;
+
+			ebus.speed = 1.0;              // speed
+			last_position_x = ebus.location.first;
+			last_position_y = ebus.location.second;
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+
+			start_time = 0.0;
+			time_prior = 0.0;
+			stage = 0;
+		}
+		break;
+	}
+
+	return 0;
+}
+
+
+
+
 // the bus line is empty, return 1
 // the bus line changes, return 2
 // the bus is in starting point, return 3
 // usual case, return 4
 // the bus is in station. return 5
-int SceneLoader::GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp)
+int SceneLoader::GetEBusInfo_Unfixed(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp)
 {	
 	
 	vector<EBusTrack> stations;         // vector of all stations
-	eBusTrack = GetEBusTrack();  // Get the EBus Line
+	eBusTrack = GetEBusTrack_Fixed();  // Get the EBus Line
 	if (eBusTrack.empty())  //if the Bus Line exist or not
 	{
 		start_time = 0.0;    // initialize the global variables
