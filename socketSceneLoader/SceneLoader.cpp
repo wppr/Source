@@ -407,7 +407,7 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 	//ebus track
 	vector<EBusTrack> eBusTrack;
 	EBus ebus;
-	GetEBusInfo(eBusTrack, ebus, curTime);
+	GetEBusInfo_Fixed(eBusTrack, ebus, curTime);
 	ShowBusLine(eBusTrack);
 	//draw ebus
 	GenerateEBus(ebus);

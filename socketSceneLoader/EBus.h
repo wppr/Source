@@ -41,4 +41,13 @@ class EBusTrack
 public :
 	int x;
 	int y;
+	EBusTrack(int x, int y)
+	{
+		this->x = x;
+		this->y = y;
+	}
+	EBusTrack()
+	{
+
+	}
 };
