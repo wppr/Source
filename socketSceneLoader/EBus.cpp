@@ -510,6 +510,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 
 int meetTheLine(float startPoint, float endPoint, float point)
 {
+	point += 0.5;
 	if (startPoint <= point && point <= endPoint) return 1;
 	if (endPoint <= point && point <= startPoint) return 1;
 	return 0;
@@ -520,8 +521,8 @@ int EBus::meet(vector<EBusTrack>& stations)
 	static float delta = 1 / 11.0;
 	for (vector<EBusTrack>::iterator iter = stations.begin(); iter != stations.end(); iter++)
 	{
-		if (fabs(lastLocation.first-iter->x) <= delta && meetTheLine(lastLocation.second, location.second, iter->y)) return 1;
-		if (fabs(lastLocation.second-iter->y) <=delta && meetTheLine(lastLocation.first, location.first, iter->x)) return 1;
+		if (fabs(lastLocation.first-iter->x-0.5) <= delta && meetTheLine(lastLocation.second, location.second, iter->y)) return 1;
+		if (fabs(lastLocation.second-iter->y-0.5) <=delta && meetTheLine(lastLocation.first, location.first, iter->x)) return 1;
 	}
 	return 0;
 }
@@ -537,54 +538,25 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 		EBusTrack station_tmp;                  // temporary station
 		int row = (*iter).y;
 		int column = (*iter).x;
-		station_tmp.x = column+0.5;
-		station_tmp.y = row+0.5;
+		station_tmp.x = column;
+		station_tmp.y = row;
 		string BlockName = layoutMatrix[row*width + column].GetBlockName();
 		if ("station" == BlockName)
 			stations.push_back(station_tmp);
 		 else if("newChargingStation" == BlockName)
 			chargingStations.push_back(station_tmp);
 	}
-	printf("stations count:%d\n", stations.size());
-	printf("charging stations count:%d\n", chargingStations.size());
-	/*
-	// main part
-	if ((time_prior - 0.0) < 1e-8)      // when time_prior=0.0, the bus is located in starting point
-	{
-		ebus.location.first = 3.0 + 12 / 5.0 + 6;      // Location
-		ebus.location.second = 1 + 1 / 6.0;
-		ebus.direction.first = 0;                       // Direction
-		ebus.direction.second = 1;
-		ebus.status = EBus::CHARGING;  // status
-		ebus.speed = 0.0;              // Charging speed
-		ebus.vtype = EBus::EBUS;       // vehicle type
-		ebus.isShowEnergy = true;      // show energy
-
-		last_position_x = ebus.location.first;
-		last_position_y = ebus.location.second;
-		start_time = timeStamp;
-		time_prior = timeStamp;       // Save the timeStamp of last loop
-		return 1;
-	}
-	*/
-
-//	printf("%f\t%lf\n", ebus.startStopTime, timeStamp);
-	//printf("speed = %f\n", ebus.speed);
-	//printf("direction x = %f\t y = %f\n", ebus.direction.first, ebus.direction.second);
+	
 	switch (ebus.status)
 	{
 	case  EBus::CHARGING :
 		if (timeStamp <= ebus.startStopTime + 5.0)
 		{
-			printf("charging\n");
-			system("pause");
 			ebus.location = ebus.lastLocation;
 			ebus.speed = 0.0;
 		}
 		else
 		{
-			printf("finish charging && start running.\n");
-			system("pause");
 			ebus.status = EBus::RUNNING;
 			ebus.speed = 1.0;
 			EBus::run(ebus, timeStamp);
@@ -594,15 +566,11 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 		EBus::run(ebus,timeStamp);
 		if (ebus.meet(stations))
 		{
-			printf("start stop\n");
-			system("pause");
 			ebus.status = EBus::STOP;
 			ebus.speed = 0.0;
 			ebus.startStopTime = timeStamp;
 		}
 		else if(ebus.meet(chargingStations)){
-			printf("start charging\n");
-			system("pause");
 			ebus.status = EBus::CHARGING;
 			ebus.speed = 0.0;
 			ebus.startStopTime = timeStamp;
@@ -611,14 +579,10 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 	case EBus::STOP:
 		if (timeStamp <= ebus.startStopTime + 2.0)
 		{
-			printf("stopping\n");
-			system("pause");
 			ebus.location = ebus.lastLocation;
 			ebus.speed = 0.0;
 		}
 		else {
-			printf("finish stop && start running\n");
-			system("pause");
 			ebus.status = EBus::RUNNING;
 			ebus.speed = 1.0;
 			EBus::run(ebus, timeStamp);
@@ -627,27 +591,7 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 	default:
 		break;
 	}
-	/*
-	if (timeStamp < (start_time + 5.0))   // Charging for 5.0 seconds
-	{
-		ebus.location.first = 3.0 + 5 / 12.0 + 6;      // Location
-		ebus.location.second = 1 + 1 / 6.0;
-		ebus.direction.first = 0;                       // Direction
-		ebus.direction.second = 1;
-		ebus.status = EBus::CHARGING;  // Status
-		ebus.speed = 0.0;              // Charging speed
-		ebus.vtype = EBus::EBUS;       // vehicle type
-		ebus.isShowEnergy = true;      // show energy
-
-		last_position_x = ebus.location.first;
-		last_position_y = ebus.location.second;
-		time_prior = timeStamp;       // Save the timeStamp of last loop
-
-		stage = 1;
-		return 1;
-	}
-	*/
-
+	time_prior = timeStamp;
 	return 0;
 }
 

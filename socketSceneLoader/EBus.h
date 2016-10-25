@@ -52,7 +52,6 @@ public :
 		vtype = EBus::EBUS;
 		lastLocation.first = 3.0 + 5 / 12.0 + 6;      // Location
 		lastLocation.second = 1 + 1 / 6.0;
-		startStopTime = 0.0;
 		location = lastLocation;
 		direction.first = 0;                       // Direction
 		direction.second = 1;
@@ -66,7 +65,6 @@ public :
 		vtype = EBus::EBUS;
 		lastLocation.first = 3.0 + 5 / 12.0 + 6;      // Location
 		lastLocation.second = 1 + 1 / 6.0;
-		startStopTime = 0.0;
 		location = lastLocation;
 		direction.first = 0;                       // Direction
 		direction.second = 1;
