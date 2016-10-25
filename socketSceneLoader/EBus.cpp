@@ -942,6 +942,6 @@ void SceneLoader::InitEbus(double timeStamp)
 	eBusNode->attachMovable(entity);
 	entity->setMesh(mesh);
 
-	this->ebus = EBus();
+	this->ebus = EBus(timeStamp);
 }
 
