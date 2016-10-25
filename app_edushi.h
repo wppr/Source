@@ -80,8 +80,8 @@ public:
 	}
 
 	void Init() {
-		w = 1024;
-		h = 768;
+		w = 1920;
+		h = 1080;
 		render = new EGLRenderSystem;
 		render->SetWandH(w, h);
 		render->Initialize();

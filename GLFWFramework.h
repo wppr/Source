@@ -38,7 +38,7 @@ class GLFWFrameWork
 {
 public:
 	GLFWwindow* window = NULL;
-	int w = 1024, h = 756;
+	int w = 1920, h = 1080;
 	HWND hwnd;
 	App* app;
 	GUI imgui;
