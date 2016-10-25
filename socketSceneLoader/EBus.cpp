@@ -550,7 +550,6 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 	switch (ebus.status)
 	{
 	case  EBus::CHARGING :
-		if (timeStamp <= ebus.startStopTime + 5.0)
 		{
 			ebus.location = ebus.lastLocation;
 			ebus.speed = 0.0;
