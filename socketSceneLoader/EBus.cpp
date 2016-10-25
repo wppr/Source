@@ -914,17 +914,17 @@ void SceneLoader::GenerateEBus(EBus& ebus)   // Generate Ebus and dynamic energy
 	eBusNode->setTranslation(trans);
 	eBusNode->setOrientation(quaternion);
 
-	ebus.startStopTime = 0;
-	ebus.status = EBus::CHARGING;
-	ebus.speed = 0.0;
-	ebus.runningStage = 1;
-	ebus.vtype = EBus::EBUS;
-	ebus.lastLocation.first = 3.0 + 12 / 5.0 + 6;      // Location
-	ebus.lastLocation.second = 1 + 1 / 6.0;
-	ebus.startStopTime = 0.0;
-	ebus.location = ebus.lastLocation;
-	ebus.direction.first = 0;                       // Direction
-	ebus.direction.second = 1;
+	//ebus.startStopTime = 0;
+	//ebus.status = EBus::CHARGING;
+	//ebus.speed = 0.0;
+	//ebus.runningStage = 1;
+	//ebus.vtype = EBus::EBUS;
+	//ebus.lastLocation.first = 3.0 + 12 / 5.0 + 6;      // Location
+	//ebus.lastLocation.second = 1 + 1 / 6.0;
+	//ebus.startStopTime = 0.0;
+	//ebus.location = ebus.lastLocation;
+	//ebus.direction.first = 0;                       // Direction
+	//ebus.direction.second = 1;
 }
 
 void SceneLoader::InitEbus()
