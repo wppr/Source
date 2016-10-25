@@ -292,6 +292,7 @@ namespace Block
 		bool carNames[200];
 		CarDir carDir;
 		bool showCars;
+		EBus ebus;
 
 		SceneManager * scene;
 		MeshManager * meshMgr;

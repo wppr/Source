@@ -101,7 +101,7 @@ public:
 		glfwSetCharCallback(window, InteractionControler::char_callback);
 
 		LastTime = glfwGetTime();
-		glfwSwapInterval(2);
+		glfwSwapInterval(1);
 	}
 
 	void Loop() {

@@ -96,9 +96,9 @@ public:
 		sl->InitEbus();
 
 		/*sl->LoadJson();
-		sl->show_json = true;*/
-
-		sl->UpdateScene(AbsolutTime);
+		sl->show_json = true;
+		sl->UpdateScene(AbsolutTime);*/
+		
 		vector<Vector3> pos;
 		vector<Quaternion> orients;
 		

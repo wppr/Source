@@ -159,7 +159,6 @@ void SceneLoader::ParseScene(string json, float time)
 	Value &cars = root["cars"];
 	if (!cars.IsNull() && showCars)
 	{
-		printf("size %d\n", cars.Size());
 		for (SizeType i = 0; i < cars.Size(); ++i)
 		{
 			float posX = cars[i]["position"]["x"].GetInt();
@@ -406,7 +405,7 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 {
 	//ebus track
 	vector<EBusTrack> eBusTrack;
-	EBus ebus;
+	//EBus ebus;
 	GetEBusInfo_Fixed(eBusTrack, ebus, curTime);
 	ShowBusLine(eBusTrack);
 	//draw ebus
