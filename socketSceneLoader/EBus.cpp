@@ -925,5 +925,7 @@ void SceneLoader::InitEbus()
 	Entity* entity = this->scene->CreateEntity("ebusEntity");
 	eBusNode->attachMovable(entity);
 	entity->setMesh(mesh);
+
+	this->ebus = EBus();
 }
 
