@@ -24,7 +24,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 {
 	this->layoutMatrix = new Entry[width * height];
 	this->rotateFlag = false;
-	this->showCars = true;
+	this->showCars = false;
 
 	for (int i = 0; i < height; ++i)
 	{
