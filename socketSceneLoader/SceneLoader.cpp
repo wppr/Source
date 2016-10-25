@@ -24,7 +24,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 {
 	this->layoutMatrix = new Entry[width * height];
 	this->rotateFlag = false;
-	this->showCars = false;
+	this->showCars = true;
 
 	for (int i = 0; i < height; ++i)
 	{
@@ -120,7 +120,7 @@ void SceneLoader::ParseScene(string json, float time)
 			string spanX = size.substr(0, x_pos);
 			string spanY = size.substr(x_pos + 1, size.size());
 
-			//modify matrix
+			//fix matrix
 			int orientation = entry[i]["orientation"].GetInt();
 			if (name == "lcross") orientation = (orientation + 2) % 4;
 			else if (name == "lcross_greenlight") orientation = (orientation + 3) % 4;
@@ -408,7 +408,7 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 	vector<EBusTrack> eBusTrack;
 	EBus ebus;
 	GetEBusInfo(eBusTrack, ebus, curTime);
-	ShowBusLine(eBusTrack);
+	//ShowBusLine(eBusTrack);
 	//draw ebus
 	GenerateEBus(ebus);
 
@@ -532,6 +532,15 @@ void SceneLoader::loadMesh() {
 		MeshPtr carMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
 		carMeshes.push_back(carMesh);
 	}
+
+	//bus
+	ss.str("");
+	ss << "model/uniform/bus/bus.obj";
+	cout << ss.str() << endl;
+	ss1.str("");
+	ss1 << "bus";
+	MeshPtr busMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
+	carMeshes.push_back(busMesh);
 }
 
 void SceneLoader::LoadJson()
@@ -564,12 +573,14 @@ void SceneLoader::PushCar(Vector3 position, int orientation, float speed, float 
 	int name = GetCarName();
 	SceneNode* carNode = this->scene->CreateSceneNode("car" + to_string(name));
 	this->carRoot->attachNode(carNode);
+	//bus test
+	//int size = carMeshes.size();
 	MeshPtr mesh = this->carMeshes[meshID];
 
 	Entity* entity = this->scene->CreateEntity("car" + to_string(name));
 	carNode->attachMovable(entity);
 	entity->setMesh(mesh);
-	 
+	
 	carNode->setScale(0.04, 0.04, 0.04);
 	Quaternion quaternion(0.5 * PI *  (orientation - 1), Vector3(0, 1, 0));
 	carNode->setOrientation(quaternion);

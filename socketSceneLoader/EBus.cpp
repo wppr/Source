@@ -86,7 +86,7 @@ vector<EBusTrack> SceneLoader::GetEBusTrack()
 void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 {
 	// By Leong
-	for (vector<EBusTrack>::iterator it = eBusTrack.begin(); it != eBusTrack.end(); ++it)
+	/*for (vector<EBusTrack>::iterator it = eBusTrack.begin(); it != eBusTrack.end(); ++it)
 	{
 		int x = it->x; 
 		int y = it->y;
@@ -98,8 +98,46 @@ void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 			{ 
 				if (meshIDs[j] == bh.meshMap["road1"])
 					meshIDs[j] = bh.meshMap["road1red"];
-				if (meshIDs[j] == bh.meshMap["road2"])
+				if (meshIDs[j] == bh.meshMap["road2"])//center
 					meshIDs[j] = bh.meshMap["road2red"];
+			}
+		}
+	}*/
+
+	for (int i = 0; i < eBusTrack.size(); ++i)
+	{
+		int x = eBusTrack[i].x;
+		int y = eBusTrack[i].y;
+		vector<BlockDef>& blocks = layoutMatrix[y * width + x].GetBlock();
+		int orien;
+		for (int i = 0; i < blocks.size(); ++i)
+		{
+			if (blocks[i].name == "street" || blocks[i].name.substr(1, 5) == "cross")
+				orien = blocks[i].orientation;
+		}
+
+		if (i > 0) //pre exist
+		{
+			int inOrien;
+			int deltaX = eBusTrack[i].x - eBusTrack[i - 1].x;
+			int deltaY = eBusTrack[i].y - eBusTrack[i - 1].y;
+			if (deltaX == 0 && deltaY == 1)
+				inOrien = 1;
+			if (deltaX == 1 && deltaY == 0)
+				inOrien = 2;
+			if (deltaX == 0 && deltaY == -1)
+				inOrien = 3;
+			if (deltaX == -1 && deltaY == 0)
+				inOrien = 4;
+
+			int redIndex;
+			if (blocks[i].name.substr(0, 6) == "xcross")
+			{
+				redIndex = (5 - orien + inOrien - 1) % 4;
+			}
+			else if (blocks[i].name.substr(0, 6) == "tcross")
+			{
+				redIndex = (5 - orien + inOrien - 1) % 4;
 			}
 		}
 	}
@@ -400,9 +438,10 @@ void SceneLoader::InitEbus()
 {
 	this->eBusNode = scene->CreateSceneNode("ebusNode");
 	this->carRoot->attachNode(eBusNode);
-	MeshPtr mesh = this->carMeshes[1];//default
+	int size = carMeshes.size();
+	MeshPtr mesh = this->carMeshes[size - 1];//default
 
-	eBusNode->setScale(0.04, 0.04, 0.04);
+	eBusNode->setScale(0.01, 0.01, 0.01);
 	Entity* entity = this->scene->CreateEntity("ebusEntity");
 	eBusNode->attachMovable(entity);
 	entity->setMesh(mesh);
