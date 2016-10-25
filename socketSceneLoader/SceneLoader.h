@@ -288,6 +288,7 @@ namespace Block
 		list<Car> cars;
 		bool carNames[200];
 		CarDir carDir;
+		bool showCars;
 
 		SceneManager * scene;
 		MeshManager * meshMgr;

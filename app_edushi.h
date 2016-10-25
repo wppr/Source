@@ -162,6 +162,7 @@ public:
 		UpdateGUI();
 		/*if (rotateCamera)
 			RotateCamera();*/
+		//sl->rotateFlag = true;
 		if (sl->rotateFlag)
 			RotateCamera();
 		else

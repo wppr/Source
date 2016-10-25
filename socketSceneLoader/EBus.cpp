@@ -88,14 +88,14 @@ void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 	// By Leong
 	for (vector<EBusTrack>::iterator it = eBusTrack.begin(); it != eBusTrack.end(); ++it)
 	{
-		int x = it->x;
+		int x = it->x; 
 		int y = it->y;
 		vector<BlockDef>& blocks = layoutMatrix[y * width + x].GetBlock();
 		for (int i = 0; i < blocks.size(); ++i)
 		{
 			vector<int>& meshIDs = blocks[i].meshID;
 			for (int j = 0; j < meshIDs.size(); ++j)
-			{
+			{ 
 				if (meshIDs[j] == bh.meshMap["road1"])
 					meshIDs[j] = bh.meshMap["road1red"];
 				if (meshIDs[j] == bh.meshMap["road2"])

@@ -24,6 +24,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 {
 	this->layoutMatrix = new Entry[width * height];
 	this->rotateFlag = false;
+	this->showCars = false;
 
 	for (int i = 0; i < height; ++i)
 	{
@@ -156,7 +157,7 @@ void SceneLoader::ParseScene(string json, float time)
 
 	//generate cars
 	Value &cars = root["cars"];
-	if (!cars.IsNull())
+	if (!cars.IsNull() && showCars)
 	{
 		printf("size %d\n", cars.Size());
 		for (SizeType i = 0; i < cars.Size(); ++i)
@@ -184,7 +185,6 @@ void SceneLoader::ParseScene(string json, float time)
 	Value &carDirElem = root["carDir"];
 	if (!carDirElem.IsNull())
 	{
-		carDir.lcrossDir = carDirElem["lcrossDir"].GetInt();
 		carDir.tcrossDir = carDirElem["tcrossDir"].GetInt();
 		carDir.xcrossDir = carDirElem["xcrossDir"].GetInt();
 	}
@@ -540,7 +540,7 @@ void SceneLoader::LoadJson()
 	stringstream ss;
 
 	ss.str("");
-	stream1.open("model/uniform/data/block1.json");
+	stream1.open("model/uniform/data/block.json");
 	if (stream1.is_open())
 	{
 		ss << stream1.rdbuf();
