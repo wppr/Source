@@ -43,6 +43,7 @@ public :
 	int runningStage;
 	static void run(EBus& ebus,double timeStamp);
 	int meet(vector<EBusTrack>& stations);
+	inline EBus() {}
 	inline EBus(double timeStamp)
 	{
 		startStopTime = timeStamp;

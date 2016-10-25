@@ -202,7 +202,7 @@ void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 			}
 			else if (name.substr(0, 6) == "lcross")
 			{
-				redIndex = (inOrien + 4 - orien - 1) % 4 + 1;
+				redIndex = (3 + inOrien - orien) % 4;
 			}
 
 			for (int j = 0; j < blocks.size(); ++j)
@@ -261,7 +261,7 @@ void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 			}
 			else if (name.substr(0, 6) == "lcross")
 			{
-				redIndex = (inOrien + 4 - orien - 1) % 4 + 1;
+				redIndex = (3 + inOrien - orien) % 4;
 			}
 
 			for (int j = 0; j < blocks.size(); ++j)
