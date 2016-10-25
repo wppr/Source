@@ -500,7 +500,8 @@ void EBus::run(EBus& ebus,double timeStamp)
 			ebus.isShowEnergy = true;      // show energy
 
 			time_prior = 0.0;
-			ebus.runningStage = 0;
+			ebus.runningStage = 1;
+			ebus.reset(timeStamp);
 		}
 		break;
 	}
@@ -544,7 +545,8 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 		 else if("newChargingStation" == BlockName)
 			chargingStations.push_back(station_tmp);
 	}
-
+	printf("stations count:%d\n", stations.size());
+	printf("charging stations count:%d\n", chargingStations.size());
 	/*
 	// main part
 	if ((time_prior - 0.0) < 1e-8)      // when time_prior=0.0, the bus is located in starting point
@@ -566,19 +568,23 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 	}
 	*/
 
-	printf("%f\t%lf\n", ebus.startStopTime, timeStamp);
-	printf("speed = %f\n", ebus.speed);
-	printf("direction x = %f\t y = %f\n", ebus.direction.first, ebus.direction.second);
+//	printf("%f\t%lf\n", ebus.startStopTime, timeStamp);
+	//printf("speed = %f\n", ebus.speed);
+	//printf("direction x = %f\t y = %f\n", ebus.direction.first, ebus.direction.second);
 	switch (ebus.status)
 	{
 	case  EBus::CHARGING :
 		if (timeStamp <= ebus.startStopTime + 5.0)
 		{
+			printf("charging\n");
+			system("pause");
 			ebus.location = ebus.lastLocation;
 			ebus.speed = 0.0;
 		}
 		else
 		{
+			printf("finish charging && start running.\n");
+			system("pause");
 			ebus.status = EBus::RUNNING;
 			ebus.speed = 1.0;
 			EBus::run(ebus, timeStamp);
@@ -588,9 +594,15 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 		EBus::run(ebus,timeStamp);
 		if (ebus.meet(stations))
 		{
+			printf("start stop\n");
+			system("pause");
 			ebus.status = EBus::STOP;
+			ebus.speed = 0.0;
+			ebus.startStopTime = timeStamp;
 		}
 		else if(ebus.meet(chargingStations)){
+			printf("start charging\n");
+			system("pause");
 			ebus.status = EBus::CHARGING;
 			ebus.speed = 0.0;
 			ebus.startStopTime = timeStamp;
@@ -599,10 +611,14 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 	case EBus::STOP:
 		if (timeStamp <= ebus.startStopTime + 2.0)
 		{
+			printf("stopping\n");
+			system("pause");
 			ebus.location = ebus.lastLocation;
 			ebus.speed = 0.0;
 		}
 		else {
+			printf("finish stop && start running\n");
+			system("pause");
 			ebus.status = EBus::RUNNING;
 			ebus.speed = 1.0;
 			EBus::run(ebus, timeStamp);
