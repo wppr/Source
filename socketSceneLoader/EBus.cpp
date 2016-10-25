@@ -110,12 +110,17 @@ void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 		int y = eBusTrack[i].y;
 		vector<BlockDef>& blocks = layoutMatrix[y * width + x].GetBlock();
 		int orien;
-		for (int i = 0; i < blocks.size(); ++i)
+		string name;
+		for (int j = 0; j < blocks.size(); ++j)
 		{
-			if (blocks[i].name == "street" || blocks[i].name.substr(1, 5) == "cross")
-				orien = blocks[i].orientation;
+			if (blocks[j].name == "street" || blocks[j].name.substr(1, 5) == "cross")
+			{
+				orien = blocks[j].orientation;
+				name = blocks[j].name;
+			}
 		}
 
+		//in
 		if (i > 0) //pre exist
 		{
 			int inOrien;
@@ -131,13 +136,92 @@ void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 				inOrien = 4;
 
 			int redIndex;
-			if (blocks[i].name.substr(0, 6) == "xcross")
+			if (name.substr(0, 6) == "xcross")
 			{
-				redIndex = (5 - orien + inOrien - 1) % 4;
+				redIndex = (5 - orien + inOrien - 1) % 4 + 1;
 			}
-			else if (blocks[i].name.substr(0, 6) == "tcross")
+			else if (name.substr(0, 6) == "tcross")
 			{
-				redIndex = (5 - orien + inOrien - 1) % 4;
+				redIndex = (5 - inOrien + orien - 1) % 4 + 1;
+			}
+			else if (name == "street")
+			{
+				redIndex = 0;
+			}
+
+			for (int j = 0; j < blocks.size(); ++j)
+			{
+				vector<int>& meshIDs = blocks[j].meshID;
+				if (blocks[j].name.substr(1, 5) == "cross")
+				{
+					
+					if (meshIDs[redIndex] == bh.meshMap["road1"])
+						meshIDs[redIndex] = bh.meshMap["road1red"];
+					if (meshIDs[redIndex] == bh.meshMap["road2"])//center
+						meshIDs[redIndex] = bh.meshMap["road2red"];
+				}
+				else 
+					meshIDs[0] = bh.meshMap["road2red"];
+			}
+		}
+
+		//center
+		for (int j = 0; j < blocks.size(); ++j)
+		{
+			vector<int>& meshIDs = blocks[j].meshID;
+			if (blocks[j].name.substr(1, 5) == "cross")
+			{
+				if (meshIDs[0] == bh.meshMap["road1"])
+					meshIDs[0] = bh.meshMap["road1red"];
+				if (meshIDs[0] == bh.meshMap["road2"])//center
+					meshIDs[0] = bh.meshMap["road2red"];
+			}
+			else
+				meshIDs[1] = bh.meshMap["road2red"];
+		}
+
+		//out
+		if (i < eBusTrack.size() - 1) //post exist
+		{
+			int inOrien;
+			int deltaX = eBusTrack[i + 1].x - eBusTrack[i].x;
+			int deltaY = eBusTrack[i + 1].y - eBusTrack[i].y;
+			if (deltaX == 0 && deltaY == 1)
+				inOrien = 3;
+			if (deltaX == 1 && deltaY == 0)
+				inOrien = 4;
+			if (deltaX == 0 && deltaY == -1)
+				inOrien = 1;
+			if (deltaX == -1 && deltaY == 0)
+				inOrien = 2;
+
+			int redIndex;
+			if (name.substr(0, 6) == "xcross")
+			{
+				redIndex = (5 - orien + inOrien - 1) % 4 + 1;
+			}
+			else if (name.substr(0, 6) == "tcross")
+			{
+				redIndex = (5 - inOrien + orien - 1) % 4 + 1;
+			}
+			else if (name == "street")
+			{
+				redIndex = 0;
+			}
+
+			for (int j = 0; j < blocks.size(); ++j)
+			{
+				vector<int>& meshIDs = blocks[j].meshID;
+				if (blocks[j].name.substr(1, 5) == "cross")
+				{
+					vector<int>& meshIDs = blocks[j].meshID;
+					if (meshIDs[redIndex] == bh.meshMap["road1"])
+						meshIDs[redIndex] = bh.meshMap["road1red"];
+					if (meshIDs[redIndex] == bh.meshMap["road2"])//center
+						meshIDs[redIndex] = bh.meshMap["road2red"];
+				}
+				else if (blocks[j].name == "street")
+					meshIDs[2] = bh.meshMap["road2red"];
 			}
 		}
 	}
@@ -441,7 +525,7 @@ void SceneLoader::InitEbus()
 	int size = carMeshes.size();
 	MeshPtr mesh = this->carMeshes[size - 1];//default
 
-	eBusNode->setScale(0.01, 0.01, 0.01);
+	eBusNode->setScale(0.00005, 0.00005, 0.00005);
 	Entity* entity = this->scene->CreateEntity("ebusEntity");
 	eBusNode->attachMovable(entity);
 	entity->setMesh(mesh);
