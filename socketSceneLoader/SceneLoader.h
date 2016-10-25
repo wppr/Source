@@ -245,7 +245,7 @@ namespace Block
 		vector<EBusTrack> GetEBusTrack_Fixed();
 		int GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, double timeStamp);// timeStamp : second
 		//by leong
-		void InitEbus();
+		void InitEbus(double timeStamp);
 		void ShowBusLine(vector<EBusTrack>& eBusTrack);
 		void GenerateEBus(EBus& ebus);
 

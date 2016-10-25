@@ -202,7 +202,7 @@ void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 			}
 			else if (name.substr(0, 6) == "lcross")
 			{
-				redIndex = (inOrien + orien - 1) % 4 + 1;
+				redIndex = (inOrien + 4 - orien - 1) % 4 + 1;
 			}
 
 			for (int j = 0; j < blocks.size(); ++j)
@@ -261,7 +261,7 @@ void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 			}
 			else if (name.substr(0, 6) == "lcross")
 			{
-				redIndex = (inOrien + orien - 1) % 4 + 1;
+				redIndex = (inOrien + 4 - orien - 1) % 4 + 1;
 			}
 
 			for (int j = 0; j < blocks.size(); ++j)
@@ -930,7 +930,7 @@ void SceneLoader::GenerateEBus(EBus& ebus)   // Generate Ebus and dynamic energy
 	eBusNode->setOrientation(quaternion);
 }
 
-void SceneLoader::InitEbus()
+void SceneLoader::InitEbus(double timeStamp)
 {
 	this->eBusNode = scene->CreateSceneNode("ebusNode");
 	this->carRoot->attachNode(eBusNode);
