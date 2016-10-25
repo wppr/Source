@@ -550,10 +550,10 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 		ebus.isShowEnergy = true;      // show energy
 		if (last_position_y > (6 + 1 / 2.0))
 		{
-			ebus.direction.first = 1;   //direction
-			ebus.direction.second = 0;
-			ebus.location.first = 12 + 5 / 12.0 + 6.0;
-			ebus.location.second = 6 + 1 / 2.0;
+			ebus.direction.first = 0;   //direction
+			ebus.direction.second = 1;
+			//ebus.location.first = 12 + 5 / 12.0 + 6.0;
+			//ebus.location.second = 6 + 1 / 2.0;
 
 			ebus.speed = 1.0;              // speed
 			last_position_x = ebus.location.first;
