@@ -342,7 +342,7 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 
 	if (timeStamp < (start_time + 5.0))   // Charging for 5.0 seconds
 	{
-		ebus.location.first = 3.0 + 12 / 5.0 + 6;      // Location
+		ebus.location.first = 3.0 + 5 / 12.0 + 6;      // Location
 		ebus.location.second = 1 + 1 / 6.0;
 		ebus.direction.first = 0;                       // Direction
 		ebus.direction.second = 1;
