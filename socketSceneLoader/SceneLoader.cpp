@@ -24,6 +24,8 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 {
 	this->layoutMatrix = new Entry[width * height];
 	this->rotateFlag = false;
+	this->roadPinFlag = false;
+	this->busGenFlag = false;
 	this->showCars = false;
 
 	for (int i = 0; i < height; ++i)
@@ -49,6 +51,7 @@ void SceneLoader::ParseScene(string json, float time)
 {
 	//cout << json << endl;
 	//parse json into sceneMatrix
+	
 	Document root;
 	root.Parse(json.c_str());
 	if (!root.IsObject())
@@ -59,8 +62,18 @@ void SceneLoader::ParseScene(string json, float time)
 	}
 	assert(root.IsObject());
 	Value &blockSize = root["blockSize"];
-	Value &rotateFlag = root["rotate"];
-	this->rotateFlag = rotateFlag.GetBool();
+	Value &rotate = root["rotate"];
+	this->rotateFlag = rotate.GetBool();
+
+	Value &roadPin = root["roadPin"];
+	this->roadPinFlag = roadPin.GetBool();
+
+	Value &carGen = root["carGen"];
+	this->showCars = carGen.GetBool();
+
+	Value &busGen = root["busGen"];
+	this->busGenFlag = busGen.GetBool();
+	busGenFlag = true;
 	
 	//set all to NULL
 	for (int i = 0; i < width * height; ++i)
@@ -79,6 +92,9 @@ void SceneLoader::ParseScene(string json, float time)
 	//clear street info
 	streetPos.clear();
 	streetOrien.clear();
+
+	if (roadPinFlag)//ignore markers
+		return;
 
 	Value &entry = root["entry"];
 	assert(entry.IsArray());

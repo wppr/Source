@@ -211,6 +211,9 @@ namespace Block
 		EBusTrack middlePoint;
 		bool show_json = false;
 		bool rotateFlag;
+		bool roadPinFlag;
+		//bool carGenFlag; //showcars
+		bool busGenFlag;
 		//default 32 * 16
 		SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height, int l, int r, int t, int b);
 

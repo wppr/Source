@@ -865,7 +865,10 @@ int SceneLoader::GetEBusInfo_Unfixed(vector<EBusTrack>& eBusTrack, EBus& ebus, d
 
 void SceneLoader::GenerateEBus(EBus& ebus)   // Generate Ebus and dynamic energy level
 {
-
+	if (!busGenFlag)
+		carRoot->detachNode(eBusNode);
+	else
+		carRoot->attachNode(eBusNode);
 	// By Leong
 	Vector3 trans = Vector3(ebus.location.first, 0, ebus.location.second);
 
