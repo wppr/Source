@@ -30,22 +30,41 @@ public:
 	MeshManager* meshMgr=NULL;
 	int blocknum = 20;
 	void FillBlockData() {
+		cout << "FillBlockData " << endl;
 		BlockDef b;
 
 		for (int i = 1; i <= blocknum; i++) {
+			cout << "load block " << i << endl;
 			serializeLoad("model/uniform/data/block" + to_string(i) + ".txt", b);
 			blockPresets[b.name] = b;
-
 		}
 		vector<string> names = { "xcross","tcross","lcross","xcross_greenlight",
 			"tcross_greenlight","lcross_greenlight","xcross_redlight",
 			"tcross_redlight","lcross_redlight","xcross_yellowlight",
-			"tcross_yellowlight","lcross_yellowlight","street","park","station","grass","marketp" };
+			"tcross_yellowlight","lcross_yellowlight","street","park","station","grass","marketp",
+
+			"oldChargingStation", "newChargingStation", //M1
+			"largeChargingStation", "container","holder","electricConnector",//M3
+			"MV", "transformer", "charge",//M4
+			"largeBus", "underpan","underpanDC", "underpanDCCom", "underpanDCComTrack" , "DC","track", "com",//M5
+			"busWithChargingStation"};
 		for (auto x : names) {
 			serializeLoad("model/uniform/data/" + x + ".txt", b);
 			blockPresets[b.name] = b;
 		}
+		cout << "FillBlockData finished" << endl;
+		/*serializeLoad("model/uniform/data/blockContainer.txt", b);
+		blockPresets["container"] = b;*/
 
+		/*BlockDef container;
+		container.name = "container";
+		container.orientation = 1;
+		container.type = "BLOCK";
+		container.meshID.push_back(meshMap["container"]);
+		container.scale.push_back(Vector3(1.0f, 1.0f, 1.0f));
+		container.orientations.push_back(1);
+		container.translate.push_back(Vector3(1.0f, 1.0f, 1.0f));
+		blockPresets["container"] = container;*/
 	}
 	void SaveBlock(string fname,string bname,string bsize,string btype,int borien) {
 		auto nodes = scene->GetSceneRoot()->getAllChildNodes();
@@ -92,6 +111,7 @@ public:
 		return b.name;
 	}
 	void Init(SceneManager* _scene,MeshManager* _meshmgr ) {
+		cout << "bh init "<< endl;
 		scene = _scene;
 		meshMgr = _meshmgr;
 		map<int, string> modellist;
@@ -124,15 +144,34 @@ public:
 		modellist[end++] = "road1red.obj";//68
 		modellist[end++] = "road2red.obj";//69
 
+		//70 -> 87
+		modellist[end++] = "XDZYX.obj";//70
+		modellist[end++] = "CDWZK.obj";//71
+		modellist[end++] = "ZYX.obj";//72
+		modellist[end++] = "mv.obj";//73
+		modellist[end++] = "transformer.obj";//74
+		modellist[end++] = "charge.obj";//75
+		modellist[end++] = "bus.obj";//76
+		modellist[end++] = "DPJCL.obj";//77
+		modellist[end++] = "DCS.obj";//78
+		modellist[end++] = "DCZ.obj";//79
+		modellist[end++] = "TX.obj";//80
+		modellist[end++] = "CDZZK.obj";//81
+		modellist[end++] = "bus_station.obj";//82
+		modellist[end++] = "DJ.obj";//83
+
 		for (int i = 1; i < end; i++) {
+			cout << "load mesh " << i << " "<<modellist[i] << endl;
 			MeshPtr mesh = meshMgr->loadMesh_assimp_check("", "model/uniform/" + modellist[i]);
 			meshs.push_back(mesh);
 		}
 
+		cout << "load finished "  << endl;
 		meshMap["road1"] = 15;
 		meshMap["road2"] = 16;
 		meshMap["road1red"] = 68;
 		meshMap["road2red"] = 69;
+		
 		FillBlockData();
 	}
 	void AttachBlock(string blockname, string nodename, Vector3 pos) {

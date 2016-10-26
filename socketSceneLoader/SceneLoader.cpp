@@ -47,6 +47,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 
 void SceneLoader::ParseScene(string json, float time)
 {
+	cout << json << endl;
 	//parse json into sceneMatrix
 	Document root;
 	root.Parse(json.c_str());
@@ -99,6 +100,7 @@ void SceneLoader::ParseScene(string json, float time)
 			Entry::EntryType type;
 			string name = entry[i]["id"].GetString();
 			BlockDef block = bh.blockPresets[name];
+			printf("name %s\n", name.c_str());
 			if (name.substr(1, 5) == "cross")
 			{
 				crosses.push_back(y * width + x);
@@ -155,6 +157,7 @@ void SceneLoader::ParseScene(string json, float time)
 		}
 	}
 
+	printf("cars\n");
 	//generate cars
 	Value &cars = root["cars"];
 	if (!cars.IsNull() && showCars)
@@ -180,6 +183,7 @@ void SceneLoader::ParseScene(string json, float time)
 		}
 	}
 
+	printf("carDir\n");
 	//carDir
 	Value &carDirElem = root["carDir"];
 	if (!carDirElem.IsNull())
@@ -302,7 +306,9 @@ void SceneLoader::UpdateScene(float curTime)
 		
 		if ("" != json)
 		{
+			printf("parse\n");
 			ParseScene(json, curTime);
+			printf("UpdateSceneNodes\n");
 			UpdateSceneNodes(curTime);
 		}
 	} 
@@ -417,7 +423,6 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 	entityRoot->detachAllNodes();
 
 	MoveCars(curTime);
-
 	for (int i = 0; i < height; i++) {
 
 		for (int j = 0; j < width; ++j)
@@ -438,6 +443,7 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 
 					BlockDef &block = layoutMatrix[i * width + j].GetBlock()[m];
 					string id = block.name;
+					
 
 					int orien = block.orientation;
 					string span = block.size;
@@ -471,13 +477,12 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 						if (NULL != node)
 							scene->destroy(node);
 						node = scene->CreateSceneNode(name);
-
 						Entity* entity = scene->getEntity(name);
 						if (NULL != entity)
 							scene->destroy(entity);
 						entity = scene->CreateEntity(name);
-
 						entity->setMesh(bh.meshs[block.meshID[k]]);
+						printf("meshID %d", block.meshID[k]);
 						node->attachMovable(entity);
 						node->setScale(block.scale[k]);
 						//rotation
@@ -489,13 +494,39 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 						node->setTranslation(block.translate[k]);
 						subEntryNode->attachNode(node);
 					}
-
 					entityRoot->attachNode(sceneNodes[i * width + j]);
 				}
 			}
 		}
 	}
 
+}
+
+void SceneLoader::loadNewComponent()
+{
+	stringstream ss, ss1;
+
+	//container
+	ss.str("");
+	ss << "model/uniform/bus/bus.obj";
+	cout << ss.str() << endl;
+	ss1.str("");
+	ss1 << "container";
+	MeshPtr containerMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
+
+	SceneNode* containerNode = this->scene->CreateSceneNode("container");
+	this->carRoot->attachNode(containerNode);
+	//bus test
+	//int size = carMeshes.size();
+	MeshPtr mesh = containerMesh;
+
+	Entity* entity = this->scene->CreateEntity("container");
+	containerNode->attachMovable(entity);
+	entity->setMesh(mesh);
+
+	containerNode->setScale(0.04, 0.04, 0.04);
+	Quaternion quaternion(0.5 * PI *  0, Vector3(0, 1, 0));
+	containerNode->setOrientation(quaternion);
 }
 
 void SceneLoader::loadMesh() {
@@ -512,7 +543,7 @@ void SceneLoader::loadMesh() {
 
 	AttachFloar();
 
-	//rooma
+	//room
 	ss.str("");
 	ss1.str("");
 	ss << "model/uniform/room/room.obj";
@@ -540,6 +571,7 @@ void SceneLoader::loadMesh() {
 	ss1 << "bus";
 	MeshPtr busMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
 	carMeshes.push_back(busMesh);
+
 }
 
 void SceneLoader::LoadJson()

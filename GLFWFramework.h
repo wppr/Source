@@ -30,7 +30,7 @@ struct MonitorConfig {
 	bool bfullscreen = true;
 	int monitor_id = 0;
 	bool windowEdge=false;
-	int posx = 100, posy = 100;
+	int posx = 0, posy = 0;
 	META(N(windowEdge), N(posx), N(posy));
 };
 
@@ -38,7 +38,7 @@ class GLFWFrameWork
 {
 public:
 	GLFWwindow* window = NULL;
-	int w = 1920, h = 1080;
+	int w = 1280, h = 1024;
 	HWND hwnd;
 	App* app;
 	GUI imgui;

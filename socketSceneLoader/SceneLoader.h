@@ -228,6 +228,7 @@ namespace Block
 		void LoadJson();//static load json from file
 		void UpdateScene(float curTime);
 		void loadMesh();
+		void loadNewComponent();
 		void InitSceneNode();
 		void InitFloor();
 		void InitCar();
