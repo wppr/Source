@@ -2,6 +2,10 @@
 #include "SceneLoader.h"
 using namespace Block;
 
+const float EBus::ENERGYREDUCESPEED = 1/8.0;
+const float EBus::CHARGINGSPEED = 1.0;
+const float EBus::BATTERYCAPACITY = 5.0;
+
 vector<EBusTrack> SceneLoader::GetEBusTrack_Fixed()
 {
 	vector <EBusTrack> eBusTrack;
@@ -29,6 +33,7 @@ vector<EBusTrack> SceneLoader::GetEBusTrack_Fixed()
 	EBusTrack track21(12, 4);
 	EBusTrack track22(12, 5);
 	EBusTrack track23(12, 6);
+	EBusTrack track24(12, 7);
 
 	eBusTrack.push_back(track1);
 	eBusTrack.push_back(track2);
@@ -53,6 +58,7 @@ vector<EBusTrack> SceneLoader::GetEBusTrack_Fixed()
 	eBusTrack.push_back(track21);
 	eBusTrack.push_back(track22);
 	eBusTrack.push_back(track23);
+	eBusTrack.push_back(track24);
 
 	return eBusTrack;
 
@@ -309,8 +315,9 @@ void EBus::run(EBus& ebus,double timeStamp)
 		ebus.direction.first = 0;   //direction
 		ebus.direction.second = 1;
 
-		timeShift = timeStamp - time_prior;
-		time_prior = timeStamp;           // Save the timeStamp of last loop
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
+		if (timeShift > 0.1) return;
 		ebus.speed = 1.0;              // speed
 
 		ebus.location.first = ebus.lastLocation.first;   // location
@@ -336,8 +343,8 @@ void EBus::run(EBus& ebus,double timeStamp)
 	case 2:  // stage 2
 		ebus.direction.first = 1;   //direction
 		ebus.direction.second = 0;
-		timeShift = timeStamp - time_prior;
-		time_prior = timeStamp;           // Save the timeStamp of last loop
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
 		ebus.speed = 1.0;              // speed
 
 		ebus.location.first = ebus.lastLocation.first + timeShift*ebus.speed;   // location
@@ -364,8 +371,8 @@ void EBus::run(EBus& ebus,double timeStamp)
 	case 3:  // stage 3
 		ebus.direction.first = 0;   //direction
 		ebus.direction.second = 1;
-		timeShift = timeStamp - time_prior;
-		time_prior = timeStamp;           // Save the timeStamp of last loop
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
 		ebus.speed = 1.0;              // speed
 
 		ebus.location.first = ebus.lastLocation.first;   // location
@@ -392,8 +399,8 @@ void EBus::run(EBus& ebus,double timeStamp)
 	case 4:  // stage 4
 		ebus.direction.first = 1;   //direction
 		ebus.direction.second = 0;
-		timeShift = timeStamp - time_prior;
-		time_prior = timeStamp;           // Save the timeStamp of last loop
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
 		ebus.speed = 1.0;              // speed
 		ebus.location.first = ebus.lastLocation.first + timeShift*ebus.speed;   // location
 		ebus.location.second = ebus.lastLocation.second;
@@ -419,8 +426,8 @@ void EBus::run(EBus& ebus,double timeStamp)
 	case 5:  // stage 5
 		ebus.direction.first = 0;   //direction
 		ebus.direction.second = -1;
-		timeShift = timeStamp - time_prior;
-		time_prior = timeStamp;           // Save the timeStamp of last loop
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
 		ebus.speed = 1.0;              // speed
 
 		ebus.location.first = ebus.lastLocation.first;   // location
@@ -448,8 +455,8 @@ void EBus::run(EBus& ebus,double timeStamp)
 	case 6:  // stage 6
 		ebus.direction.first = 1;   //direction
 		ebus.direction.second = 0;
-		timeShift = timeStamp - time_prior;
-		time_prior = timeStamp;           // Save the timeStamp of last loop
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
 		ebus.speed = 1.0;              // speed
 		ebus.location.first = ebus.lastLocation.first + timeShift*ebus.speed;   // location
 		ebus.location.second = ebus.lastLocation.second;
@@ -474,8 +481,8 @@ void EBus::run(EBus& ebus,double timeStamp)
 	case 7:  // stage 7
 		ebus.direction.first = 0;   //direction
 		ebus.direction.second = 1;
-		timeShift = timeStamp - time_prior;
-		time_prior = timeStamp;           // Save the timeStamp of last loop
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
 		ebus.speed = 1.0;              // speed
 
 		ebus.location.first = ebus.lastLocation.first;   // location
@@ -484,7 +491,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 		ebus.status = EBus::RUNNING;  // Status
 		ebus.vtype = EBus::EBUS;       // vehicle type
 		ebus.isShowEnergy = true;      // show energy
-		if (ebus.location.second > (6 + 1 / 2.0))
+		if (ebus.location.second > (7 + 1 / 2.0))
 		{
 			ebus.direction.first = 0;   //direction
 			ebus.direction.second = 1;
@@ -497,8 +504,8 @@ void EBus::run(EBus& ebus,double timeStamp)
 			ebus.vtype = EBus::EBUS;       // vehicle type
 			ebus.isShowEnergy = true;      // show energy
 
-			time_prior = 0.0;
-			ebus.runningStage = 1;
+			//time_prior = 0.0;
+			//ebus.runningStage = 1;
 			ebus.reset(timeStamp);
 		}
 		break;
@@ -545,13 +552,16 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 			chargingStations.push_back(station_tmp);
 	}
 	
+	printf("energy level = %f\n",ebus.energyLevel);
 	switch (ebus.status)
 	{
 	case  EBus::CHARGING :
-		if (timeStamp <= ebus.startStopTime + 6.0)
+		if (ebus.energyLevel < 5)
 		{
-			ebus.location = ebus.lastLocation;
-			ebus.speed = 0.0;
+			ebus.energyLevel += (timeStamp - ebus.lastRunTime)*EBus::CHARGINGSPEED;
+			if (ebus.energyLevel > 5) ebus.energyLevel = 5.0;
+			//ebus.location = ebus.lastLocation;
+			//ebus.speed = 0.0;
 		}
 		else
 		{
@@ -561,6 +571,7 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 		}
 		break;
 	case EBus::RUNNING :
+		ebus.energyLevel -= (timeStamp - ebus.lastRunTime)*EBus::ENERGYREDUCESPEED;
 		EBus::run(ebus,timeStamp);
 		if (ebus.meet(stations))
 		{
@@ -571,10 +582,11 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 		else if(ebus.meet(chargingStations)){
 			ebus.status = EBus::CHARGING;
 			ebus.speed = 0.0;
-			ebus.startStopTime = timeStamp;
+//			ebus.startStopTime = timeStamp;
 		}
 		break;
 	case EBus::STOP:
+		ebus.energyLevel -= (timeStamp - ebus.lastRunTime)*EBus::ENERGYREDUCESPEED;
 		if (timeStamp <= ebus.startStopTime + 2.0)
 		{
 			ebus.location = ebus.lastLocation;
@@ -589,7 +601,7 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 	default:
 		break;
 	}
-	time_prior = timeStamp;
+	ebus.lastRunTime = timeStamp;
 	return 0;
 }
 
@@ -874,6 +886,7 @@ void SceneLoader::GenerateEBus(EBus& ebus)   // Generate Ebus and dynamic energy
 
 void SceneLoader::InitEbus(double timeStamp)
 {
+	printf("ebus init\n");
 	this->eBusNode = scene->CreateSceneNode("ebusNode");
 	this->carRoot->attachNode(eBusNode);
 	int size = carMeshes.size();

@@ -26,6 +26,10 @@ public :
 		PRIVATECAR
 	};
 
+	static const float ENERGYREDUCESPEED;
+	static const float CHARGINGSPEED;
+	static const float BATTERYCAPACITY;
+
 	inline EBus() {}
 	//void GetEBusInfo(vector<EBusTrack>& eBusTrack, EBus& ebus);
 public :
@@ -38,33 +42,40 @@ public :
 	pair<int, int> direction;// ¡ý(0,1) 1  ¡ú(1,0) 2  ¡ü(0,-1) 3  ¡û(-1,0) 4
 	float speed;
 	bool isShowEnergy;
-	int energyLevel;
+	float energyLevel;
 	double startStopTime;
+	double lastRunTime;
+	//double lastChargingTime;
+	//double startChargineTime;
 	int runningStage;
 	static void run(EBus& ebus,double timeStamp);
 	int meet(vector<EBusTrack>& stations);
 	inline EBus(double timeStamp)
 	{
-		startStopTime = timeStamp;
-		status = EBus::CHARGING;
+		lastRunTime = timeStamp;
+		//lastChargingTime = timeStamp;
+		energyLevel = 1.0;
+		status = EBus::RUNNING;
 		speed = 0.0;
 		runningStage = 1;
 		vtype = EBus::EBUS;
-		lastLocation.first = 3.0 + 5 / 12.0 + 6;      // Location
-		lastLocation.second = 1 + 1 / 6.0;
+		lastLocation.first = 3.0 + 5 / 12.0;      // Location
+		lastLocation.second = 2 + 1 / 6.0;
 		location = lastLocation;
 		direction.first = 0;                       // Direction
 		direction.second = 1;
 	}
 	inline void reset(double timeStamp)
 	{
-		startStopTime = timeStamp;
-		status = EBus::CHARGING;
+		lastRunTime = timeStamp;
+		//lastChargingTime = timeStamp;
+		energyLevel = 1.0;
+		status = EBus::RUNNING;
 		speed = 0.0;
 		runningStage = 1;
 		vtype = EBus::EBUS;
-		lastLocation.first = 3.0 + 5 / 12.0 + 6;      // Location
-		lastLocation.second = 1 + 1 / 6.0;
+		lastLocation.first = 3.0 + 5 / 12.0;      // Location
+		lastLocation.second = 2 + 1 / 6.0;
 		location = lastLocation;
 		direction.first = 0;                       // Direction
 		direction.second = 1;

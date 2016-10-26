@@ -405,14 +405,14 @@ void SceneLoader::AttachFloar()
 }
 
 void SceneLoader::UpdateSceneNodes(float curTime)
-{
+{	
 	//ebus track
 	vector<EBusTrack> eBusTrack;
 	//EBus ebus;
-	//GetEBusInfo_Fixed(eBusTrack, ebus, curTime);
-	//ShowBusLine(eBusTrack);
+	GetEBusInfo_Fixed(eBusTrack, ebus, curTime);
+	ShowBusLine(eBusTrack);
 	//draw ebus
-	//GenerateEBus(ebus);
+	GenerateEBus(ebus);
 
 	//modify sceneNodes
 	SceneManager* scene = SceneContainer::getInstance().get("scene1");

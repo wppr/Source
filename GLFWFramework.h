@@ -59,7 +59,8 @@ public:
 		//glfwWindowHint(GLFW_SAMPLES, samples);
 
 
-		//serializeLoad("MonitorConfig.txt", mconfig);
+		serializeLoad("MonitorConfig.txt", mconfig);
+		//serializeSave("MonitorConfig.txt", mconfig);
 		glfwWindowHint(GLFW_DECORATED, mconfig.windowEdge);
 		window = glfwCreateWindow(w, h, "Window", NULL, NULL);
 		//设置窗口位置，如果第一个显示器是1080p，第二个初始位置是1080
