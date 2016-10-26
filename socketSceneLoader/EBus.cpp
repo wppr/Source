@@ -6,29 +6,29 @@ vector<EBusTrack> SceneLoader::GetEBusTrack_Fixed()
 {
 	vector <EBusTrack> eBusTrack;
 
-	EBusTrack track1(3+6,1);
-	EBusTrack track2(3+6, 2);
-	EBusTrack track3(3+6, 3);
-	EBusTrack track4(4+6, 3);
-	EBusTrack track5(5+6, 3);
-	EBusTrack track6(5+6, 4);
-	EBusTrack track7(5+6, 5);
-	EBusTrack track8(6+6, 5);
-	EBusTrack track9(7+6, 5);
-	EBusTrack track10(8+6, 5);
-	EBusTrack track11(9+6, 5);
-	EBusTrack track12(9+6, 4);
-	EBusTrack track13(9+6, 3);
-	EBusTrack track14(9+6, 2);
-	EBusTrack track15(9+6, 1);
-	EBusTrack track16(10+6, 1);
-	EBusTrack track17(11+6, 1);
-	EBusTrack track18(12+6, 1);
-	EBusTrack track19(12+6, 2);
-	EBusTrack track20(12+6, 3);
-	EBusTrack track21(12+6, 4);
-	EBusTrack track22(12+6, 5);
-	EBusTrack track23(12+6, 6);
+	EBusTrack track1(3,1);
+	EBusTrack track2(3, 2);
+	EBusTrack track3(3, 3);
+	EBusTrack track4(4, 3);
+	EBusTrack track5(5, 3);
+	EBusTrack track6(5, 4);
+	EBusTrack track7(5, 5);
+	EBusTrack track8(6, 5);
+	EBusTrack track9(7, 5);
+	EBusTrack track10(8, 5);
+	EBusTrack track11(9, 5);
+	EBusTrack track12(9, 4);
+	EBusTrack track13(9, 3);
+	EBusTrack track14(9, 2);
+	EBusTrack track15(9, 1);
+	EBusTrack track16(10, 1);
+	EBusTrack track17(11, 1);
+	EBusTrack track18(12, 1);
+	EBusTrack track19(12, 2);
+	EBusTrack track20(12, 3);
+	EBusTrack track21(12, 4);
+	EBusTrack track22(12, 5);
+	EBusTrack track23(12, 6);
 
 	eBusTrack.push_back(track1);
 	eBusTrack.push_back(track2);
@@ -299,8 +299,6 @@ int stage = 0;
 double timeShift = 0.0;
 
 
-// in starting point, return 1;
-
 void EBus::run(EBus& ebus,double timeStamp)
 {
 	ebus.lastLocation = ebus.location;
@@ -325,7 +323,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 		{
 			ebus.direction.first = 1;   //direction
 			ebus.direction.second = 0;
-			ebus.location.first = 3 + 1 / 2.0 + 6.0;
+			ebus.location.first = 3 + 1 / 2.0;
 			ebus.location.second = 3 + 7 / 12.0;
 
 			ebus.speed = 3.0;              // speed
@@ -348,11 +346,11 @@ void EBus::run(EBus& ebus,double timeStamp)
 		ebus.status = EBus::RUNNING;  // Status
 		ebus.vtype = EBus::EBUS;       // vehicle type
 		ebus.isShowEnergy = true;      // show energy
-		if (ebus.location.first > (5 + 1 / 2.0 + 6.0))
+		if (ebus.location.first > (5 + 1 / 2.0 ))
 		{
 			ebus.direction.first = 0;   //direction
 			ebus.direction.second = 1;
-			ebus.location.first = 5 + 5 / 12.0 + 6.0;
+			ebus.location.first = 5 + 5 / 12.0 ;
 			ebus.location.second = 3 + 1 / 2.0;
 
 			ebus.speed = 3.0;              // speed
@@ -380,7 +378,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 		{
 			ebus.direction.first = 1;   //direction
 			ebus.direction.second = 0;
-			ebus.location.first = 5 + 1 / 2.0 + 6.0;
+			ebus.location.first = 5 + 1 / 2.0 ;
 			ebus.location.second = 5 + 7 / 12.0;
 
 			ebus.speed = 1.0;              // speed
@@ -403,11 +401,11 @@ void EBus::run(EBus& ebus,double timeStamp)
 		ebus.status = EBus::RUNNING;  // Status
 		ebus.vtype = EBus::EBUS;       // vehicle type
 		ebus.isShowEnergy = true;      // show energy
-		if (ebus.location.first > (9 + 1 / 2.0 + 6.0))
+		if (ebus.location.first > (9 + 1 / 2.0 ))
 		{
 			ebus.direction.first = 0;   //direction
 			ebus.direction.second = -1;
-			ebus.location.first = 9 + 7 / 12.0 + 6.0;
+			ebus.location.first = 9 + 7 / 12.0 ;
 			ebus.location.second = 5 + 1 / 2.0;
 
 			ebus.speed = 1.0;              // speed
@@ -436,7 +434,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 		{
 			ebus.direction.first = 1;   //direction
 			ebus.direction.second = 0;
-			ebus.location.first = 9 + 1 / 2.0 + 6.0;
+			ebus.location.first = 9 + 1 / 2.0 ;
 			ebus.location.second = 1 + 7 / 12.0;
 
 			ebus.speed = 1.0;              // speed
@@ -459,11 +457,11 @@ void EBus::run(EBus& ebus,double timeStamp)
 		ebus.status = EBus::RUNNING;  // Status
 		ebus.vtype = EBus::EBUS;       // vehicle type
 		ebus.isShowEnergy = true;      // show energy
-		if (ebus.location.first> (12 + 1 / 2.0 + 6.0))
+		if (ebus.location.first> (12 + 1 / 2.0 ))
 		{
 			ebus.direction.first = 0;   //direction
 			ebus.direction.second = 1;
-			ebus.location.first = 12 + 5 / 12.0 + 6.0;
+			ebus.location.first = 12 + 5 / 12.0 ;
 			ebus.location.second = 1 + 1 / 2.0;
 
 			ebus.speed = 1.0;              // speed
