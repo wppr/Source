@@ -90,7 +90,7 @@ public:
 		CreateScene();
 		LoadConfig();
 		//sceneLoader
-		sl = new SceneLoader(scene, meshMgr, 32, 16, LEFT, RIGHT, TOP, BOTTOM);
+		sl = new SceneLoader(scene, meshMgr, 16, 8, LEFT, RIGHT, TOP, BOTTOM);
 		sl->loadMesh();
 		sl->InitClient(c.ip, c.port);
 		sl->InitEbus(AbsolutTime);

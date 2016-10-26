@@ -21,9 +21,9 @@ using std::mutex;
 using std::map;
 using std::pair;
 
-#define LEFT 6
-#define RIGHT 26
-#define TOP 16
+#define LEFT 2
+#define RIGHT 14
+#define TOP 8
 #define BOTTOM 0
 #define CARNUM 11
 
