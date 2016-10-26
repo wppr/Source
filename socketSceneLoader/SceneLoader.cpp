@@ -498,33 +498,6 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 
 }
 
-void SceneLoader::loadNewComponent()
-{
-	stringstream ss, ss1;
-
-	//container
-	ss.str("");
-	ss << "model/uniform/bus/bus.obj";
-	cout << ss.str() << endl;
-	ss1.str("");
-	ss1 << "container";
-	MeshPtr containerMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
-
-	SceneNode* containerNode = this->scene->CreateSceneNode("container");
-	this->carRoot->attachNode(containerNode);
-	//bus test
-	//int size = carMeshes.size();
-	MeshPtr mesh = containerMesh;
-
-	Entity* entity = this->scene->CreateEntity("container");
-	containerNode->attachMovable(entity);
-	entity->setMesh(mesh);
-
-	containerNode->setScale(0.04, 0.04, 0.04);
-	Quaternion quaternion(0.5 * PI *  0, Vector3(0, 1, 0));
-	containerNode->setOrientation(quaternion);
-}
-
 void SceneLoader::loadMesh() {
 
 	//street
@@ -568,6 +541,16 @@ void SceneLoader::loadMesh() {
 	MeshPtr busMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
 	carMeshes.push_back(busMesh);
 
+	//battery
+	for (int i = 0; i < 7; ++i)
+	{
+		ss.str("");
+		ss << "model/uniform/battery/b"+ to_string(i) + ".obj";
+		cout << ss.str() << endl;
+		ss1.str("");
+		ss1 << "battery"<< to_string(i);
+		this->batteries[i] = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
+	}
 }
 
 void SceneLoader::LoadJson()
@@ -576,7 +559,7 @@ void SceneLoader::LoadJson()
 	stringstream ss;
 
 	ss.str("");
-	stream1.open("model/uniform/data/block.json");
+	stream1.open("model/uniform/data/block1.json");
 	if (stream1.is_open())
 	{
 		ss << stream1.rdbuf();

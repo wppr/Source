@@ -228,7 +228,6 @@ namespace Block
 		void LoadJson();//static load json from file
 		void UpdateScene(float curTime);
 		void loadMesh();
-		void loadNewComponent();
 		void InitSceneNode();
 		void InitFloor();
 		void InitCar();
@@ -307,6 +306,10 @@ namespace Block
 		SceneNode* carRoot;
 		SceneNode* entityRoot;
 		SceneNode* eBusNode;
+		SceneNode* busNode;
+		SceneNode* eBatteryNode;
+		Entity* batteryEntity;
+		MeshPtr batteries[6];
 
 		string staticJson;
 

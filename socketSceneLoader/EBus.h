@@ -42,7 +42,7 @@ public :
 	pair<int, int> direction;// ¡ý(0,1) 1  ¡ú(1,0) 2  ¡ü(0,-1) 3  ¡û(-1,0) 4
 	float speed;
 	bool isShowEnergy;
-	float energyLevel;
+	float energyLevel;//0->5
 	double startStopTime;
 	double lastRunTime;
 	//double lastChargingTime;

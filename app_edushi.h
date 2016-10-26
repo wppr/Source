@@ -95,9 +95,9 @@ public:
 		sl->InitClient(c.ip, c.port);
 		sl->InitEbus(AbsolutTime);
 
-		/*sl->LoadJson();
+		sl->LoadJson();
 		sl->show_json = true;
-		sl->UpdateScene(AbsolutTime);*/
+		sl->UpdateScene(AbsolutTime);
 		
 		vector<Vector3> pos;
 		vector<Quaternion> orients;

@@ -881,7 +881,13 @@ void SceneLoader::GenerateEBus(EBus& ebus)   // Generate Ebus and dynamic energy
 	Quaternion quaternion((orien - 1) * 0.5f * PI, Vector3(0, 1, 0));
 
 	eBusNode->setTranslation(trans);
-	eBusNode->setOrientation(quaternion);
+	busNode->setOrientation(quaternion);
+
+	float energyPercentage = ebus.energyLevel / 5.0f;
+	int energyLevel = energyPercentage * 7.0f;
+	if (energyLevel >= 7) energyLevel = 6;//max 6
+	if (energyLevel <= 0) energyLevel = 0;//least 0
+	batteryEntity->setMesh(batteries[energyLevel]);
 }
 
 void SceneLoader::InitEbus(double timeStamp)
@@ -892,10 +898,24 @@ void SceneLoader::InitEbus(double timeStamp)
 	int size = carMeshes.size();
 	MeshPtr mesh = this->carMeshes[size - 1];//default
 
-	eBusNode->setScale(0.00005, 0.00005, 0.00005);
+	busNode = scene->CreateSceneNode("busNode");
 	Entity* entity = this->scene->CreateEntity("ebusEntity");
-	eBusNode->attachMovable(entity);
+	busNode->attachMovable(entity);
 	entity->setMesh(mesh);
+	busNode->setScale(0.00005, 0.00005, 0.00005);
+
+	eBusNode->attachNode(busNode);
+
+	eBatteryNode = scene->CreateSceneNode("battery");
+	batteryEntity = this->scene->CreateEntity("batteryEntity");
+	eBatteryNode->attachMovable(batteryEntity);
+	batteryEntity->setMesh(batteries[6]);
+	eBatteryNode->setScale(0.4, 0.4, 0.4);
+	eBatteryNode->setTranslation(0, 0.3, 0);
+	Quaternion quaternion(0.5f * PI, Vector3(0, 1, 0));
+	eBatteryNode->setOrientation(quaternion);
+
+	eBusNode->attachNode(eBatteryNode);
 
 	this->ebus = EBus(timeStamp);
 }
