@@ -93,7 +93,7 @@ public:
 		sl = new SceneLoader(scene, meshMgr, 16, 8, LEFT, RIGHT, TOP, BOTTOM);
 		sl->loadMesh();
 		sl->InitClient(c.ip, c.port);
-		sl->InitEbus(AbsolutTime);
+		//sl->InitEbus(AbsolutTime);
 
 		/*sl->LoadJson();
 		sl->show_json = true;

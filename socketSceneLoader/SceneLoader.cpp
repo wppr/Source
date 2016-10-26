@@ -47,7 +47,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 
 void SceneLoader::ParseScene(string json, float time)
 {
-	cout << json << endl;
+	//cout << json << endl;
 	//parse json into sceneMatrix
 	Document root;
 	root.Parse(json.c_str());
@@ -100,7 +100,7 @@ void SceneLoader::ParseScene(string json, float time)
 			Entry::EntryType type;
 			string name = entry[i]["id"].GetString();
 			BlockDef block = bh.blockPresets[name];
-			printf("name %s\n", name.c_str());
+			//printf("name %s\n", name.c_str());
 			if (name.substr(1, 5) == "cross")
 			{
 				crosses.push_back(y * width + x);
@@ -157,7 +157,7 @@ void SceneLoader::ParseScene(string json, float time)
 		}
 	}
 
-	printf("cars\n");
+	//printf("cars\n");
 	//generate cars
 	Value &cars = root["cars"];
 	if (!cars.IsNull() && showCars)
@@ -183,7 +183,6 @@ void SceneLoader::ParseScene(string json, float time)
 		}
 	}
 
-	printf("carDir\n");
 	//carDir
 	Value &carDirElem = root["carDir"];
 	if (!carDirElem.IsNull())
@@ -306,9 +305,7 @@ void SceneLoader::UpdateScene(float curTime)
 		
 		if ("" != json)
 		{
-			printf("parse\n");
 			ParseScene(json, curTime);
-			printf("UpdateSceneNodes\n");
 			UpdateSceneNodes(curTime);
 		}
 	} 
@@ -482,7 +479,6 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 							scene->destroy(entity);
 						entity = scene->CreateEntity(name);
 						entity->setMesh(bh.meshs[block.meshID[k]]);
-						printf("meshID %d", block.meshID[k]);
 						node->attachMovable(entity);
 						node->setScale(block.scale[k]);
 						//rotation
