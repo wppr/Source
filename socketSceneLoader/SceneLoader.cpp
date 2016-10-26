@@ -111,7 +111,7 @@ void SceneLoader::ParseScene(string json, float time)
 				else if(name == "lcross" || name == "lcross_greenlight")
 					type = Entry::EntryType::LCROSS;
 			}
-			else if (name == "park" || name == "station")
+			else if (name == "park" || name == "station" || name == "newChargingStation" || name == "oldChargingStation")
 				type = Entry::EntryType::AFFL;
 			else
 				type = Entry::EntryType::BLOCK;
@@ -412,10 +412,10 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 	//ebus track
 	vector<EBusTrack> eBusTrack;
 	//EBus ebus;
-	GetEBusInfo_Fixed(eBusTrack, ebus, curTime);
-	ShowBusLine(eBusTrack);
+	//GetEBusInfo_Fixed(eBusTrack, ebus, curTime);
+	//ShowBusLine(eBusTrack);
 	//draw ebus
-	GenerateEBus(ebus);
+	//GenerateEBus(ebus);
 
 	//modify sceneNodes
 	SceneManager* scene = SceneContainer::getInstance().get("scene1");
