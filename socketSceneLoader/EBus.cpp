@@ -357,7 +357,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 		{
 			ebus.direction.first = 0;   //direction
 			ebus.direction.second = 1;
-			ebus.location.first = 5 + 5 / 12.0 ;
+			ebus.location.first = 5 + 5 / 12.0 +1/24.0;
 			ebus.location.second = 3 + 1 / 2.0;
 
 			ebus.speed = 3.0;              // speed
@@ -412,7 +412,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 		{
 			ebus.direction.first = 0;   //direction
 			ebus.direction.second = -1;
-			ebus.location.first = 9 + 7 / 12.0 ;
+			ebus.location.first = 9 + 7 / 12.0 -1/24.0;
 			ebus.location.second = 5 + 1 / 2.0;
 
 			ebus.speed = 1.0;              // speed
@@ -468,7 +468,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 		{
 			ebus.direction.first = 0;   //direction
 			ebus.direction.second = 1;
-			ebus.location.first = 12 + 5 / 12.0 ;
+			ebus.location.first = 12 + 5 / 12.0 +1/24.0;
 			ebus.location.second = 1 + 1 / 2.0;
 
 			ebus.speed = 1.0;              // speed
