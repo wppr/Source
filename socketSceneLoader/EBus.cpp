@@ -697,7 +697,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 
 										   //time_prior = 0.0;
 										   //ebus.runningStage = 1;
-			ebus.runningStage = 13;
+			ebus.runningStage = 14;
 			//ebus.reset(timeStamp);
 		}
 		break;
@@ -714,7 +714,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 		ebus.status = EBus::RUNNING;  // Status
 		ebus.vtype = EBus::EBUS;       // vehicle type
 		ebus.isShowEnergy = true;      // show energy
-		if (ebus.location.second < (1 + 1 / 2.0))
+		if (ebus.location.second < (1 + 1 / 6.0))
 		{
 			ebus.direction.first = 0;   //direction
 			ebus.direction.second = 1;
