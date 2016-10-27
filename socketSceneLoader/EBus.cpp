@@ -322,7 +322,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 
 		timeShift = timeStamp - ebus.lastRunTime;
 		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
-		if (timeShift > 0.1) return;
+	//	if (timeShift > 0.1) return;
 		ebus.speed = 1.0;              // speed
 
 		ebus.location.first = ebus.lastLocation.first;   // location
