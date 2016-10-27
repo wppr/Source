@@ -170,6 +170,8 @@ void SceneLoader::ShowBusLine(vector<EBusTrack>& eBusTrack)
 		}
 	}*/
 
+	if (!wayGenFlag) return;
+
 	for (int i = 0; i < eBusTrack.size(); ++i)
 	{
 		int x = eBusTrack[i].x;
@@ -1119,8 +1121,9 @@ void SceneLoader::GenerateEBus(EBus& ebus)   // Generate Ebus and dynamic energy
 	float energyPercentage = ebus.energyLevel / 5.0f;
 	int energyLevel = energyPercentage * 7.0f;
 	if (energyLevel >= 7) energyLevel = 6;//max 6
-	if (energyLevel <= 0) energyLevel = 0;//least 0
+	if (energyLevel < 0) energyLevel = 0;//least 0
 	batteryEntity->setMesh(batteries[energyLevel]);
+	printf("bat %s\n", batteries[energyLevel]->getName());
 }
 
 void SceneLoader::InitEbus(double timeStamp)
@@ -1150,6 +1153,6 @@ void SceneLoader::InitEbus(double timeStamp)
 
 	eBusNode->attachNode(eBatteryNode);
 
-	this->ebus = EBus(timeStamp);
+	//this->ebus = EBus(timeStamp);
 }
 

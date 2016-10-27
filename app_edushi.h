@@ -12,6 +12,7 @@ struct EdushiConfig {
 	Vector3 cameraUp;
 	Vector3 LookCenter;
 
+	bool cameraReset = false;
 
 	float LookDownAngle = 2.7;
 	float UpYAngle = 0;
@@ -28,7 +29,7 @@ struct EdushiConfig {
 	string ip;
 	string port;
 
-	META(N(cameraPos),N(cameraUp),N(LookCenter),N(LookDownAngle),N(UpYAngle),
+	META(N(cameraPos),N(cameraUp), N(LookCenter), N(cameraReset),N(LookDownAngle),N(UpYAngle),
 		N(cameraCenterDist),N(ip),N(port),N(cameraRoundAngle), N(fov),N(mapw),N(maph));
 };
 
@@ -169,6 +170,8 @@ public:
 		else
 		{
 			c.cameraRoundAngle = originConfig.cameraRoundAngle;
+			printf("cameraReset %d\n", c.cameraReset);
+			//if(c.cameraReset) UpdateCamera(c);
 			UpdateCamera(c);
 			firstRotate = true;
 		}

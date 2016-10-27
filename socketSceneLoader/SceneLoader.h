@@ -214,6 +214,7 @@ namespace Block
 		bool roadPinFlag;
 		//bool carGenFlag; //showcars
 		bool busGenFlag;
+		bool wayGenFlag;
 		//default 32 * 16
 		SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height, int l, int r, int t, int b);
 

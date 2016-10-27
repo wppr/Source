@@ -46,7 +46,7 @@ public:
 			"oldChargingStation", "newChargingStation", //M1
 			"largeChargingStation", "container","holder","electricConnector",//M3
 			"MV", "transformer", "charge",//M4
-			"largeBus", "underpan","underpanDC", "underpanDCCom", "underpanDCComTrack" , "DC","track", "com",//M5
+			"largeBus", "underpan","underpanDC", "underpanDCCom", "underpanDCComTrack" , "underpanDCComTrack1", "underpanDCComTrack2", "DC","track", "com",//M5
 			"busWithChargingStation"};
 		for (auto x : names) {
 			serializeLoad("model/uniform/data/" + x + ".txt", b);

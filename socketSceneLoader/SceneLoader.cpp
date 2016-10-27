@@ -26,6 +26,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 	this->rotateFlag = false;
 	this->roadPinFlag = false;
 	this->busGenFlag = false;
+	this->wayGenFlag = false;
 	this->showCars = false;
 
 	for (int i = 0; i < height; ++i)
@@ -49,7 +50,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 
 void SceneLoader::ParseScene(string json, float time)
 {
-	//printf("%s\n", json.c_str());
+	printf("%s\n", json.c_str());
 	//parse json into sceneMatrix
 	
 	Document root;
@@ -69,12 +70,25 @@ void SceneLoader::ParseScene(string json, float time)
 	this->roadPinFlag = roadPin.GetInt();
 
 	Value &carGen = root["carGen"];
-	this->showCars = carGen.GetInt();
+	//this->showCars = carGen.GetInt();
 
 	Value &busGen = root["busGen"];
-	this->busGenFlag = busGen.GetInt();
-	busGenFlag = true;
+	if (!busGenFlag && busGen.GetInt())
+	{
+		
+		ebus = EBus(time);
+	}
+
+	busGenFlag = busGen.GetInt();
+	printf("busGenFlag %d \n", busGenFlag);
+
+
+	Value &wayGen = root["wayGen"];
+	this->wayGenFlag = wayGen.GetInt();
 	
+	if (roadPinFlag)//ignore markers
+		return;
+
 	//set all to NULL
 	for (int i = 0; i < width * height; ++i)
 	{
@@ -92,9 +106,6 @@ void SceneLoader::ParseScene(string json, float time)
 	//clear street info
 	streetPos.clear();
 	streetOrien.clear();
-
-	if (roadPinFlag)//ignore markers
-		return;
 
 	Value &entry = root["entry"];
 	assert(entry.IsArray());
@@ -321,7 +332,9 @@ void SceneLoader::UpdateScene(float curTime)
 		
 		if ("" != json)
 		{
+			printf("ParseScene\n");
 			ParseScene(json, curTime);
+			printf("UpdateSceneNodes\n");
 			UpdateSceneNodes(curTime);
 		}
 	} 
@@ -422,12 +435,13 @@ void SceneLoader::AttachFloar()
 
 void SceneLoader::UpdateSceneNodes(float curTime)
 {	
-	//printf("");
+	printf("GetEBusInfo_Fixed\#n");
 	//ebus track
 	vector<EBusTrack> eBusTrack;
 	//EBus ebus;
 	GetEBusInfo_Fixed(eBusTrack, ebus, curTime);
 	ShowBusLine(eBusTrack);
+	printf("GenerateEBus\n");
 	//draw ebus
 	GenerateEBus(ebus);
 
@@ -562,11 +576,12 @@ void SceneLoader::loadMesh() {
 	for (int i = 0; i < 7; ++i)
 	{
 		ss.str("");
-		ss << "model/uniform/battery/b"+ to_string(i) + ".obj";
+		ss << "model/uniform/battery0"+ to_string(i) + ".obj";
 		cout << ss.str() << endl;
 		ss1.str("");
 		ss1 << "battery"<< to_string(i);
 		this->batteries[i] = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
+		printf("bat %s\n", batteries[i]->getName());
 	}
 }
 
