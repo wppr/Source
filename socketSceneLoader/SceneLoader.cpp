@@ -49,7 +49,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 
 void SceneLoader::ParseScene(string json, float time)
 {
-	//cout << json << endl;
+	//printf("%s\n", json.c_str());
 	//parse json into sceneMatrix
 	
 	Document root;
@@ -63,16 +63,16 @@ void SceneLoader::ParseScene(string json, float time)
 	assert(root.IsObject());
 	Value &blockSize = root["blockSize"];
 	Value &rotate = root["rotate"];
-	this->rotateFlag = rotate.GetBool();
+	this->rotateFlag = rotate.GetInt();
 
 	Value &roadPin = root["roadPin"];
-	this->roadPinFlag = roadPin.GetBool();
+	this->roadPinFlag = roadPin.GetInt();
 
 	Value &carGen = root["carGen"];
-	this->showCars = carGen.GetBool();
+	this->showCars = carGen.GetInt();
 
 	Value &busGen = root["busGen"];
-	this->busGenFlag = busGen.GetBool();
+	this->busGenFlag = busGen.GetInt();
 	busGenFlag = true;
 	
 	//set all to NULL
@@ -422,6 +422,7 @@ void SceneLoader::AttachFloar()
 
 void SceneLoader::UpdateSceneNodes(float curTime)
 {	
+	//printf("");
 	//ebus track
 	vector<EBusTrack> eBusTrack;
 	//EBus ebus;
