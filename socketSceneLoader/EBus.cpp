@@ -494,9 +494,40 @@ void EBus::run(EBus& ebus,double timeStamp)
 		if (ebus.location.second > (7 + 1 / 2.0))
 		{
 			ebus.direction.first = 0;   //direction
-			ebus.direction.second = 1;
-			//ebus.location.first = 12 + 5 / 12.0 + 6.0;
-			//ebus.location.second = 6 + 1 / 2.0;
+			ebus.direction.second = -1;
+			ebus.location.first = 12 + 5 / 12.0 +1/6.0 -1/24.0;
+			ebus.location.second = 7 + 5 / 6.0;
+
+			ebus.speed = 1.0;              // speed
+
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+			ebus.runningStage = 8;
+			//time_prior = 0.0;
+			//ebus.runningStage = 1;
+			//ebus.reset(timeStamp);
+		}
+		break;
+	case 8:  // stage 8: reverse stage 1
+		ebus.direction.first = 0;   //direction
+		ebus.direction.second = -1;
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+
+		ebus.location.first = ebus.lastLocation.first;   // location
+		ebus.location.second = ebus.lastLocation.second - timeShift*ebus.speed;
+
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (ebus.location.second < (1 + 1 / 2.0))
+		{
+			ebus.direction.first = -1;   //direction
+			ebus.direction.second = 0;
+			ebus.location.first = 12 + 1/2.0;
+			ebus.location.second = 1+5/12.0+1/24.0;
 
 			ebus.speed = 1.0;              // speed
 
@@ -504,8 +535,201 @@ void EBus::run(EBus& ebus,double timeStamp)
 			ebus.vtype = EBus::EBUS;       // vehicle type
 			ebus.isShowEnergy = true;      // show energy
 
-			//time_prior = 0.0;
-			//ebus.runningStage = 1;
+										   //time_prior = 0.0;
+										   //ebus.runningStage = 1;
+			ebus.runningStage = 9;
+			//ebus.reset(timeStamp);
+		}
+		break;
+	case 9:  // stage 9: reverse stage 2
+		ebus.direction.first = -1;   //direction
+		ebus.direction.second = 0;
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+
+		ebus.location.first = ebus.lastLocation.first - timeShift*ebus.speed;   // location
+		ebus.location.second = ebus.lastLocation.second;
+
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (ebus.location.first < (9 + 1 / 2.0))
+		{
+			ebus.direction.first = 0;   //direction
+			ebus.direction.second = 1;
+			ebus.location.first = 9 + 5 / 12.0+1/24.0;
+			ebus.location.second = 1 + 1/2.0;
+
+			ebus.speed = 1.0;              // speed
+
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+
+										   //time_prior = 0.0;
+										   //ebus.runningStage = 1;
+			ebus.runningStage = 10;
+			//ebus.reset(timeStamp);
+		}
+		break;
+	case 10:  // stage 10: reverse stage 3
+		ebus.direction.first = 0;   //direction
+		ebus.direction.second = 1;
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+
+		ebus.location.first = ebus.lastLocation.first ;   // location
+		ebus.location.second = ebus.lastLocation.second + timeShift*ebus.speed;
+
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (ebus.location.second > (5 + 1 / 2.0))
+		{
+			ebus.direction.first = -1;   //direction
+			ebus.direction.second = 0;
+			ebus.location.first = 9+1/2.0;
+			ebus.location.second = 5+5/12.0;
+
+			ebus.speed = 1.0;              // speed
+
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+
+										   //time_prior = 0.0;
+										   //ebus.runningStage = 1;
+			ebus.runningStage = 11;
+			//ebus.reset(timeStamp);
+		}
+		break;
+	case 11:  // stage 11: reverse stage 4
+		ebus.direction.first = -1;   //direction
+		ebus.direction.second = 0;
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+
+		ebus.location.first = ebus.lastLocation.first - timeShift*ebus.speed;   // location
+		ebus.location.second = ebus.lastLocation.second ;
+
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (ebus.location.first < (5 + 1 / 2.0))
+		{
+			ebus.direction.first = 0;   //direction
+			ebus.direction.second = -1;
+			ebus.location.first = 5 + 7 / 12.0 -1/24.0;
+			ebus.location.second = 5 + 1 / 2.0;
+
+			ebus.speed = 1.0;              // speed
+
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+
+										   //time_prior = 0.0;
+										   //ebus.runningStage = 1;
+			ebus.runningStage = 12;
+			//ebus.reset(timeStamp);
+		}
+		break;
+	case 12:  // stage 12: reverse stage 5
+		ebus.direction.first = 0;   //direction
+		ebus.direction.second = -1;
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+
+		ebus.location.first = ebus.lastLocation.first ;   // location
+		ebus.location.second = ebus.lastLocation.second - timeShift*ebus.speed;
+
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (ebus.location.second < (3 + 1 / 2.0))
+		{
+			ebus.direction.first = -1;   //direction
+			ebus.direction.second = 0;
+			ebus.location.first = 5 + 1/2.0;
+			ebus.location.second = 3+ 5/12.0;
+
+			ebus.speed = 1.0;              // speed
+
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+
+										   //time_prior = 0.0;
+										   //ebus.runningStage = 1;
+			ebus.runningStage = 13;
+			//ebus.reset(timeStamp);
+		}
+		break;
+	case 13:  // stage 13: reverse stage 6
+		ebus.direction.first = -1;   //direction
+		ebus.direction.second = 0;
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+
+		ebus.location.first = ebus.lastLocation.first - timeShift*ebus.speed;   // location
+		ebus.location.second = ebus.lastLocation.second ;
+
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (ebus.location.first < (3 + 1 / 2.0))
+		{
+			ebus.direction.first = 0;   //direction
+			ebus.direction.second = -1;
+			ebus.location.first = 3+ 7/12.0-1/24.0;
+			ebus.location.second = 3 + 1/2.0;
+
+			ebus.speed = 1.0;              // speed
+
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+
+										   //time_prior = 0.0;
+										   //ebus.runningStage = 1;
+			ebus.runningStage = 13;
+			//ebus.reset(timeStamp);
+		}
+		break;
+	case 14:  // stage 14: reverse stage 7
+		ebus.direction.first = 0;   //direction
+		ebus.direction.second = -1;
+		timeShift = timeStamp - ebus.lastRunTime;
+		ebus.lastRunTime = timeStamp;           // Save the timeStamp of last loop
+		ebus.speed = 1.0;              // speed
+
+		ebus.location.first = ebus.lastLocation.first ;   // location
+		ebus.location.second = ebus.lastLocation.second - timeShift*ebus.speed;
+
+		ebus.status = EBus::RUNNING;  // Status
+		ebus.vtype = EBus::EBUS;       // vehicle type
+		ebus.isShowEnergy = true;      // show energy
+		if (ebus.location.second < (1 + 1 / 2.0))
+		{
+			ebus.direction.first = 0;   //direction
+			ebus.direction.second = -1;
+			//ebus.location.first = 3 + 7 / 12.0 - 1 / 24.0;
+			//ebus.location.second = 3 + 1 / 2.0;
+
+			ebus.speed = 1.0;              // speed
+
+			ebus.status = EBus::RUNNING;  // Status
+			ebus.vtype = EBus::EBUS;       // vehicle type
+			ebus.isShowEnergy = true;      // show energy
+
+										   //time_prior = 0.0;
+										   //ebus.runningStage = 1;
+			//ebus.runningStage = 13;
 			ebus.reset(timeStamp);
 		}
 		break;
