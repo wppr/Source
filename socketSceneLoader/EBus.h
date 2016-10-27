@@ -60,7 +60,7 @@ public :
 		runningStage = 1;
 		vtype = EBus::EBUS;
 		lastLocation.first = 3.0 + 5 / 12.0 + 1/24.0;      // Location
-		lastLocation.second = 2 + 1 / 6.0;
+		lastLocation.second = 0 + 1 / 6.0;
 		location = lastLocation;
 		direction.first = 0;                       // Direction
 		direction.second = 1;
@@ -75,7 +75,7 @@ public :
 		runningStage = 1;
 		vtype = EBus::EBUS;
 		lastLocation.first = 3.0 + 5 / 12.0 +1/24.0;      // Location
-		lastLocation.second = 2 + 1 / 6.0;
+		lastLocation.second = 0 + 1 / 6.0;
 		location = lastLocation;
 		direction.first = 0;                       // Direction
 		direction.second = 1;

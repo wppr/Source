@@ -9,31 +9,33 @@ const float EBus::BATTERYCAPACITY = 5.0;
 vector<EBusTrack> SceneLoader::GetEBusTrack_Fixed()
 {
 	vector <EBusTrack> eBusTrack;
-
-	EBusTrack track1(3,1);
-	EBusTrack track2(3, 2);
-	EBusTrack track3(3, 3);
-	EBusTrack track4(4, 3);
-	EBusTrack track5(5, 3);
-	EBusTrack track6(5, 4);
-	EBusTrack track7(5, 5);
-	EBusTrack track8(6, 5);
-	EBusTrack track9(7, 5);
-	EBusTrack track10(8, 5);
-	EBusTrack track11(9, 5);
-	EBusTrack track12(9, 4);
-	EBusTrack track13(9, 3);
-	EBusTrack track14(9, 2);
-	EBusTrack track15(9, 1);
-	EBusTrack track16(10, 1);
-	EBusTrack track17(11, 1);
-	EBusTrack track18(12, 1);
-	EBusTrack track19(12, 2);
-	EBusTrack track20(12, 3);
-	EBusTrack track21(12, 4);
-	EBusTrack track22(12, 5);
-	EBusTrack track23(12, 6);
-	EBusTrack track24(12, 7);
+	EBusTrack track1(3, 0);
+	EBusTrack track2(3,1);
+	EBusTrack track3(3, 2);
+	EBusTrack track4(3, 3);
+	EBusTrack track5(4, 3);
+	EBusTrack track6(5, 3);
+	EBusTrack track7(5, 4);
+	EBusTrack track8(5, 5);
+	EBusTrack track9(6, 5);
+	EBusTrack track10(7, 5);
+	EBusTrack track11(8, 5);
+	EBusTrack track12(9, 5);
+	EBusTrack track13(9, 4);
+	EBusTrack track14(9, 3);
+	EBusTrack track15(9, 2);
+	EBusTrack track16(9, 1);
+	EBusTrack track17(9, 0);
+	EBusTrack track18(10, 0);
+	EBusTrack track19(11, 0);
+	EBusTrack track20(12, 0);
+	EBusTrack track21(12, 1);
+	EBusTrack track22(12, 2);
+	EBusTrack track23(12, 3);
+	EBusTrack track24(12, 4);
+	EBusTrack track25(12, 5);
+	EBusTrack track26(12, 6);
+	EBusTrack track27(12, 7);
 
 	eBusTrack.push_back(track1);
 	eBusTrack.push_back(track2);
@@ -59,6 +61,9 @@ vector<EBusTrack> SceneLoader::GetEBusTrack_Fixed()
 	eBusTrack.push_back(track22);
 	eBusTrack.push_back(track23);
 	eBusTrack.push_back(track24);
+	eBusTrack.push_back(track25);
+	eBusTrack.push_back(track26);
+	eBusTrack.push_back(track27);
 
 	return eBusTrack;
 
@@ -437,12 +442,12 @@ void EBus::run(EBus& ebus,double timeStamp)
 		ebus.vtype = EBus::EBUS;       // vehicle type
 		ebus.isShowEnergy = true;      // show energy
 
-		if (ebus.location.second < (1 + 1 / 2.0))
+		if (ebus.location.second < (0 + 1 / 2.0))
 		{
 			ebus.direction.first = 1;   //direction
 			ebus.direction.second = 0;
 			ebus.location.first = 9 + 1 / 2.0 ;
-			ebus.location.second = 1 + 7 / 12.0;
+			ebus.location.second = 0 + 7 / 12.0;
 
 			ebus.speed = 1.0;              // speed
 
@@ -469,7 +474,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 			ebus.direction.first = 0;   //direction
 			ebus.direction.second = 1;
 			ebus.location.first = 12 + 5 / 12.0 +1/24.0;
-			ebus.location.second = 1 + 1 / 2.0;
+			ebus.location.second = 0 + 1 / 2.0;
 
 			ebus.speed = 1.0;              // speed
 			ebus.status = EBus::RUNNING;  // Status
@@ -522,12 +527,12 @@ void EBus::run(EBus& ebus,double timeStamp)
 		ebus.status = EBus::RUNNING;  // Status
 		ebus.vtype = EBus::EBUS;       // vehicle type
 		ebus.isShowEnergy = true;      // show energy
-		if (ebus.location.second < (1 + 1 / 2.0))
+		if (ebus.location.second < (0 + 1 / 2.0))
 		{
 			ebus.direction.first = -1;   //direction
 			ebus.direction.second = 0;
 			ebus.location.first = 12 + 1/2.0;
-			ebus.location.second = 1+5/12.0+1/24.0;
+			ebus.location.second = 0+5/12.0+1/24.0;
 
 			ebus.speed = 1.0;              // speed
 
@@ -559,7 +564,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 			ebus.direction.first = 0;   //direction
 			ebus.direction.second = 1;
 			ebus.location.first = 9 + 5 / 12.0+1/24.0;
-			ebus.location.second = 1 + 1/2.0;
+			ebus.location.second = 0 + 1/2.0;
 
 			ebus.speed = 1.0;              // speed
 
@@ -714,7 +719,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 		ebus.status = EBus::RUNNING;  // Status
 		ebus.vtype = EBus::EBUS;       // vehicle type
 		ebus.isShowEnergy = true;      // show energy
-		if (ebus.location.second < (1 + 1 / 6.0))
+		if (ebus.location.second < (0 + 1 / 6.0))
 		{
 			ebus.direction.first = 0;   //direction
 			ebus.direction.second = 1;
