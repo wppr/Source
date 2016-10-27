@@ -50,7 +50,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 
 void SceneLoader::ParseScene(string json, float time)
 {
-	printf("%s\n", json.c_str());
+	//printf("%s\n", json.c_str());
 	//parse json into sceneMatrix
 	
 	Document root;
@@ -80,7 +80,7 @@ void SceneLoader::ParseScene(string json, float time)
 	}
 
 	busGenFlag = busGen.GetInt();
-	printf("busGenFlag %d \n", busGenFlag);
+	//printf("busGenFlag %d \n", busGenFlag);
 
 
 	Value &wayGen = root["wayGen"];
@@ -332,9 +332,9 @@ void SceneLoader::UpdateScene(float curTime)
 		
 		if ("" != json)
 		{
-			printf("ParseScene\n");
+			//printf("ParseScene\n");
 			ParseScene(json, curTime);
-			printf("UpdateSceneNodes\n");
+			//printf("UpdateSceneNodes\n");
 			UpdateSceneNodes(curTime);
 		}
 	} 
@@ -435,13 +435,13 @@ void SceneLoader::AttachFloar()
 
 void SceneLoader::UpdateSceneNodes(float curTime)
 {	
-	printf("GetEBusInfo_Fixed\#n");
+	//printf("GetEBusInfo_Fixed\#n");
 	//ebus track
 	vector<EBusTrack> eBusTrack;
 	//EBus ebus;
 	GetEBusInfo_Fixed(eBusTrack, ebus, curTime);
 	ShowBusLine(eBusTrack);
-	printf("GenerateEBus\n");
+	//printf("GenerateEBus\n");
 	//draw ebus
 	GenerateEBus(ebus);
 
@@ -581,7 +581,7 @@ void SceneLoader::loadMesh() {
 		ss1.str("");
 		ss1 << "battery"<< to_string(i);
 		this->batteries[i] = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
-		printf("bat %s\n", batteries[i]->getName());
+		//printf("bat %s\n", batteries[i]->getName());
 	}
 }
 

@@ -170,7 +170,7 @@ public:
 		else
 		{
 			c.cameraRoundAngle = originConfig.cameraRoundAngle;
-			printf("cameraReset %d\n", c.cameraReset);
+			//printf("cameraReset %d\n", c.cameraReset);
 			//if(c.cameraReset) UpdateCamera(c);
 			UpdateCamera(c);
 			firstRotate = true;

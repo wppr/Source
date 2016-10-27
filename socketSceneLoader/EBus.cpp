@@ -783,7 +783,7 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 			chargingStations.push_back(station_tmp);
 	}
 	
-	printf("energy level = %f\n",ebus.energyLevel);
+	//printf("energy level = %f\n",ebus.energyLevel);
 	switch (ebus.status)
 	{
 	case  EBus::CHARGING :
@@ -818,7 +818,7 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 		break;
 	case EBus::STOP:
 		ebus.energyLevel -= (timeStamp - ebus.lastRunTime)*EBus::ENERGYREDUCESPEED;
-		if (timeStamp <= ebus.startStopTime + 2.0)
+		if (timeStamp <= ebus.startStopTime + 1.0)
 		{
 			ebus.location = ebus.lastLocation;
 			ebus.speed = 0.0;
@@ -1123,12 +1123,12 @@ void SceneLoader::GenerateEBus(EBus& ebus)   // Generate Ebus and dynamic energy
 	if (energyLevel >= 7) energyLevel = 6;//max 6
 	if (energyLevel < 0) energyLevel = 0;//least 0
 	batteryEntity->setMesh(batteries[energyLevel]);
-	printf("bat %s\n", batteries[energyLevel]->getName());
+	//printf("bat %s\n", batteries[energyLevel]->getName());
 }
 
 void SceneLoader::InitEbus(double timeStamp)
 {
-	printf("ebus init\n");
+	//printf("ebus init\n");
 	this->eBusNode = scene->CreateSceneNode("ebusNode");
 	this->carRoot->attachNode(eBusNode);
 	int size = carMeshes.size();
