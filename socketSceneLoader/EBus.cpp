@@ -717,7 +717,7 @@ void EBus::run(EBus& ebus,double timeStamp)
 		if (ebus.location.second < (1 + 1 / 2.0))
 		{
 			ebus.direction.first = 0;   //direction
-			ebus.direction.second = -1;
+			ebus.direction.second = 1;
 			//ebus.location.first = 3 + 7 / 12.0 - 1 / 24.0;
 			//ebus.location.second = 3 + 1 / 2.0;
 
