@@ -831,6 +831,7 @@ int SceneLoader::GetEBusInfo_Fixed(vector<EBusTrack>& eBusTrack, EBus& ebus, dou
 		break;
 	}
 	ebus.lastRunTime = timeStamp;
+	if (ebus.energyLevel < 0) ebus.energyLevel = 0;
 	return 0;
 }
 
