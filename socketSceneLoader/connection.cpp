@@ -355,40 +355,22 @@ void Client::Receive()
 			LOG("recv success\n");
 			for (int i = 0; i < iResult; ++i)
 			{
-				ss << buf[i];
-				switch (buf[i])
+				if (buf[i] == '/')
 				{
-				case '{':
-					charStack.push(buf[i]);
-					break;
-
-				case '}':
-					assert('{' == charStack.top());
-					charStack.pop();
-					if (charStack.empty())
-					{
-						jsonMutex.lock();
-						clientJson = ss.str();
-						jsonMutex.unlock();
-						ss.str("");
-					}
-					break;
-
-				case '[':
-					charStack.push(buf[i]);
-					break;
-
-				case ']':
-					assert('[' == charStack.top());
-					charStack.pop();
-					if (charStack.empty())
-					{
-						jsonMutex.lock();
-						clientJson = ss.str();
-						jsonMutex.unlock();
-						ss.str("");
-					}
-					break;
+					reading = true;
+					tempString = "";
+				}
+				else if(buf[i] == '\\')
+				{
+					reading = false;
+					jsonMutex.lock();
+					clientJson = tempString;
+					jsonMutex.unlock();
+					tempString = "";
+				}
+				else if(reading)
+				{
+					tempString.push_back(buf[i]);
 				}
 			}
 		}

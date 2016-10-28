@@ -108,6 +108,10 @@ namespace HW
 		void MoveRight(float d);
 		void MoveForward(float d);
 		void MoveBack(float d);
+		void Closer();
+		void Farther();
+		float GetDistance();
+		void SetDistance(float d);
 		void SetPitchYaw(float pitch, float yaw);
 		float getYaw();
 		float getPitch();
@@ -117,6 +121,9 @@ namespace HW
 	protected:
 		/// members for frustum 
 		float m_Left,m_Right,m_Top,m_Bottom,m_Near,m_Far,m_fov, m_spec;
+
+		//distance from eye to center
+		float distance;
 		
 		Vector3 m_DerivedPosition;
 		// hint whether current global position is valid.

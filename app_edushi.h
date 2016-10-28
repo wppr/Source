@@ -112,12 +112,12 @@ public:
 	void UpdateCamera(EdushiConfig& c) {
 		auto cen = getSceneCenter(c.mapw, c.maph);
 		cen.y = c.LookCenter[1];
-		
+
 		float radRound = c.cameraRoundAngle / 180 * PI;
 		float radUp = c.LookDownAngle / 180 * PI;
 		float h = c.cameraCenterDist*sin(radUp);
 		Vector3 offset = Vector3(c.cameraCenterDist*sin(radRound), h, c.cameraCenterDist*cos(radRound));
-		float rady=c.UpYAngle / 180 * PI;
+		float rady = c.UpYAngle / 180 * PI;
 		Quaternion q(rady, -offset);
 		Vector3 up2 = q*Vector3(0, 1, 0);
 		camera->lookAt(cen + offset, cen, up2);
@@ -125,8 +125,9 @@ public:
 		c.cameraPos = cen + offset;
 		c.LookCenter = cen;
 		c.cameraUp = up2;
-		
+
 	}
+	
 	//void SetCamera(float angleUp, float angleRound) {
 	//	auto cen = getSceneCenter(32,16);
 	//	cen.y += c.LookCenter[1];
@@ -164,7 +165,7 @@ public:
 		/*if (rotateCamera)
 			RotateCamera();*/
 		//sl->rotateFlag = true;
-		
+		printf("render in\n");
 		if (sl->rotateFlag)
 			RotateCamera();
 		else
@@ -178,6 +179,7 @@ public:
 
 		sl->UpdateScene(AbsolutTime);
 
+		printf("pipeline->Render()\n");
 		pipeline->Render();
 		//CarSim.Update();
 	}

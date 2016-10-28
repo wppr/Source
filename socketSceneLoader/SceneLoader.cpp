@@ -50,7 +50,7 @@ SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width,
 
 void SceneLoader::ParseScene(string json, float time)
 {
-	//printf("%s\n", json.c_str());
+	printf("%s\n", json.c_str());
 	//parse json into sceneMatrix
 	
 	Document root;
@@ -75,7 +75,6 @@ void SceneLoader::ParseScene(string json, float time)
 	Value &busGen = root["busGen"];
 	if (!busGenFlag && busGen.GetInt())
 	{
-		
 		ebus = EBus(time);
 	}
 
@@ -184,7 +183,7 @@ void SceneLoader::ParseScene(string json, float time)
 		}
 	}
 
-	//printf("cars\n");
+	printf("generate cars\n");
 	//generate cars
 	Value &cars = root["cars"];
 	if (!cars.IsNull() && showCars)
@@ -218,6 +217,7 @@ void SceneLoader::ParseScene(string json, float time)
 		carDir.xcrossDir = carDirElem["xcrossDir"].GetInt();
 	}
 
+	printf("generate street\n");
 	//generate street
 	pair<int, int> dirs[4];
 	dirs[0] = pair<int, int>(0, 1); 
@@ -332,9 +332,9 @@ void SceneLoader::UpdateScene(float curTime)
 		
 		if ("" != json)
 		{
-			//printf("ParseScene\n");
+			printf("ParseScene\n");
 			ParseScene(json, curTime);
-			//printf("UpdateSceneNodes\n");
+			printf("UpdateSceneNodes\n");
 			UpdateSceneNodes(curTime);
 		}
 	} 
@@ -439,18 +439,22 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 	//ebus track
 	vector<EBusTrack> eBusTrack;
 	//EBus ebus;
+	printf("GetEBusInfo_Fixed\n");
 	GetEBusInfo_Fixed(eBusTrack, ebus, curTime);
+	printf("ShowBusLine\n");
 	ShowBusLine(eBusTrack);
 	//printf("GenerateEBus\n");
 	//draw ebus
+	printf("GenerateEBus\n");
 	GenerateEBus(ebus);
 
 	//modify sceneNodes
 	SceneManager* scene = SceneContainer::getInstance().get("scene1");
 	SceneNode* root = scene->GetSceneRoot();
 	entityRoot->detachAllNodes();
-
+	printf("MoveCars\n");
 	MoveCars(curTime);
+	printf("iterate update nodes\n");
 	for (int i = 0; i < height; i++) {
 
 		for (int j = 0; j < width; ++j)

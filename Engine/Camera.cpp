@@ -482,6 +482,26 @@ namespace HW
 		setPosition(pos - d*dir);
 	}
 
+	void Camera::Closer()
+	{
+		distance += 1;
+	}
+
+	void Camera::Farther()
+	{
+		distance -= 1;
+	}
+
+	float Camera::GetDistance()
+	{
+		return distance;
+	}
+
+	void Camera::SetDistance(float d)
+	{
+		this->distance = d;
+	}
+
 	void Camera::SetPitchYaw(float pitch, float yaw)
 	{
 		Vector3 front;

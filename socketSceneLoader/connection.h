@@ -64,4 +64,6 @@ private:
 	int InitSocket();
 	string ip, port;
 	SOCKET ClientSocket;
+	string tempString;
+	bool reading;
 };
