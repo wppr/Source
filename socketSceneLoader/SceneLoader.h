@@ -232,6 +232,7 @@ namespace Block
 		void LoadJson();//static load json from file
 		void UpdateScene(float curTime);
 		void loadMesh();
+		void LoadTag();
 		void InitSceneNode();
 		void InitFloor();
 		void InitCar();

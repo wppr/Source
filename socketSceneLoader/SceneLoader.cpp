@@ -533,6 +533,44 @@ void SceneLoader::UpdateSceneNodes(float curTime)
 
 }
 
+void SceneLoader::LoadTag()
+{
+	stringstream ss, ss1;
+
+	//floor
+	ss.str("");
+	ss1.str("");
+	ss << "model/uniform/banner.obj";
+	ss1 << "banner";
+	MeshPtr bannerMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
+
+	SceneNode* bannerNode = scene->CreateSceneNode("bannerNode");
+	Entity* bannerEntity = scene->CreateEntity("bannerEntity");
+	bannerNode->attachMovable(bannerEntity);
+	bannerEntity->setMesh(bannerMesh);
+	//bannerNode->rotate(Vector3(0, 1, 0), 0.5 * PI);
+	bannerNode->scale(Vector3(4, 0.01, 0.5));
+	bannerNode->setTranslation(2.3, 0, 6);
+	Quaternion q(1.5 * PI, Vector3(0, 1, 0));
+	bannerNode->setOrientation(q);
+
+	ss.str("");
+	ss1.str("");
+	ss << "model/uniform/logo.obj";
+	ss1 << "logo";
+	MeshPtr logoMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
+
+	SceneNode* logoNode = scene->CreateSceneNode("logoNode");
+	Entity* logoEntity = scene->CreateEntity("logoEntity");
+	logoNode->attachMovable(logoEntity);
+	logoEntity->setMesh(logoMesh);
+
+	SceneNode* root = scene->GetSceneRoot();
+	root->attachNode(bannerNode);
+	//root->attachNode(logoNode);
+}
+
+
 void SceneLoader::loadMesh() {
 
 	//street
@@ -587,6 +625,9 @@ void SceneLoader::loadMesh() {
 		this->batteries[i] = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
 		//printf("bat %s\n", batteries[i]->getName());
 	}
+
+	//tag
+	LoadTag();
 }
 
 void SceneLoader::LoadJson()
