@@ -235,7 +235,8 @@ public:
 				if (ImGui::Button("Load model")) LoadModel(tmp, name);
 
 				if (ImGui::Button("RemoveAll")) RemoveAllNodes(); ImGui::SameLine();
-				if (ImGui::Button("AttachFloor")) sl->AttachFloar();
+				if (ImGui::Button("
+					r")) sl->AttachFloar();
 				if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;	
 				ImGui::End();
 			}

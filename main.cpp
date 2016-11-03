@@ -1,10 +1,11 @@
 #define  _WINSOCKAPI_
 #include "App_SSS.h"
 #include "app_PBR.h"
-//#include "app_edushi_VR.h"
-#include "app_edushi.h"
+#include "app_edushi_VR.h"
+//#include "app_edushi.h"
 //#include "app_VR.h"
 #include "GLFWFramework.h"
+#include "app_VR_Experience.h"
 //#include "edushiKey.h"
 //#include "connection.h"
 //#pragma comment(lib,"LibConnection.lib")
@@ -16,8 +17,8 @@ std::function< void (int,int)> f;
 void main() {
 	GLFWFrameWork fw;
 
-	auto app4 = new App_edushi;
-	//auto app4 = new App_edushi_VR;
+	//auto app4 = new App_VR_Experience;
+	auto app4 = new App_edushi_VR;
 	//auto app4 = new App_VR;
 	fw.app = app4;
 	

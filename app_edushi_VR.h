@@ -460,7 +460,7 @@ public:
 		}
 
 		nearClip = 0.1f;
-		farClip = 30.0f;
+		farClip = 10000.0f;
 		m_pHMD->GetRecommendedRenderTargetSize(&renderWidth, &renderHeight);
 
 		//init not success, shut down

@@ -310,6 +310,10 @@ namespace Block
 		//invalid invoke
 		SceneLoader(const SceneLoader&);
 		SceneLoader& operator= (const SceneLoader&);
+
+		//VR scene
+		Vector3 globalScale;
+		Vector3 globalTrans;
 	};
 
 }

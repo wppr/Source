@@ -180,9 +180,12 @@ public:
 	void SetInterp()
 	{
 		vector<double> x;
-		double start = 0.01;
+		double t = 0.001;
 		for (auto &pos : marks)
-			x.push_back(start++);
+		{
+			x.push_back(t);
+			t += 2;
+		}
 		interp.SetData(x, marks);
 	}
 };

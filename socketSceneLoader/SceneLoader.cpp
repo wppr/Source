@@ -22,6 +22,10 @@ Vector3 PivotCalibration(int orientation, bool clockWise);
 SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height, int l, int r, int t, int b)
 	: scene(scene), meshMgr(meshMgr), width(width), height(height), l(l), r(r), t(t), b(b)
 {
+	/*globalScale = Vector3(100, 100, 100);
+	globalTrans = Vector3(-1890, 0, -1230);*/
+	globalScale = Vector3(1, 1, 1);
+	globalTrans = Vector3(0, 0, 0);
 	this->layoutMatrix = new Entry[width * height];
 	this->rotateFlag = false;
 
@@ -316,6 +320,8 @@ void SceneLoader::InitSceneNode()
 	SceneManager* scene_instance = SceneContainer::getInstance().get("scene1");
 	SceneNode* root = scene_instance->GetSceneRoot();
 	root->attachNode(entityRoot);
+	entityRoot->setScale(globalScale);
+	entityRoot->setTranslation(globalTrans);
 
 	//sceneNodes
 	sceneNodes = new SceneNode*[width * height];
@@ -390,6 +396,8 @@ void SceneLoader::AttachFloar()
 	SceneNode* root = scene_instance->GetSceneRoot();
 	floorRoot = scene->CreateSceneNode("floorRoot");
 	root->attachNode(floorRoot);
+	floorRoot->setScale(globalScale);
+	floorRoot->setTranslation(globalTrans);
 
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; ++j) {
@@ -405,19 +413,19 @@ void SceneLoader::AttachFloar()
 void SceneLoader::UpdateSceneNodes(float curTime)
 {
 	//ebus track
-	vector<EBusTrack> eBusTrack;
-	EBus ebus;
-	GetEBusInfo(eBusTrack, ebus, curTime);
-	ShowBusLine(eBusTrack);
-	//draw ebus
-	GenerateEBus(ebus);
+	//vector<EBusTrack> eBusTrack;
+	//EBus ebus;
+	//GetEBusInfo(eBusTrack, ebus, curTime);
+	//ShowBusLine(eBusTrack);
+	////draw ebus
+	//GenerateEBus(ebus);
 
 	//modify sceneNodes
 	SceneManager* scene = SceneContainer::getInstance().get("scene1");
 	SceneNode* root = scene->GetSceneRoot();
 	entityRoot->detachAllNodes();
 
-	MoveCars(curTime);
+	//MoveCars(curTime);
 
 	for (int i = 0; i < height; i++) {
 
@@ -540,7 +548,7 @@ void SceneLoader::LoadJson()
 	stringstream ss;
 
 	ss.str("");
-	stream1.open("model/uniform/data/block1.json");
+	stream1.open("model/uniform/data/block.json");
 	if (stream1.is_open())
 	{
 		ss << stream1.rdbuf();
