@@ -5,6 +5,7 @@
 #include "InteractionControler.h"
 #include "GUIWrapper.h"
 #include "socketSceneLoader\SceneLoader.h"
+#include "Interpolation.h"
 #include <openvr.h>
 
 using namespace Block;
@@ -44,6 +45,14 @@ public:
 	SceneLoader* sl = NULL;
 
 	EdushiConfig c, originConfig;
+
+	//track
+	vector<Vector3> marks;
+	Interpolation interp;
+	bool free = true;
+	float speed = 0.02;
+	float acceleration = 0;
+	float t = 0;
 
 	float rotatespeed = 0;
 	bool rotateCamera = false;
@@ -97,8 +106,7 @@ public:
 
 		sl->LoadJson();
 		sl->show_json = true;
-
-		sl->UpdateScene(AbsolutTime);
+		
 		//CarSim.Init(this);
 		vector<Vector3> pos;
 		vector<Quaternion> orients;
@@ -110,6 +118,15 @@ public:
 		//c.cameraUp == camera->getUp();
 		//c.LookCenter = getSceneCenter(c.mapw, c.maph);
 		UpdateCamera(c);
+		//vrScene = "room";
+		vrScene = "city";
+		LoadMarks(vrScene + ".txt");
+		SetInterp();
+
+		if ("room" == vrScene)
+			sl->AttachRoom();
+		else
+			sl->UpdateScene(AbsolutTime);
 	}
 	Vector3 getSceneCenter(int w, int h) {
 		Vector3 cen = 0.5*Vector3(w, 0, h)*scenescale + sceneTranlate;
@@ -573,10 +590,95 @@ public:
 
 		if (m_rTrackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].bPoseIsValid)
 		{
-			HMDPos = devicePose[vr::k_unTrackedDeviceIndex_Hmd].inverse();
+			if(free)
+				HMDPos = devicePose[vr::k_unTrackedDeviceIndex_Hmd].inverse();
+			else
+			{
+				speed += acceleration;
+				t += speed;
+				Vector3 pos = interp.GetInterpolation(t);
+				Vector3 dir = interp.GetDerivative(t);
+				//Vector3 pos = circleRoute.GetInterpolation(t);
+				//Vector3 dir = circleRoute.GetDerivative(t);
+				dir.normalize();
+				dir = -dir;
+				//cout << t << " pos " << pos.x << "," << pos.y << "," << pos.z << endl;
+				//cout << t << " dir " << dir.x << "," << dir.y << "," << dir.z << endl;
+
+				//camera->lookAt(pos, pos + dir, Vector3(0, 1, 0));
+				Vector3 xAxis = dir.crossProduct(Vector3(0, 1, 0));
+				xAxis.normalize();
+				Vector3 yAxis = xAxis.crossProduct(dir);
+				Matrix4 model
+				(
+					xAxis[0], yAxis[0], dir[0], pos[0],
+					xAxis[1], yAxis[1], dir[1], pos[1],
+					xAxis[2], yAxis[2], dir[2], pos[2],
+					0       , 0       , 0     , 1  
+				);
+				/*Matrix4 model
+				(
+					1, 0, 0, 0,
+					0, 1, 0, 2,
+					0, 0, 1, 2,
+					0, 0, 0, 1
+				);*/
+				HMDPos = model.inverse();
+				/*devicePose[vr::k_unTrackedDeviceIndex_Hmd] = model;
+				HMDPos = devicePose[vr::k_unTrackedDeviceIndex_Hmd].inverse();*/
+			}
 		}
 
 		double afterUpdate = glfwGetTime();
+	}
+	void FollowRoute() {
+		speed += acceleration;
+		t += speed;
+		Vector3 pos = interp.GetInterpolation(t);
+		Vector3 dir = interp.GetDerivative(t);
+		//Vector3 pos = circleRoute.GetInterpolation(t);
+		//Vector3 dir = circleRoute.GetDerivative(t);
+		dir.normalize();
+		//cout << t << " pos " << pos.x << "," << pos.y << "," << pos.z << endl;
+		//cout << t << " dir " << dir.x << "," << dir.y << "," << dir.z << endl;
+
+		camera->lookAt(pos, pos + dir, Vector3(0, 1, 0));
+	}
+
+	void LoadMarks(string filename)
+	{
+		ifstream input("..\\Workspace\\VRExperience\\" + filename);
+		if (input.fail())
+		{
+			cout << "\"" << filename << "\"" << "doesn't exist" << endl;
+			return;
+		}
+		marks.clear();
+		Vector3 pos;
+		while (input >> pos.x >> pos.y >> pos.z)
+			marks.push_back(pos);
+		input.close();
+	}
+
+	void SaveMarks(string filename)
+	{
+		ofstream output("..\\Workspace\\VRExperience\\" + filename);
+		output.clear();
+		for (auto& pos : marks)
+			output << pos.x << "\t" << pos.y << "\t" << pos.z << endl;
+		output.close();
+	}
+
+	void SetInterp()
+	{
+		vector<double> x;
+		double t = 0.001;
+		for (auto &pos : marks)
+		{
+			x.push_back(t);
+			t += 2;
+		}
+		interp.SetData(x, marks);
 	}
 
 	private :
@@ -594,4 +696,5 @@ public:
 		Matrix4 HMDPos;
 		float nearClip;
 		float farClip;
+		string vrScene;
 };

@@ -47,9 +47,13 @@ void EdushiVRPipeline::Init()
 	//// 对一个 cubemap 进行 ggx filter 操作
 	//pbr.PrefilterEnvMapSaveImages(env, "default_asserts/hdrmap/ggx_filtered/pisa");
 	//pbr.LoadPrefilterEnvMap(env, "default_asserts/hdrmap/ggx_filtered/pisa");
-	skybox.rt_result = rt_render_left;
-	skybox.afterPass = ShadingPass;
-	skybox.Init();
+	skyboxLeft.rt_result = rt_render_left;
+	skyboxLeft.afterPass = ShadingPass;
+	skyboxLeft.Init();
+
+	skyboxRight.rt_result = rt_render_right;
+	skyboxRight.afterPass = ShadingPass;
+	skyboxRight.Init();
 
 	env[0] = tm.CreateTextureCubeMap(e_pisa, "pisa");
 	env_diffuse[0] = tm.CreateTextureCubeMap(e_pisa_diffuse, "pbr_env_diffuse_pisa");
@@ -59,7 +63,7 @@ void EdushiVRPipeline::Init()
 	env_diffuse[1] = tm.CreateTextureCubeMap(e_uffizi_diffuse, "pbr_env_diffuse_uffizi");
 	pbr.LoadPrefilterEnvMap(env[1], "default_asserts/hdrmap/ggx_filtered/uffizi");
 
-	env[2] = skybox.env_map;
+	env[2] = skyboxLeft.env_map;
 	auto e_sky = GenCubemapList("skybox/diffuse/s_mip4_face", ".hdr");
 	env_diffuse[2] = tm.CreateTextureCubeMap(e_sky, "sky0");
 	pbr.LoadPrefilterEnvMap(env[2], "default_asserts/skybox/diffuse/s");
@@ -126,33 +130,33 @@ void EdushiVRPipeline::Render()
 	profile.NewFrame();
 	SceneManager* scene = SceneContainer::getInstance().get(SceneName);
 	auto camera = scene->getCamera(CameraName);
-	if (skybox.camera == NULL)
-		skybox.camera = camera;
 
 	LightCamera.LightPosition = LightPos[0];
 	LightCamera.LightDir = -LightPos[0];
 	shadowmap.SetLightCamera(0, LightCamera);
+	shadowmap.Render();
 
 	//**********************************************************************************************************************
 	//************************						LEFT										 ***************************
 	//**********************************************************************************************************************
 	GlobalVariablePool* gp = GlobalVariablePool::GetSingletonPtr();
-	gp->SetProjectMatrix(projLeft);
-	gp->SetViewMatrix(viewLeft);
+	/*gp->SetProjectMatrix(projLeft);
+	gp->SetViewMatrix(viewLeft);*/
+	camera->setProjectionMatrix(projLeft);
+	camera->setViewMatrix(viewLeft);
+	if (skyboxLeft.camera == NULL)
+		skyboxLeft.camera = camera;
 
-	shadowmap.Render();
 	profile.Tick("Shadow");
 	////MSAA render scene and resolve to usual texture
 	gbuffer_left.Render();
-	//gbuffer_left.Render();
 	profile.Tick("Gbuffer");
-
 	ssao_left.Near = camera->getNear();
 	ssao_left.Far = camera->getFar();
 	ssao_left.Render();
 	profile.Tick("SSAO");
 
-	//skybox.Render();
+	skyboxLeft.Render();
 
 	RenderQueue queue;
 	scene->getVisibleRenderQueue_as(camera, queue);
@@ -193,8 +197,12 @@ void EdushiVRPipeline::Render()
 	//**********************************************************************************************************************
 	//************************						right										 ***************************
 	//**********************************************************************************************************************
-	gp->SetProjectMatrix(projRight);
-	gp->SetViewMatrix(viewRight);
+	/*gp->SetProjectMatrix(projRight);
+	gp->SetViewMatrix(viewRight);*/
+	camera->setProjectionMatrix(projRight);
+	camera->setViewMatrix(viewRight);
+	if (skyboxRight.camera == NULL)
+		skyboxRight.camera = camera;
 
 	profile.Tick("Shadow");
 	////MSAA render scene and resolve to usual texture
@@ -206,7 +214,7 @@ void EdushiVRPipeline::Render()
 	ssao_right.Render();
 	profile.Tick("SSAO");
 
-	//skybox.Render();
+	skyboxRight.Render();
 
 	p->setProgramConstantData("env_map", env[envMapId]);
 	p->setSampler("env_map", SamplerManager::getInstance().get("ClampLinear"));

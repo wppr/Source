@@ -22,10 +22,10 @@ Vector3 PivotCalibration(int orientation, bool clockWise);
 SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height, int l, int r, int t, int b)
 	: scene(scene), meshMgr(meshMgr), width(width), height(height), l(l), r(r), t(t), b(b)
 {
-	/*globalScale = Vector3(100, 100, 100);
-	globalTrans = Vector3(-1890, 0, -1230);*/
-	globalScale = Vector3(1, 1, 1);
-	globalTrans = Vector3(0, 0, 0);
+	globalScale = Vector3(100, 100, 100);
+	globalTrans = Vector3(-1890, 0, -1230);
+	/*globalScale = Vector3(1, 1, 1);
+	globalTrans = Vector3(0, 0, 0);*/
 	this->layoutMatrix = new Entry[width * height];
 	this->rotateFlag = false;
 

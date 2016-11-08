@@ -45,7 +45,7 @@ public:
 	SimpleProfile profile;
 	VarianceShadowMapGenerateEffect shadowmap;
 	LightCameraParam LightCamera;
-	SkyBoxEffect skybox;
+	SkyBoxEffect skyboxLeft, skyboxRight;
 	Matrix4 projLeft, viewLeft, projRight, viewRight;
 private:
 	PBREffect2 pbr;

@@ -326,6 +326,16 @@ namespace HW
 
 	}
 
+	void Camera::setProjectionMatrix(Matrix4 proj)
+	{
+		this->m_projMatrix = proj;
+	}
+
+	void Camera::setViewMatrix(Matrix4 view)
+	{
+		this->m_viewMatrix = view;
+	}
+
 	void Camera::calcClipPlanes()
 	{
 		if(m_ProjType == PT_PERSPECTIVE)

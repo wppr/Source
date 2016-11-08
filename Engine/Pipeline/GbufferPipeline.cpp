@@ -48,6 +48,6 @@ void GBufferEffect::Render()
 	p->setProgramConstantData("near", &near, "float", sizeof(float));
 	p->setProgramConstantData("far", &far, "float", sizeof(float));
 	// render to a buffer
-	mRenderSystem->RenderPass(NULL, queue, gbuffer_pass, output_gbufferRT);
+	mRenderSystem->RenderPass(camera, queue, gbuffer_pass, output_gbufferRT);
 
 }

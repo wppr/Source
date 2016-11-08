@@ -98,6 +98,8 @@ namespace HW
 		    in a right handed coordinate system,follow the convention of OpenGL.
 		*/
 		Matrix4 getViewMatrix();
+		void setProjectionMatrix(Matrix4 proj);
+		void setViewMatrix(Matrix4 view);
 
 		Ray getCameraToviewportRay(float x,float y);
 
