@@ -521,12 +521,14 @@ void SceneLoader::loadMesh() {
 
 	AttachFloar();
 
-	//room
+	//rooma
 	ss.str("");
 	ss1.str("");
 	ss << "model/uniform/room/room.obj";
 	ss1 << "room";
 	roomMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
+
+	//AttachRoom();
 
 	for (int i = 1; i <= CARNUM; ++i)
 	{
@@ -538,31 +540,6 @@ void SceneLoader::loadMesh() {
 		MeshPtr carMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
 		carMeshes.push_back(carMesh);
 	}
-
-	//houses
-	ss.str("");
-	ss1.str("");
-	ss << "model/netease_model/model/house.obj";
-	ss1 << "house1";
-	houseMesh[0] = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
-
-	ss.str("");
-	ss1.str("");
-	ss << "model/netease_model/model2/house.obj";
-	ss1 << "house2";
-	houseMesh[1] = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
-
-	ss.str("");
-	ss1.str("");
-	ss << "model/netease_model/model3/house.obj";
-	ss1 << "house3";
-	houseMesh[2] = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
-
-	ss.str("");
-	ss1.str("");
-	ss << "model/netease_model/model4/house.obj";
-	ss1 << "house4";
-	houseMesh[3] = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
 }
 
 void SceneLoader::LoadJson()
