@@ -293,6 +293,7 @@ namespace Block
 		MeshManager * meshMgr;
 		MeshPtr floarFragment;
 		MeshPtr roomMesh;
+		MeshPtr houseMesh[4];
 		vector<MeshPtr> carMeshes;
 		SceneNode** sceneNodes;
 		SceneNode** floarNodes;

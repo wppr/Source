@@ -6,6 +6,7 @@
 #include "GUIWrapper.h"
 #include "socketSceneLoader\SceneLoader.h"
 #include "Interpolation.h"
+#include "pattern.h"
 #include <openvr.h>
 
 using namespace Block;
@@ -47,12 +48,23 @@ public:
 	EdushiConfig c, originConfig;
 
 	//track
-	vector<Vector3> marks;
-	Interpolation interp;
-	bool free = true;
-	float speed = 0.02;
-	float acceleration = 0;
-	float t = 0;
+	//vector<Vector3> marks;
+	//Interpolation interp;
+	//bool free = false;
+	//float speed = 0.02;
+	//float acceleration = 0;
+	//float t = 0;
+
+	//pattern
+	enum MatrixSource {
+		VR,
+		CAMERA
+	};
+	MatrixSource matrixSource = VR;
+	CameraController cameraController;
+	vector<InterpData> marks;
+	Pattern pattern;
+	double duration = 0;
 
 	float rotatespeed = 0;
 	bool rotateCamera = false;
@@ -94,7 +106,7 @@ public:
 		render = new EGLRenderSystem;
 		render->SetWandH(w, h);
 		render->Initialize();
-		VRInit();
+		//VRInit();
 		InitDevice();
 		InitPipeline();
 		CreateScene();
@@ -118,10 +130,10 @@ public:
 		//c.cameraUp == camera->getUp();
 		//c.LookCenter = getSceneCenter(c.mapw, c.maph);
 		UpdateCamera(c);
-		//vrScene = "room";
-		vrScene = "city";
+		vrScene = "room";
+	/*	vrScene = "room";
 		LoadMarks(vrScene + ".txt");
-		SetInterp();
+		SetInterp();*/
 
 		if ("room" == vrScene)
 			sl->AttachRoom();
@@ -183,18 +195,30 @@ public:
 		sysentry->setPipeline(pipeline);
 	}
 
+	void UpdateDuration()
+	{
+		static bool first = true;
+		static float lasttime;
+		if (first)
+		{
+			lasttime = AbsolutTime;
+			first = false;
+		}
+		duration = AbsolutTime - lasttime;
+		lasttime = AbsolutTime;
+	}
+
 	void Render() {
 		UpdateGUI();
-
+		UpdateDuration();
 		//sl->UpdateScene(AbsolutTime);
-		
 		UpdatePorjection();
 
 		double beforeRender = glfwGetTime();
 		pipeline->Render();
 		double afterRender = glfwGetTime();
 
-		VRSubmitTexture();
+		//VRSubmitTexture();
 		//CarSim.Update();
 	}
 
@@ -401,8 +425,112 @@ public:
 				p->shadowmap.SetLightCamera(0, p->LightCamera);
 				ImGui::End();
 			}
-			ImGui::End();
 
+			static bool show_record_window = false;
+			if (ImGui::Button("Show Record Pattern Window")) show_record_window = !show_record_window;
+			if (show_record_window)
+			{
+				matrixSource = CAMERA;
+				if (ImGui::TreeNode("CameraControl"))
+				{
+					ImGui::DragFloat("pitch", &cameraController.PitchSpeed, 0.01);
+					ImGui::DragFloat("yaw", &cameraController.YawSpeed, 0.01);
+					ImGui::DragFloat("linear", &cameraController.LinearSpeed, 0.01);
+					ImGui::DragFloat("acceleration", &cameraController.Acceleration, 0.01);
+					static bool enable = false;
+					if (ImGui::Button("enable/disable")) enable = !enable;
+					if (enable)
+						cameraController.UpdateCamera(camera, duration);
+					ImGui::TreePop();
+				}
+				if (ImGui::TreeNode("RecordOperations"))
+				{
+					if (ImGui::Button("Pop"))
+					{
+						if (!marks.empty())
+							marks.pop_back();
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Push"))
+					{
+						Vector3 pos = camera->getPosition();
+						Vector3 dir = camera->getDirection();
+						marks.push_back(InterpData(AbsolutTime, pos, dir));
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Clear"))
+						marks.clear();
+					ImGui::TreePop();
+					//display
+					for (auto &m : marks)
+					{
+						ImGui::PushItemWidth(80);
+						ImGui::InputFloat("", &m.Time);
+						ImGui::PopItemWidth();
+						ImGui::SameLine();
+						ImGui::PushItemWidth(150);
+						ImGui::InputFloat3("", &m.Position[0]);
+						ImGui::PopItemWidth();
+						ImGui::SameLine();
+						ImGui::PushItemWidth(150);
+						ImGui::InputFloat3("", &m.Direction[0]);
+						ImGui::PopItemWidth();
+					}
+					//save marks
+					static char filename[50] = "";
+					ImGui::InputText("File Name", filename, 50);
+					if (ImGui::Button("Save"))
+						SaveMarks("..\\WorkSpace\\Patterns\\"+string(filename), marks);
+				}
+			}
+			else matrixSource = VR;
+
+			static bool show_pattern_window = false;
+			if (ImGui::Button("Show Play Pattern Window")) show_pattern_window = !show_pattern_window;
+			if (show_pattern_window)
+			{
+				static double timer = 0;
+				matrixSource = CAMERA;
+				LoadMarks("..\\WorkSpace\\Patterns\\new_default.txt", marks);
+				//display
+				for (auto &m : marks)
+				{
+					ImGui::PushItemWidth(80);
+					ImGui::InputFloat("", &m.Time);
+					ImGui::PopItemWidth();
+					ImGui::SameLine();
+					ImGui::PushItemWidth(150);
+					ImGui::InputFloat3("", &m.Position[0]);
+					ImGui::PopItemWidth();
+					ImGui::SameLine();
+					ImGui::PushItemWidth(150);
+					ImGui::InputFloat3("", &m.Direction[0]);
+					ImGui::PopItemWidth();
+				}
+				//load marks
+				static char filename[50] = "";
+				ImGui::InputText("File Name", filename, 50);
+				if (ImGui::Button("Load"))
+				{
+					LoadMarks("..\\WorkSpace\\Patterns\\" + string(filename), marks);
+					pattern.setMarks(marks);
+				}
+				ImGui::SameLine();
+				static bool pause = true;
+				if (ImGui::Button("Resume/Pause")) pause = !pause;
+				if (!pause)
+				{
+					timer += duration;
+					camera->setPosition(pattern.getPosition(timer));
+					camera->setDirection(pattern.getDirection(timer));
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Reset"))
+					timer = 0;
+			}
+			else matrixSource = VR;
+
+			ImGui::End();
 		}
 
 	}
@@ -551,11 +679,24 @@ public:
 
 	void UpdatePorjection()
 	{
-		((EdushiVRPipeline*)(this->sysentry->m_pipeline))->projLeft = projLeft;
-		((EdushiVRPipeline*)(this->sysentry->m_pipeline))->projRight = projRight;
-
-		((EdushiVRPipeline*)(this->sysentry->m_pipeline))->viewLeft = eyePosLeft * HMDPos;
-		((EdushiVRPipeline*)(this->sysentry->m_pipeline))->viewRight = eyePosRight * HMDPos;
+		auto p = static_cast<EdushiVRPipeline*>(this->sysentry->m_pipeline);
+		switch (matrixSource) {
+			case VR: {
+				p->projLeft = projLeft;
+				p->projRight = projRight;
+				p->viewLeft = eyePosLeft * HMDPos;
+				p->viewRight = eyePosRight * HMDPos;
+				break;
+			}
+			case CAMERA: {
+				p->projLeft = camera->getProjectionMatrixDXRH();
+				p->projRight = camera->getProjectionMatrixDXRH();
+				p->viewLeft = camera->getViewMatrix();
+				p->viewRight = camera->getViewMatrix();
+				break;
+			}
+			default:break;
+		}
 	}
 
 	void VRSubmitTexture()
@@ -563,7 +704,7 @@ public:
 		double beforeSubmit = glfwGetTime();
 		//submit texture
 		GLuint leftID, rightID;
-		
+
 		((EdushiVRPipeline*)(this->sysentry->m_pipeline))->GetStereoTex(leftID, rightID);
 		vr::Texture_t leftEyeTexture = { (void*)leftID, vr::API_OpenGL, vr::ColorSpace_Gamma };
 		vr::VRCompositor()->Submit(vr::Eye_Left, &leftEyeTexture);
@@ -590,95 +731,46 @@ public:
 
 		if (m_rTrackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].bPoseIsValid)
 		{
-			if(free)
+			//if (free)
 				HMDPos = devicePose[vr::k_unTrackedDeviceIndex_Hmd].inverse();
-			else
-			{
-				speed += acceleration;
-				t += speed;
-				Vector3 pos = interp.GetInterpolation(t);
-				Vector3 dir = interp.GetDerivative(t);
-				//Vector3 pos = circleRoute.GetInterpolation(t);
-				//Vector3 dir = circleRoute.GetDerivative(t);
-				dir.normalize();
-				dir = -dir;
-				//cout << t << " pos " << pos.x << "," << pos.y << "," << pos.z << endl;
-				//cout << t << " dir " << dir.x << "," << dir.y << "," << dir.z << endl;
+			//else
+			//{
+			//	speed += acceleration;
+			//	t += speed;
+			//	Vector3 pos = interp.GetInterpolation(t);
+			//	Vector3 dir = interp.GetDerivative(t);
+			//	//Vector3 pos = circleRoute.GetInterpolation(t);
+			//	//Vector3 dir = circleRoute.GetDerivative(t);
+			//	dir.normalize();
+			//	dir = -dir;
+			//	//cout << t << " pos " << pos.x << "," << pos.y << "," << pos.z << endl;
+			//	//cout << t << " dir " << dir.x << "," << dir.y << "," << dir.z << endl;
 
-				//camera->lookAt(pos, pos + dir, Vector3(0, 1, 0));
-				Vector3 xAxis = dir.crossProduct(Vector3(0, 1, 0));
-				xAxis.normalize();
-				Vector3 yAxis = xAxis.crossProduct(dir);
-				Matrix4 model
-				(
-					xAxis[0], yAxis[0], dir[0], pos[0],
-					xAxis[1], yAxis[1], dir[1], pos[1],
-					xAxis[2], yAxis[2], dir[2], pos[2],
-					0       , 0       , 0     , 1  
-				);
-				/*Matrix4 model
-				(
-					1, 0, 0, 0,
-					0, 1, 0, 2,
-					0, 0, 1, 2,
-					0, 0, 0, 1
-				);*/
-				HMDPos = model.inverse();
-				/*devicePose[vr::k_unTrackedDeviceIndex_Hmd] = model;
-				HMDPos = devicePose[vr::k_unTrackedDeviceIndex_Hmd].inverse();*/
-			}
+			//	//camera->lookAt(pos, pos + dir, Vector3(0, 1, 0));
+			//	Vector3 xAxis = dir.crossProduct(Vector3(0, 1, 0));
+			//	xAxis.normalize();
+			//	Vector3 yAxis = xAxis.crossProduct(dir);
+			//	Matrix4 model
+			//	(
+			//		xAxis[0], yAxis[0], dir[0], pos[0],
+			//		xAxis[1], yAxis[1], dir[1], pos[1],
+			//		xAxis[2], yAxis[2], dir[2], pos[2],
+			//		0, 0, 0, 1
+			//	);
+			//	/*Matrix4 model
+			//	(
+			//		1, 0, 0, 0,
+			//		0, 1, 0, 2,
+			//		0, 0, 1, 2,
+			//		0, 0, 0, 1
+			//	);*/
+			//	HMDPos = model.inverse();
+			//	/*devicePose[vr::k_unTrackedDeviceIndex_Hmd] = model;
+			//	HMDPos = devicePose[vr::k_unTrackedDeviceIndex_Hmd].inverse();*/
+			//}
 		}
 
 		double afterUpdate = glfwGetTime();
-	}
-	void FollowRoute() {
-		speed += acceleration;
-		t += speed;
-		Vector3 pos = interp.GetInterpolation(t);
-		Vector3 dir = interp.GetDerivative(t);
-		//Vector3 pos = circleRoute.GetInterpolation(t);
-		//Vector3 dir = circleRoute.GetDerivative(t);
-		dir.normalize();
-		//cout << t << " pos " << pos.x << "," << pos.y << "," << pos.z << endl;
-		//cout << t << " dir " << dir.x << "," << dir.y << "," << dir.z << endl;
-
-		camera->lookAt(pos, pos + dir, Vector3(0, 1, 0));
-	}
-
-	void LoadMarks(string filename)
-	{
-		ifstream input("..\\Workspace\\VRExperience\\" + filename);
-		if (input.fail())
-		{
-			cout << "\"" << filename << "\"" << "doesn't exist" << endl;
-			return;
-		}
-		marks.clear();
-		Vector3 pos;
-		while (input >> pos.x >> pos.y >> pos.z)
-			marks.push_back(pos);
-		input.close();
-	}
-
-	void SaveMarks(string filename)
-	{
-		ofstream output("..\\Workspace\\VRExperience\\" + filename);
-		output.clear();
-		for (auto& pos : marks)
-			output << pos.x << "\t" << pos.y << "\t" << pos.z << endl;
-		output.close();
-	}
-
-	void SetInterp()
-	{
-		vector<double> x;
-		double t = 0.001;
-		for (auto &pos : marks)
-		{
-			x.push_back(t);
-			t += 2;
-		}
-		interp.SetData(x, marks);
 	}
 
 	private :
