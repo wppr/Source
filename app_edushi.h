@@ -97,6 +97,7 @@ public:
 
 		sl->LoadJson();
 		sl->show_json = true;
+		sl->AttachFloar();
 
 		sl->UpdateScene(AbsolutTime);
 		vector<Vector3> pos;
@@ -235,8 +236,7 @@ public:
 				if (ImGui::Button("Load model")) LoadModel(tmp, name);
 
 				if (ImGui::Button("RemoveAll")) RemoveAllNodes(); ImGui::SameLine();
-				if (ImGui::Button("
-					r")) sl->AttachFloar();
+				if (ImGui::Button("r")) sl->AttachFloar();
 				if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;	
 				ImGui::End();
 			}

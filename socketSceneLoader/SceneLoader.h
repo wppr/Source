@@ -231,11 +231,10 @@ namespace Block
 		void InitSceneNode();
 		void InitFloor();
 		void InitCar();
-		void AttachFloar();
-		void AttachRoom();
 		void UpdateSceneNodes(float curTime);
 		void GetRandomCars(vector<Vector3>& roadPos, vector<Quaternion>& roadOrien);
 		int GetCarName();
+		void AttachScene();
 
 		// EBus 
 		//by Jie
@@ -279,6 +278,13 @@ namespace Block
 
 		//block
 		BlockHelper bh;
+
+		//VR scene
+		float globalScale;
+		Vector3 globalTrans;
+		int vrScene;
+		string vrScenes[3] = {"room", "city", "house"};
+
 	private :
 		int width, height, l, r, t, b;//width & height of the layoutMatrix
 		Entry* layoutMatrix;
@@ -293,6 +299,7 @@ namespace Block
 		MeshManager * meshMgr;
 		MeshPtr floarFragment;
 		MeshPtr roomMesh;
+		MeshPtr houseMesh;
 		vector<MeshPtr> carMeshes;
 		SceneNode** sceneNodes;
 		SceneNode** floarNodes;
@@ -300,6 +307,8 @@ namespace Block
 		SceneNode* floorRoot;
 		SceneNode* carRoot;
 		SceneNode* entityRoot;
+		SceneNode* room;
+		SceneNode* house;
 		SceneNode* eBusNode;
 
 		string staticJson;
@@ -311,9 +320,6 @@ namespace Block
 		SceneLoader(const SceneLoader&);
 		SceneLoader& operator= (const SceneLoader&);
 
-		//VR scene
-		Vector3 globalScale;
-		Vector3 globalTrans;
 	};
 
 }

@@ -135,6 +135,11 @@ void EdushiPipeline::Render()
 
 	LightCamera.LightPosition = LightPos[0];
 	LightCamera.LightDir = -LightPos[0];
+	/*LightCamera.Near = 1;
+	LightCamera.Far = 1000;
+	LightCamera.width = 1000;
+	LightCamera.height = 1000;
+	LightCamera.perspective = false;*/
 	shadowmap.SetLightCamera(0, LightCamera);
 	shadowmap.Render();
 	profile.Tick("Shadow");

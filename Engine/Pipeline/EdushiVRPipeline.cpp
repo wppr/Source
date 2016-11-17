@@ -80,8 +80,8 @@ void EdushiVRPipeline::Init()
 
 	LightCamera.LightPosition = LightPos[0];
 	LightCamera.LightDir = -LightPos[0];
-	LightCamera.Near = 1;
-	LightCamera.Far = 15;
+	LightCamera.Near = 0.1;
+	LightCamera.Far = 150;
 	LightCamera.width = 6;
 	LightCamera.height = 4;
 	LightCamera.perspective = false;

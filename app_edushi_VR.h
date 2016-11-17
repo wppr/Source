@@ -119,15 +119,12 @@ public:
 		//c.LookCenter = getSceneCenter(c.mapw, c.maph);
 		UpdateCamera(c);
 		//vrScene = "room";
-		vrScene = "city";
-		LoadMarks(vrScene + ".txt");
+		LoadMarks(sl->vrScenes[sl->vrScene] + ".txt");
 		SetInterp();
 
-		if ("room" == vrScene)
-			sl->AttachRoom();
-		else
-			sl->UpdateScene(AbsolutTime);
+		sl->AttachScene();
 	}
+
 	Vector3 getSceneCenter(int w, int h) {
 		Vector3 cen = 0.5*Vector3(w, 0, h)*scenescale + sceneTranlate;
 		return cen;
@@ -187,11 +184,13 @@ public:
 		UpdateGUI();
 
 		//sl->UpdateScene(AbsolutTime);
-		
+		FetchControllers();
 		UpdatePorjection();
+		printf("UpdatePorjection\n");
 
 		double beforeRender = glfwGetTime();
 		pipeline->Render();
+		printf("Render\n");
 		double afterRender = glfwGetTime();
 
 		VRSubmitTexture();
@@ -257,7 +256,7 @@ public:
 				if (ImGui::Button("Load model")) LoadModel(tmp, name);
 
 				if (ImGui::Button("RemoveAll")) RemoveAllNodes(); ImGui::SameLine();
-				if (ImGui::Button("AttachFloor")) sl->AttachFloar();
+				//if (ImGui::Button("AttachFloor")) sl->AttachFloar();
 				if (ImGui::Button("Switch Show Json")) sl->show_json = !sl->show_json;
 				ImGui::End();
 			}
@@ -476,8 +475,8 @@ public:
 			success = false;
 		}
 
-		nearClip = 0.1f;
-		farClip = 10000.0f;
+		nearClip = 0.01f;
+		farClip = 1000.0f;
 		m_pHMD->GetRecommendedRenderTargetSize(&renderWidth, &renderHeight);
 
 		//init not success, shut down
@@ -556,6 +555,14 @@ public:
 
 		((EdushiVRPipeline*)(this->sysentry->m_pipeline))->viewLeft = eyePosLeft * HMDPos;
 		((EdushiVRPipeline*)(this->sysentry->m_pipeline))->viewRight = eyePosRight * HMDPos;
+
+		/*((EdushiVRPipeline*)(this->sysentry->m_pipeline))->viewLeft[1][3] -= 5;
+		((EdushiVRPipeline*)(this->sysentry->m_pipeline))->viewRight[1][3] -= 5;*/
+		for (int i = 0; i < 3; ++i)
+		{
+			((EdushiVRPipeline*)(this->sysentry->m_pipeline))->viewLeft[i][3] *= sl->globalScale;
+			((EdushiVRPipeline*)(this->sysentry->m_pipeline))->viewRight[i][3] *= sl->globalScale;
+		}
 	}
 
 	void VRSubmitTexture()
@@ -590,8 +597,10 @@ public:
 
 		if (m_rTrackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].bPoseIsValid)
 		{
-			if(free)
+			if (free)
+			{
 				HMDPos = devicePose[vr::k_unTrackedDeviceIndex_Hmd].inverse();
+			}
 			else
 			{
 				speed += acceleration;
@@ -631,6 +640,83 @@ public:
 
 		double afterUpdate = glfwGetTime();
 	}
+
+	//controller
+	void FetchControllers()
+	{
+		if (m_pHMD->IsInputFocusCapturedByAnotherProcess())
+			return;
+
+		int trackedControllerCount = 0;
+
+		for (vr::TrackedDeviceIndex_t unTrackedDevice = vr::k_unTrackedDeviceIndex_Hmd + 1; unTrackedDevice < vr::k_unMaxTrackedDeviceCount; ++unTrackedDevice)
+		{
+			if (!m_pHMD->IsTrackedDeviceConnected(unTrackedDevice))
+				continue;
+
+			if (m_pHMD->GetTrackedDeviceClass(unTrackedDevice) != vr::TrackedDeviceClass_Controller)
+				continue;
+
+			trackedControllerCount++;
+
+
+			//state fetch
+			vr::VRControllerState_t *pControllerState = new vr::VRControllerState_t;
+			m_pHMD->GetControllerState(unTrackedDevice, pControllerState);
+			printf("-------------------------------------\n");
+			//printf("ulButtonPressed: %d\n", pControllerState->ul);
+			printf("k_unControllerStateAxisCount: %d\n", vr::k_unControllerStateAxisCount);
+			cout<<"ulButtonPressed: " << uint32_t(pControllerState->ulButtonPressed) <<endl;
+			cout << "ulButtonTouched: " << pControllerState->ulButtonTouched << endl;
+			printf("0: %.2f %.2f\n", pControllerState->rAxis[0].x, pControllerState->rAxis[0].y);
+			printf("1: %.2f %.2f\n", pControllerState->rAxis[1].x, pControllerState->rAxis[1].y);
+			printf("2: %.2f %.2f\n", pControllerState->rAxis[2].x, pControllerState->rAxis[2].y);
+			printf("3: %.2f %.2f\n", pControllerState->rAxis[3].x, pControllerState->rAxis[3].y);
+			printf("4: %.2f %.2f\n", pControllerState->rAxis[4].x, pControllerState->rAxis[4].y);
+			//printf("ulButtonTouched: %.2f %.2f\n", pControllerState->rAxis[pControllerState->ulButtonTouched].x, pControllerState->rAxis[pControllerState->ulButtonTouched].y);
+			//printf("Joystick: %.2f %.2f\n", pControllerState->rAxis[vr::k_eControllerAxis_Joystick].x, pControllerState->rAxis[vr::k_eControllerAxis_Joystick].y);
+			//process signal
+			//trigger
+			int curTriggerSignal;
+			if (pControllerState->rAxis[vr::k_eControllerAxis_TrackPad].x > 0.5f)
+				curTriggerSignal = 1;
+			else
+				curTriggerSignal = 0;
+
+			if (curTriggerSignal - preTriggerSignal > 0.5f)//up
+			{
+				sl->vrScene = (sl->vrScene + 1) % 3;
+				LoadMarks(sl->vrScenes[sl->vrScene] + ".txt");
+				SetInterp();
+				printf("vrScene %d\n", sl->vrScene);
+				sl->AttachScene();
+			}
+			preTriggerSignal = curTriggerSignal;
+
+			//button
+			int curButtonSignal;
+			if (pControllerState->ulButtonPressed == 2)
+			{
+				//system("pause");
+				curButtonSignal = 2;
+			}
+			else
+				curButtonSignal = 0;
+			if (curButtonSignal - preButtonSignal == 2)
+			{
+				printf("button: %d %d\n", preButtonSignal, curButtonSignal);
+				//system("pause");
+				t = 0;
+				free = !free;
+			}
+			preButtonSignal = curButtonSignal;
+		}
+
+		printf("process\n");
+		
+	}
+
+	//vr track
 	void FollowRoute() {
 		speed += acceleration;
 		t += speed;
@@ -696,5 +782,8 @@ public:
 		Matrix4 HMDPos;
 		float nearClip;
 		float farClip;
-		string vrScene;
+
+		//controller
+		int preTriggerSignal;//0 or 1
+		int preButtonSignal;//0 or 2
 };

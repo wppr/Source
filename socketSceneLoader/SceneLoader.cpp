@@ -22,10 +22,8 @@ Vector3 PivotCalibration(int orientation, bool clockWise);
 SceneLoader::SceneLoader(SceneManager * scene, MeshManager * meshMgr, int width, int height, int l, int r, int t, int b)
 	: scene(scene), meshMgr(meshMgr), width(width), height(height), l(l), r(r), t(t), b(b)
 {
-	globalScale = Vector3(100, 100, 100);
-	globalTrans = Vector3(-1890, 0, -1230);
-	/*globalScale = Vector3(1, 1, 1);
-	globalTrans = Vector3(0, 0, 0);*/
+	vrScene = 0;
+
 	this->layoutMatrix = new Entry[width * height];
 	this->rotateFlag = false;
 
@@ -320,7 +318,7 @@ void SceneLoader::InitSceneNode()
 	SceneManager* scene_instance = SceneContainer::getInstance().get("scene1");
 	SceneNode* root = scene_instance->GetSceneRoot();
 	root->attachNode(entityRoot);
-	entityRoot->setScale(globalScale);
+	//entityRoot->setScale(Vector3(globalScale));
 	entityRoot->setTranslation(globalTrans);
 
 	//sceneNodes
@@ -365,6 +363,22 @@ void SceneLoader::InitFloor()
 		}
 	}
 
+	SceneManager* scene_instance = SceneContainer::getInstance().get("scene1");
+	SceneNode* root = scene_instance->GetSceneRoot();
+	floorRoot = scene->CreateSceneNode("floorRoot");
+	root->attachNode(floorRoot);
+	//floorRoot->setScale(Vector3(globalScale));
+	floorRoot->setTranslation(globalTrans);
+
+	//for (int i = 0; i < height; i++) {
+	//	for (int j = 0; j < width; ++j) {
+	//		if (j < l || j >= r) continue;//clip sides
+
+	//		floarEntities[i * width + j]->setMesh(floarFragment);
+	//		floarNodes[i * width + j]->setTranslation(j, 0, i);
+	//		floorRoot->attachNode(floarNodes[i * width + j]);
+	//	}
+	//}
 }
 
 //Init car root node
@@ -374,40 +388,6 @@ void SceneLoader::InitCar()
 	SceneNode* root = scene_instance->GetSceneRoot();
 	carRoot = scene->CreateSceneNode("carRoot");
 	root->attachNode(carRoot);
-}
-
-void SceneLoader::AttachRoom()
-{
-	SceneManager* scene_instance = SceneContainer::getInstance().get("scene1");
-	SceneNode* root = scene_instance->GetSceneRoot();
-	SceneNode* room = scene->CreateSceneNode("room");
-	room->setScale(0.07, 0.07, 0.07);
-
-	Entity* roomEntity = scene->CreateEntity("entity");
-	roomEntity->setMesh(roomMesh);
-	room->attachMovable(roomEntity);
-
-	root->attachNode(room);
-}
-
-void SceneLoader::AttachFloar()
-{
-	SceneManager* scene_instance = SceneContainer::getInstance().get("scene1");
-	SceneNode* root = scene_instance->GetSceneRoot();
-	floorRoot = scene->CreateSceneNode("floorRoot");
-	root->attachNode(floorRoot);
-	floorRoot->setScale(globalScale);
-	floorRoot->setTranslation(globalTrans);
-
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; ++j) {
-			if (j < l || j >= r) continue;//clip sides
-
-			floarEntities[i * width + j]->setMesh(floarFragment);
-			floarNodes[i * width + j]->setTranslation(j, 0, i);
-			floorRoot->attachNode(floarNodes[i * width + j]);
-		}
-	}
 }
 
 void SceneLoader::UpdateSceneNodes(float curTime)
@@ -519,17 +499,32 @@ void SceneLoader::loadMesh() {
 	ss1 << "floor";
 	floarFragment = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
 
-	AttachFloar();
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; ++j) {
+			if (j < l || j >= r) continue;//clip sides
 
-	//rooma
+			floarEntities[i * width + j]->setMesh(floarFragment);
+			floarNodes[i * width + j]->setTranslation(j, 0, i);
+			floorRoot->attachNode(floarNodes[i * width + j]);
+		}
+	}
+
+	//room
 	ss.str("");
 	ss1.str("");
 	ss << "model/uniform/room/room.obj";
 	ss1 << "room";
 	roomMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
 
-	//AttachRoom();
+	SceneManager* scene_instance = SceneContainer::getInstance().get("scene1");
+	room = scene->CreateSceneNode("room");
+	room->setScale(0.07, 0.07, 0.07);
 
+	Entity* roomEntity = scene->CreateEntity("roomEntity");
+	roomEntity->setMesh(roomMesh);
+	room->attachMovable(roomEntity);
+
+	//car
 	for (int i = 1; i <= CARNUM; ++i)
 	{
 		ss.str("");
@@ -540,6 +535,22 @@ void SceneLoader::loadMesh() {
 		MeshPtr carMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
 		carMeshes.push_back(carMesh);
 	}
+
+	//house
+	ss.str("");
+	ss1.str("");
+	ss << "model/netease_model/house.obj";
+	ss1 << "house";
+	houseMesh = meshMgr->loadMesh_assimp_check(ss1.str(), ss.str());
+
+	house = scene->CreateSceneNode("house");
+	house->scale(0.2, 0.2, 0.2);
+	house->translate(0, -5, 0);
+
+	Entity* houseEntity = scene->CreateEntity("houseEntity");
+	houseEntity->setMesh(houseMesh);
+	house->attachMovable(houseEntity);
+
 }
 
 void SceneLoader::LoadJson()
@@ -958,4 +969,45 @@ Vector3 PivotCalibration(int orientation, bool clockWise)
 	}
 
 	return calibration;
+}
+
+void SceneLoader::AttachScene()
+{
+	if (0 == vrScene)//room
+	{
+		globalScale = 1;
+		globalTrans = Vector3(0, 0, 0);
+	}
+	else if (2 == vrScene)//house
+	{
+		globalScale = 0.5;
+		globalTrans = Vector3(-20, 0, 0);
+	}
+	else if (1 == vrScene)
+	{
+		globalScale = 0.01;
+		globalTrans = Vector3(-4, -0.01, -2.5);
+	}
+
+	SceneNode* root = scene->GetSceneRoot();
+	root->detachAllNodes();
+
+	switch (vrScene)
+	{
+	case 0:
+		room->setTranslation(globalTrans);
+		root->attachNode(room);
+		break;
+	case 1:
+		entityRoot->setTranslation(globalTrans);
+		floorRoot->setTranslation(globalTrans);
+		root->attachNode(entityRoot);
+		root->attachNode(floorRoot);
+		UpdateScene(0);
+		break;
+	case 2:
+		house->setTranslation(globalTrans);
+		root->attachNode(house);
+		break;
+	}
 }
